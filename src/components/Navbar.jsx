@@ -75,6 +75,7 @@ export const Navbar = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="रचना, कवि, शहर या श्रेणी खोजें..."
+              aria-label="रचना, कवि या श्रेणी खोजें"
               className="w-full pl-9 pr-24 py-2 text-xs rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3" />
@@ -83,6 +84,7 @@ export const Navbar = ({
               <select
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
+                aria-label="खोज श्रेणी चुनें (Select Search Category)"
                 className="bg-transparent text-[11px] font-semibold text-slate-600 dark:text-slate-400 border-none focus:ring-0 py-1 pr-6 cursor-pointer"
               >
                 <option value="all">सभी (All)</option>
@@ -100,6 +102,7 @@ export const Navbar = ({
           {/* Write New Post Button */}
           <button
             onClick={onOpenCreatePost}
+            aria-label="रचना लिखें (Write Post)"
             className="px-3.5 py-2 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-bold text-xs rounded-xl shadow-md shadow-rose-900/20 flex items-center gap-1.5 active:scale-95 transition"
           >
             <PlusCircle className="w-4 h-4" />
@@ -109,6 +112,7 @@ export const Navbar = ({
           {/* Theme Toggle (Dark/Light) */}
           <button
             onClick={toggleTheme}
+            aria-label="थीम बदलें (Toggle Theme)"
             className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
           >
             {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
@@ -119,6 +123,7 @@ export const Navbar = ({
             <div className="relative">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
+                aria-label="यूज़र प्रोफ़ाइल मेन्यू"
                 className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
                 <img
@@ -141,6 +146,7 @@ export const Navbar = ({
 
                   <button
                     onClick={() => { setActiveView('profile'); setShowUserDropdown(false); }}
+                    aria-label="मेरी प्रोफ़ाइल देखें"
                     className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"
                   >
                     <User className="w-4 h-4 text-slate-400" />
@@ -150,6 +156,7 @@ export const Navbar = ({
                   {userRole === 'admin' && (
                     <button
                       onClick={() => { setActiveView('admin'); setShowUserDropdown(false); }}
+                      aria-label="एडमिन डैशबोर्ड देखें"
                       className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-rose-600 font-bold"
                     >
                       <Shield className="w-4 h-4 text-rose-600" />
@@ -159,6 +166,7 @@ export const Navbar = ({
 
                   <button
                     onClick={() => { onLogout(); setShowUserDropdown(false); }}
+                    aria-label="साइन आउट करें"
                     className="w-full text-left px-3 py-2 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 flex items-center gap-2"
                   >
                     <LogOut className="w-4 h-4 text-rose-600" />
@@ -170,6 +178,7 @@ export const Navbar = ({
           ) : (
             <button
               onClick={onOpenAuthModal}
+              aria-label="लॉगिन या नया खाता बनाएँ"
               className="px-3 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow active:scale-95 transition"
             >
               <LogIn className="w-3.5 h-3.5" />

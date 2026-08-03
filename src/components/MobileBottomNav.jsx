@@ -23,10 +23,11 @@ export const MobileBottomNav = ({ activeView, setActiveView, onOpenCreatePost })
           <button
             key={item.id}
             onClick={() => setActiveView(item.id)}
+            aria-label={`${item.label} नेविगेशन देखें`}
             className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
               isActive 
                 ? 'text-rose-600 dark:text-rose-400 font-bold scale-105' 
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
@@ -38,6 +39,7 @@ export const MobileBottomNav = ({ activeView, setActiveView, onOpenCreatePost })
       {/* Quick Write Floating Post Button on Mobile */}
       <button
         onClick={onOpenCreatePost}
+        aria-label="नई रचना लिखें"
         className="flex flex-col items-center gap-1 py-1 px-3 text-amber-600 dark:text-amber-400 active:scale-95 transition"
       >
         <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-900/30">

@@ -105,7 +105,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 truncate font-medium">
               <span>{post.author.username}</span>
               <span>•</span>
               <span>{post.author.city}</span>
@@ -120,6 +120,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           {isUserOwnPost ? (
             <button
               onClick={() => onEditPost && onEditPost(post)}
+              aria-label="रचना संपादित करें"
               className="px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 text-xs font-bold flex items-center gap-1 transition"
               title="रचना संपादित करें"
             >
@@ -129,6 +130,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           ) : (
             <button
               onClick={handleFollowToggle}
+              aria-label={isFollowing ? "कवि को अनफ़ॉलो करें" : "कवि को फ़ॉलो करें"}
               className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 transition active:scale-95 ${
                 isFollowing
                   ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
@@ -157,7 +159,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
       </h2>
 
       {/* Category Tag & Reading Stats Bar */}
-      <div className="flex items-center gap-2 sm:gap-4 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-3 flex-wrap">
+      <div className="flex items-center gap-2 sm:gap-4 text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 font-medium mb-3 flex-wrap">
         <span className="px-2.5 py-0.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 font-bold text-rose-600 dark:text-rose-400 border border-rose-200/40 dark:border-rose-900/40">
           {post.category}
         </span>
@@ -173,6 +175,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
         {/* Audio Recite Player Button */}
         <button
           onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+          aria-label={isPlayingAudio ? 'कविता पाठ रोकें' : 'कविता पाठ सुनें'}
           className={`ml-auto flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
             isPlayingAudio 
               ? 'bg-rose-600 text-white animate-pulse shadow-md' 
@@ -221,10 +224,11 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           {/* Like Button */}
           <button
             onClick={handleLikeToggle}
+            aria-label={`रचना पसंद करें (${likesCount} लाइक्स)`}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition active:scale-95 ${
               isLiked
                 ? 'text-rose-600 bg-rose-50 dark:bg-rose-950/60'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-600' : ''}`} />
@@ -234,7 +238,8 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           {/* Comment Button */}
           <button
             onClick={handleCommentToggle}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            aria-label={`टिप्पणियाँ देखें (${post.comments ? post.comments.length : 0} कमेंट्स)`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
           >
             <MessageCircle className="w-4 h-4" />
             <span>{post.comments ? post.comments.length : 0}</span>
@@ -243,7 +248,8 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           {/* Share Button */}
           <button
             onClick={handleShareToggle}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            aria-label="रचना शेयर करें"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
           >
             <Share2 className="w-4 h-4" />
             <span className="hidden sm:inline">{t('share.title')}</span>
@@ -254,10 +260,11 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           {/* Bookmark Button */}
           <button
             onClick={handleBookmarkToggle}
+            aria-label="रचना सहेजें (Bookmark)"
             className={`p-2 rounded-full transition ${
               isBookmarked 
                 ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/50' 
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'
             }`}
             title={t('bookmark.save')}
           >
@@ -267,7 +274,8 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           {/* Report Button */}
           <button
             onClick={() => setShowReportModal(true)}
-            className="p-2 rounded-full text-slate-400 hover:text-rose-500 transition"
+            aria-label="रचना रिपोर्ट करें"
+            className="p-2 rounded-full text-slate-500 hover:text-rose-500 transition"
             title={t('report.title')}
           >
             <Flag className="w-4 h-4" />
@@ -277,7 +285,8 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
           {isUserOwnPost && (
             <button
               onClick={() => onDeletePost && onDeletePost(post.id)}
-              className="p-2 rounded-full text-slate-400 hover:text-rose-600 transition"
+              aria-label="रचना डिलीट करें"
+              className="p-2 rounded-full text-slate-500 hover:text-rose-600 transition"
               title="रचना डिलीट करें"
             >
               <Trash2 className="w-4 h-4" />
@@ -297,6 +306,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
             <div className="grid grid-cols-2 gap-2 text-xs">
               <button 
                 onClick={handleCopyLink} 
+                aria-label="लिंक कॉपी करें"
                 className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold flex items-center gap-2 justify-center text-slate-800 dark:text-slate-200 hover:bg-slate-200"
               >
                 <Copy className="w-4 h-4 text-rose-500" />
@@ -307,6 +317,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
                 href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title)}`} 
                 target="_blank" 
                 rel="noreferrer"
+                aria-label="व्हाट्सएप पर शेयर करें"
                 className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 font-bold flex items-center gap-2 justify-center hover:bg-emerald-500/20"
               >
                 <Send className="w-4 h-4" />
@@ -316,6 +327,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
 
             <button
               onClick={() => setShowShareModal(false)}
+              aria-label="शेयर मॉडल बंद करें"
               className="w-full py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold"
             >
               बंद करें
