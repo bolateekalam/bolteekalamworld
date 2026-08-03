@@ -349,7 +349,7 @@ function AppContent() {
   };
 
   const handleOpenCreatePostProtected = () => {
-    requireAuth(() => setShowCreateModal(true));
+    setShowCreateModal(true);
   };
 
   // 🔴 100% Bulletproof Post Creation: Save to localStorage AND Supabase DB
