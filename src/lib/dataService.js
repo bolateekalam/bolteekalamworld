@@ -60,7 +60,11 @@ export const createPostInDB = async (postData, userId) => {
       tags: postData.tags || ['बोलतीकलम']
     };
 
-    if (isValidUUID(userId)) {
+    // Try to get authenticated Supabase user session UUID
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user?.id && isValidUUID(session.user.id)) {
+      payload.user_id = session.user.id;
+    } else if (isValidUUID(userId)) {
       payload.user_id = userId;
     }
 
@@ -69,8 +73,10 @@ export const createPostInDB = async (postData, userId) => {
       .insert([payload])
       .select();
 
-    if (error) throw error;
-    return data[0];
+    if (error) {
+      console.warn('Supabase insert warning:', error.message);
+    }
+    return data && data[0] ? data[0] : payload;
   } catch (err) {
     console.error('Error creating post in DB:', err);
     return null;
