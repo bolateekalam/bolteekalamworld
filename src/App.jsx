@@ -208,12 +208,14 @@ function AppContent() {
     } else {
       setUserRole('user');
       const storedPhone = localStorage.getItem(`user_phone_${userEmail}`) || userObj.phone || '';
+      const storedDOB = localStorage.getItem(`user_dob_${userEmail}`) || userObj.birthday || '';
 
       setUserProfile(prev => ({
         ...prev,
         name: userObj.name || prev.name,
         email: userObj.email || prev.email,
         phone: storedPhone || prev.phone,
+        birthday: storedDOB || prev.birthday || '2000-08-15',
         username: userObj.username || prev.username,
         avatar: userObj.avatar || prev.avatar,
         city: userObj.city || prev.city,
@@ -258,12 +260,16 @@ function AppContent() {
     if (completedUser.phone) {
       localStorage.setItem(`user_phone_${userEmail}`, completedUser.phone);
     }
+    if (completedUser.birthday) {
+      localStorage.setItem(`user_dob_${userEmail}`, completedUser.birthday);
+    }
 
     const updated = {
       ...userProfile,
       name: completedUser.name,
       email: completedUser.email,
       phone: completedUser.phone,
+      birthday: completedUser.birthday || userProfile.birthday || '2000-08-15',
       city: completedUser.city,
       avatar: completedUser.avatar,
       username: completedUser.username || `@${completedUser.name.toLowerCase().replace(/\s+/g, '_')}`,
@@ -285,10 +291,13 @@ function AppContent() {
 
   const handleSaveProfileAndSyncDB = (updatedProfile) => {
     setUserProfile(updatedProfile);
-    if (updatedProfile.phone && currentUser?.email) {
-      localStorage.setItem(`user_phone_${currentUser.email}`, updatedProfile.phone);
-    }
-    if (currentUser) {
+    if (currentUser?.email) {
+      if (updatedProfile.phone) {
+        localStorage.setItem(`user_phone_${currentUser.email}`, updatedProfile.phone);
+      }
+      if (updatedProfile.birthday) {
+        localStorage.setItem(`user_dob_${currentUser.email}`, updatedProfile.birthday);
+      }
       updateUserProfileInDB(updatedProfile, currentUser.email || currentUser.id);
     }
   };
