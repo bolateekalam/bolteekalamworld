@@ -8,41 +8,31 @@ export const PoetryBattlesView = ({ poetryBattle, requireAuth, onRewardPoints })
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [userVotes, setUserVotes] = useState({});
 
-  // Live Pending Battle Challenges State
-  const [pendingChallenges, setPendingChallenges] = useState([
-    {
-      id: 'challenge-101',
-      challengerName: 'राजेश त्रिपाठी',
-      challengerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
-      topic: 'सावन की पहली फुहार',
-      challengerPoem: 'बूंदों की झंकार से भीगा मन का कोना,\nसावन आया याद आया वो पुराना जमाना।\nकागज़ की कश्ती पानी का रेला,\nबचपन की गलियों में फिर वो मेला।',
-      status: 'pending',
-      createdAt: '2 घंटे पहले'
-    }
-  ]);
+  // Live Pending Battle Challenges State (Starts Empty [])
+  const [pendingChallenges, setPendingChallenges] = useState([]);
 
   // Response Poem State for Accepted Battle
   const [responsePoem, setResponsePoem] = useState('');
   const [activeAcceptingId, setActiveAcceptingId] = useState(null);
 
-  // Active Live Battles (Guaranteed Safe Schema)
+  // Active Live Battles (Guaranteed Safe Real Team Schema)
   const [battles, setBattles] = useState([
     {
       id: 'pb-live-1',
-      topic: 'देशभक्ति की पावन ललकार',
+      topic: '80वाँ स्वतंत्रता दिवस विशेष — देशभक्ति का महासंग्राम',
       user1: {
-        id: 'u1',
-        name: 'अमित कुमार प्रखर',
+        id: 'u-sanjay',
+        name: 'संजय राय (संस्थापक)',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
         poem: 'मातृभूमि की बलिवेदी पर शीश चढ़ाने आए हैं।\nविजय पताका फहराने हम देशभक्त मँडराए हैं।',
-        votes: 184
+        votes: 75
       },
       user2: {
-        id: 'u2',
-        name: 'नेहा शर्मा काव्या',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+        id: 'u-akash',
+        name: 'आकाश कुमार सिंह (सह-संस्थापक)',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
         poem: 'तिरंगे की शान में गाएँ हम वीरों की गाथा अमर।\nभारत माँ के चरणों में नत मस्तक है ये सारा नगर।',
-        votes: 216
+        votes: 45
       },
       endsIn: '18 घंटे 45 मिनट'
     }
@@ -137,6 +127,7 @@ export const PoetryBattlesView = ({ poetryBattle, requireAuth, onRewardPoints })
 
         <button
           onClick={() => requireAuth(() => setShowChallengeModal(true))}
+          aria-label="कवि को चुनौती दें"
           className="px-5 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-rose-900/40 transition active:scale-95"
         >
           <Plus className="w-4 h-4" />
@@ -172,6 +163,7 @@ export const PoetryBattlesView = ({ poetryBattle, requireAuth, onRewardPoints })
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleAcceptChallenge(ch.id)}
+                      aria-label="चुनौती स्वीकार करें"
                       className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow"
                     >
                       <Check className="w-3.5 h-3.5" />
@@ -179,6 +171,7 @@ export const PoetryBattlesView = ({ poetryBattle, requireAuth, onRewardPoints })
                     </button>
                     <button
                       onClick={() => handleDeclineChallenge(ch.id)}
+                      aria-label="चुनौती अस्वीकार करें"
                       className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/20 text-rose-600 text-xs font-bold flex items-center gap-1"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -290,6 +283,7 @@ export const PoetryBattlesView = ({ poetryBattle, requireAuth, onRewardPoints })
                   <button
                     onClick={() => handleVote(b.id, b.user1.id)}
                     disabled={hasVoted}
+                    aria-label={`${b.user1.name} की कविता को वोट दें`}
                     className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
                       userVotes[b.id] === b.user1.id
                         ? 'bg-emerald-600 text-white shadow'
@@ -322,6 +316,7 @@ export const PoetryBattlesView = ({ poetryBattle, requireAuth, onRewardPoints })
                   <button
                     onClick={() => handleVote(b.id, b.user2.id)}
                     disabled={hasVoted}
+                    aria-label={`${b.user2.name} की कविता को वोट दें`}
                     className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
                       userVotes[b.id] === b.user2.id
                         ? 'bg-emerald-600 text-white shadow'

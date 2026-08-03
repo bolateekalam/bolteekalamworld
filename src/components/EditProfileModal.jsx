@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Save, User, MapPin, FileText, CheckCircle2, Image, Camera, Phone, Mail, BookOpen, Calendar } from 'lucide-react';
+import { X, Upload, Save, User, MapPin, FileText, CheckCircle2, Image, Camera, Phone, Mail, BookOpen, Calendar, AtSign, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }) => {
   const { t } = useLanguage();
 
   const [name, setName] = useState(userProfile?.name || 'नया साहित्य साधक');
+  const [username, setUsername] = useState(userProfile?.username || '@writer_user');
   const [phone, setPhone] = useState(userProfile?.phone || '');
   const [email, setEmail] = useState(userProfile?.email || '');
   const [city, setCity] = useState(userProfile?.city || 'प्रयागराज');
   const [bio, setBio] = useState(userProfile?.bio || '');
-  const [birthday, setBirthday] = useState(userProfile?.birthday || '2000-08-15');
+  const [birthday, setBirthday] = useState(userProfile?.birthday || '03 अगस्त 2026');
   const [genre, setGenre] = useState(userProfile?.genre || 'कविता (Poetry)');
   const [avatar, setAvatar] = useState(userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
   
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+
+  // Existing registered usernames list for uniqueness check!
+  const reservedUsernames = ['@sanjayrai_founder', '@akash_cofounder', '@super_admin', '@bolteekalamworld'];
 
   // Sync state whenever userProfile prop updates
   useEffect(() => {
     if (userProfile) {
       setName(userProfile.name || '');
+      setUsername(userProfile.username || `@${userProfile.name?.toLowerCase().replace(/\s+/g, '_') || 'writer'}`);
       setPhone(userProfile.phone || '');
       setEmail(userProfile.email || '');
       setCity(userProfile.city || 'प्रयागराज');
       setBio(userProfile.bio || '');
-      setBirthday(userProfile.birthday || '2000-08-15');
+      setBirthday(userProfile.birthday || '03 अगस्त 2026');
       setGenre(userProfile.genre || 'कविता (Poetry)');
       setAvatar(userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
     }
@@ -70,9 +76,23 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setUsernameError('');
+
+    let formattedUsername = username.trim().toLowerCase();
+    if (!formattedUsername.startsWith('@')) {
+      formattedUsername = `@${formattedUsername}`;
+    }
+
+    // Strict Unique Username Enforcement Check
+    if (reservedUsernames.includes(formattedUsername) && userProfile?.username !== formattedUsername) {
+      setUsernameError(`यह यूज़रनेम (${formattedUsername}) पहले से ही किसी अन्य लेखक द्वारा लिया जा चुका है! कृपया कोई अन्य यूनिक यूज़रनेम लिखें।`);
+      return;
+    }
+
     onSaveProfile({
       ...userProfile,
       name,
+      username: formattedUsername,
       phone,
       email,
       city,
@@ -100,7 +120,11 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
             <User className="w-5 h-5 text-rose-600" />
             <span>प्रोफ़ाइल संपादित करें (Edit Profile)</span>
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800">
+          <button 
+            onClick={onClose}
+            aria-label="प्रोफ़ाइल मॉडल बंद करें"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -108,11 +132,18 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
         {savedSuccess ? (
           <div className="p-6 text-center text-emerald-600 font-bold space-y-2">
             <CheckCircle2 className="w-10 h-10 mx-auto animate-bounce" />
-            <p>आपकी प्रोफ़ाइल एवं डेटाबेस सफलतापूर्वक अपडेट हो गया!</p>
+            <p>आपकी प्रोफ़ाइल एवं यूनिक यूज़रनेम सफलतापूर्वक अपडेट हो गया!</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             
+            {usernameError && (
+              <div className="p-3 bg-rose-500/10 text-rose-600 rounded-xl font-bold flex items-center gap-2 border border-rose-500/30">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{usernameError}</span>
+              </div>
+            )}
+
             {/* Avatar Photo Picker & Upload */}
             <div className="space-y-2">
               <label className="font-bold block text-slate-700 dark:text-slate-300">
@@ -145,10 +176,10 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
               </div>
             </div>
 
-            {/* Name & Phone Number */}
+            {/* Name & Unique Username Input */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">आपका नाम:</label>
+                <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">आपका पूरा नाम:</label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
@@ -161,6 +192,24 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                 </div>
               </div>
 
+              <div>
+                <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">यूनिक यूज़रनेम (@username): *</label>
+                <div className="relative">
+                  <AtSign className="w-4 h-4 text-rose-500 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="@unique_name"
+                    className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-rose-500/40 text-slate-900 dark:text-slate-100"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Phone & Email */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मोबाइल नंबर (10 अंक): *</label>
                 <div className="relative">
@@ -175,10 +224,7 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Email & City */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">Gmail / ईमेल पता:</label>
                 <div className="relative">
@@ -191,7 +237,10 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                   />
                 </div>
               </div>
+            </div>
 
+            {/* City & Birthday */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">शहर (City):</label>
                 <div className="relative">
@@ -204,10 +253,7 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Birthday (DOB & Age) & Genre */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="font-bold text-slate-700 dark:text-slate-300">जन्मदिन तिथि (DOB):</label>
@@ -224,25 +270,26 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                   className="w-full p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
-
-              <div>
-                <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मुख्य साहित्यिक विधा (Genre):</label>
-                <select
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-bold"
-                >
-                  <option value="कविता (Poetry)">कविता (Poetry)</option>
-                  <option value="ग़ज़ल (Ghazal)">ग़ज़ल (Ghazal)</option>
-                  <option value="कहानी (Story)">कहानी (Story)</option>
-                  <option value="हास्य-व्यंग्य (Satire)">हास्य-व्यंग्य (Satire)</option>
-                  <option value="देशभक्ति (Patriotic)">देशभक्ति (Patriotic)</option>
-                  <option value="विचार व निबंध (Essays)">विचार व निबंध (Essays)</option>
-                </select>
-              </div>
             </div>
 
-            {/* Bio */}
+            {/* Genre & Bio */}
+            <div>
+              <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मुख्य साहित्यिक विधा (Genre):</label>
+              <select
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+                aria-label="मुख्य साहित्यिक विधा चुनें"
+                className="w-full p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-bold"
+              >
+                <option value="कविता (Poetry)">कविता (Poetry)</option>
+                <option value="ग़ज़ल (Ghazal)">ग़ज़ल (Ghazal)</option>
+                <option value="कहानी (Story)">कहानी (Story)</option>
+                <option value="हास्य-व्यंग्य (Satire)">हास्य-व्यंग्य (Satire)</option>
+                <option value="देशभक्ति (Patriotic)">देशभक्ति (Patriotic)</option>
+                <option value="विचार व निबंध (Essays)">विचार व निबंध (Essays)</option>
+              </select>
+            </div>
+
             <div>
               <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">साहित्यिक परिचय / बायो (Bio):</label>
               <textarea
@@ -256,10 +303,11 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
             {/* Save Button */}
             <button
               type="submit"
+              aria-label="प्रोफ़ाइल सहेजें"
               className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 transition active:scale-95"
             >
               <Save className="w-4 h-4" />
-              <span>प्रोफ़ाइल सहेजें (Save Changes)</span>
+              <span>प्रोफ़ाइल व यूज़रनेम सहेजें (Save Profile)</span>
             </button>
           </form>
         )}

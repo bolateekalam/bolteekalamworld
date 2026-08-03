@@ -23,10 +23,12 @@ export const HomeFeedView = ({
   const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  const todayFormattedDate = new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
   const bannerData = patrioticBanner || {
-    tag: '79वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳',
-    title: 'समस्त देशवासियों को 79वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!',
-    description: 'स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें।',
+    tag: '80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳',
+    title: 'समस्त देशवासियों को 80वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!',
+    description: '80वें स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें।',
     bgImage: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800'
   };
 
@@ -48,7 +50,7 @@ export const HomeFeedView = ({
           <div className="space-y-2 relative z-10">
             <div className="flex items-center gap-1.5 text-xs font-bold text-amber-200">
               <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>{bannerData.tag || 'त्योहार विशेषांक 🇮🇳'}</span>
+              <span>{bannerData.tag || '80वाँ स्वतंत्रता दिवस विशेषांक 🇮🇳'}</span>
             </div>
             <h3 className="text-lg font-bold font-rozha text-white leading-tight">
               {bannerData.title}
@@ -56,6 +58,13 @@ export const HomeFeedView = ({
             <p className="text-xs text-orange-100 font-tiro leading-relaxed">
               {bannerData.description}
             </p>
+          </div>
+
+          <div className="relative z-10 pt-2 flex items-center justify-between text-[11px] font-bold text-amber-200">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-amber-300" />
+              <span>आज: {todayFormattedDate}</span>
+            </span>
           </div>
         </div>
 
@@ -84,6 +93,7 @@ export const HomeFeedView = ({
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           <button
             onClick={() => setSelectedCategory('all')}
+            aria-label="सभी रचनाएँ देखें"
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
               selectedCategory === 'all'
                 ? 'bg-rose-600 text-white shadow-md shadow-rose-900/20'
@@ -97,30 +107,21 @@ export const HomeFeedView = ({
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
+              aria-label={`${cat.hi} श्रेणी की रचनाएँ देखें`}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                 selectedCategory === cat.id
                   ? 'bg-rose-600 text-white shadow-md shadow-rose-900/20 font-bold'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              {cat.hi} ({cat.en})
+              {cat.hi}
             </button>
           ))}
         </div>
       </div>
 
-      {/* 4. Main Posts Feed */}
+      {/* 4. Literature Feed Posts List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>नवीनतम एवं ट्रेंडिंग रचनाएँ</span>
-          </h3>
-          <span className="text-xs text-slate-500">
-            {filteredPosts.length} रचनाएँ पाई गईं
-          </span>
-        </div>
-
         {filteredPosts.map((post) => (
           <PostCard 
             key={post.id} 

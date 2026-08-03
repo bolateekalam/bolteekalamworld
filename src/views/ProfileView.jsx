@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { 
   User, ShieldCheck, Flame, BookOpen, Bookmark, Award, Trophy,
   Eye, Heart, Sparkles, MapPin, Calendar, Share2, Copy, Check, 
-  Gift, Lock, Package, Edit3, Send, Phone, Mail 
+  Gift, Lock, Package, Edit3, Send, Phone, Mail, UserPlus, UserCheck 
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import PostCard from '../components/PostCard';
+import PointsExplanationModal from '../components/PointsExplanationModal';
 
 export const ProfileView = ({ 
   posts = [], 
@@ -21,9 +22,12 @@ export const ProfileView = ({
   const [copiedPortfolio, setCopiedPortfolio] = useState(false);
   const [shippingAddress, setShippingAddress] = useState('');
   const [isKitRequested, setIsKitRequested] = useState(false);
+  const [showPointsModal, setShowPointsModal] = useState(false);
+  const [isFollowingProfile, setIsFollowingProfile] = useState(false);
+  const [followerCount, setFollowerCount] = useState(userProfile?.followers || 0);
 
   const profile = userProfile || {
-    name: 'आप (User Author)',
+    name: 'साहित्य साधक',
     email: 'user@bolteekalam.com',
     phone: '+91 9876543210',
     username: '@writer_user',
@@ -31,14 +35,24 @@ export const ProfileView = ({
     cover: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200',
     badge: 'verifiedAuthor',
     bio: 'काव्य-रसिक, लेखक एवं हिंदी साहित्य प्रेमी। शब्दों के माध्यम से अंतर्मन की वेदना और समाज की चेतना को उजागर करने का विनम्र प्रयास।',
-    city: 'नई दिल्ली',
+    city: 'प्रयागराज',
     joined: 'जनवरी 2026',
-    birthday: '2000-08-15',
-    followers: 1240,
-    following: 180,
-    streak: 14,
-    points: 4890,
-    badges: ['Verified Author', 'Daily Challenge Champion', 'Top Contributor', '7-Day Writing Streak']
+    birthday: '03 अगस्त 2026',
+    followers: 0,
+    following: 0,
+    streak: 0,
+    points: 0,
+    badges: ['Verified Author', 'साहित्य साधक']
+  };
+
+  const handleToggleFollow = () => {
+    if (isFollowingProfile) {
+      setIsFollowingProfile(false);
+      setFollowerCount(prev => Math.max(0, prev - 1));
+    } else {
+      setIsFollowingProfile(true);
+      setFollowerCount(prev => prev + 1);
+    }
   };
 
   const handleSharePortfolio = () => {
@@ -65,6 +79,7 @@ export const ProfileView = ({
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <button
               onClick={onOpenEditProfile}
+              aria-label="प्रोफ़ाइल संपादित करें"
               className="px-3.5 py-1.5 rounded-full bg-slate-950/80 text-white text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 hover:bg-slate-950"
             >
               <Edit3 className="w-3.5 h-3.5 text-rose-400" />
@@ -73,6 +88,7 @@ export const ProfileView = ({
 
             <button
               onClick={handleSharePortfolio}
+              aria-label="प्रोफ़ाइल लिंक शेयर करें"
               className="px-3.5 py-1.5 rounded-full bg-slate-950/80 text-white text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 hover:bg-slate-950"
             >
               {copiedPortfolio ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5 text-amber-400" />}
@@ -96,10 +112,35 @@ export const ProfileView = ({
               </span>
             </div>
 
-            {/* Stats Badges */}
+            {/* Stats & Action Badges */}
             <div className="flex items-center gap-2 flex-wrap">
+              
+              {/* Follow Button */}
+              <button
+                onClick={handleToggleFollow}
+                aria-label={isFollowingProfile ? "अनफ़ॉलो करें" : "फ़ॉलो करें"}
+                className={`px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95 ${
+                  isFollowingProfile
+                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
+                    : 'bg-rose-600 hover:bg-rose-700 text-white'
+                }`}
+              >
+                {isFollowingProfile ? (
+                  <>
+                    <UserCheck className="w-4 h-4 text-emerald-500" />
+                    <span>फ़ॉलो कर रहे हैं</span>
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    <span>+ फॉलो (Follow)</span>
+                  </>
+                )}
+              </button>
+
               <button
                 onClick={onOpenReferEarn}
+                aria-label="मित्र को आमंत्रित करें"
                 className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition"
               >
                 <Gift className="w-4 h-4 text-slate-950 animate-bounce" />
@@ -108,13 +149,19 @@ export const ProfileView = ({
 
               <div className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-xs flex items-center gap-1.5">
                 <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <span>{profile.streak} दिन Streak</span>
+                <span>{profile.streak || 0} दिन Streak</span>
               </div>
 
-              <div className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold text-xs flex items-center gap-1.5 font-outfit">
+              {/* Clickable Points Badge Opening PointsExplanationModal */}
+              <button
+                onClick={() => setShowPointsModal(true)}
+                aria-label="पॉइंट्स नियम व विवरण देखें"
+                className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-semibold text-xs flex items-center gap-1.5 font-outfit border border-rose-500/30 transition active:scale-95 cursor-pointer"
+                title="पॉइंट्स नियम व विवरण देखने हेतु क्लिक करें"
+              >
                 <Award className="w-4 h-4 text-rose-500" />
-                <span>{profile.points.toLocaleString()} पॉइंट्स</span>
-              </div>
+                <span>{(profile.points || 0).toLocaleString()} पॉइंट्स ℹ️</span>
+              </button>
             </div>
 
           </div>
@@ -147,10 +194,10 @@ export const ProfileView = ({
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>जन्मदिन: {profile.birthday}</span>
+                <span>जन्मदिन: {profile.birthday || '03 अगस्त 2026'}</span>
               </span>
-              <span><strong>{profile.followers.toLocaleString()}</strong> फ़ॉलोअर्स</span>
-              <span><strong>{profile.following}</strong> फ़ॉलोइंग</span>
+              <span><strong>{followerCount.toLocaleString()}</strong> फ़ॉलोअर्स</span>
+              <span><strong>{profile.following || 0}</strong> फ़ॉलोइंग</span>
             </div>
 
             {/* Achievement Badges Showcase */}
@@ -173,9 +220,12 @@ export const ProfileView = ({
               <Trophy className="w-4 h-4 text-amber-500" />
               <span>{t('profile.milestoneTitle')}</span>
             </h3>
-            <span className="text-xs font-mono font-bold text-amber-500">
-              वर्तमान पॉइंट्स: {profile.points} pts
-            </span>
+            <button 
+              onClick={() => setShowPointsModal(true)}
+              className="text-xs font-mono font-bold text-amber-500 underline"
+            >
+              वर्तमान पॉइंट्स: {profile.points || 0} pts (नियम देखें)
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -187,7 +237,7 @@ export const ProfileView = ({
                 title: 'साहित्य साधक सम्मान',
                 category: '1,000 Points Milestone Award',
                 type: 'Milestone Cert Level 1',
-                date: '02 अगस्त 2026',
+                date: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
                 certificateId: 'BK-MS-1000',
                 requiredPoints: 1000
               })}
@@ -212,7 +262,7 @@ export const ProfileView = ({
                 title: 'वरिष्ठ रचनाकार सम्मान',
                 category: '2,500 Points Senior Milestone',
                 type: 'Milestone Cert Level 2',
-                date: '02 अगस्त 2026',
+                date: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
                 certificateId: 'BK-MS-2500',
                 requiredPoints: 2500
               })}
@@ -237,7 +287,7 @@ export const ProfileView = ({
                 title: 'महाकवि सम्मान & बोलती कलम किट',
                 category: '5,000 Points Grand Master Milestone',
                 type: 'Bolti Kalam Kit Award',
-                date: '02 अगस्त 2026',
+                date: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
                 certificateId: 'BK-MS-5000',
                 requiredPoints: 5000
               })}
@@ -300,6 +350,7 @@ export const ProfileView = ({
         <div className="flex border-t border-slate-200 dark:border-slate-800 px-6 gap-6 bg-slate-50/50 dark:bg-slate-800/40 text-xs font-bold">
           <button
             onClick={() => setActiveTab('works')}
+            aria-label="प्रकाशित रचनाएँ देखें"
             className={`py-3 border-b-2 transition ${
               activeTab === 'works' 
                 ? 'border-rose-600 text-rose-600 dark:text-rose-400 font-bold' 
@@ -310,6 +361,7 @@ export const ProfileView = ({
           </button>
           <button
             onClick={() => setActiveTab('bookmarks')}
+            aria-label="सहेजी गई रचनाएँ देखें"
             className={`py-3 border-b-2 transition ${
               activeTab === 'bookmarks' 
                 ? 'border-rose-600 text-rose-600 dark:text-rose-400 font-bold' 
@@ -334,6 +386,13 @@ export const ProfileView = ({
           />
         ))}
       </div>
+
+      {/* Points Explanation Modal */}
+      <PointsExplanationModal
+        isOpen={showPointsModal}
+        onClose={() => setShowPointsModal(false)}
+        points={profile.points || 0}
+      />
 
     </div>
   );

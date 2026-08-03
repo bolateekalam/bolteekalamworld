@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import { X, Swords, Send, UserPlus, Share2, Sparkles, CheckCircle2, Copy } from 'lucide-react';
 
 export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge }) => {
-  const [targetOpponent, setTargetOpponent] = useState('अमित वर्मा (@amit_writer)');
+  const [targetOpponent, setTargetOpponent] = useState('संजय राय (@sanjayrai_founder)');
   const [customOpponent, setCustomOpponent] = useState('');
-  const [battleTopic, setBattleTopic] = useState('सावन और विरह की वेदना');
+  const [battleTopic, setBattleTopic] = useState('80वाँ स्वतंत्रता दिवस — देशभक्ति का महासंग्राम');
   const [poemTitle, setPoemTitle] = useState('');
   const [poemContent, setPoemContent] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const sampleOpponents = [
-    { id: 'o1', name: 'अमित वर्मा', username: '@amit_writer' },
-    { id: 'o2', name: 'प्रिया सिंह', username: '@priya_poetry' },
-    { id: 'o3', name: 'शैलेंद्र मिश्र', username: '@shailendra_kavi' }
+  const registeredPlatformUsers = [
+    { id: 'u-sanjay', name: 'संजय राय', username: '@sanjayrai_founder' },
+    { id: 'u-akash', name: 'आकाश कुमार सिंह', username: '@akash_cofounder' }
   ];
 
   if (!isOpen) return null;
@@ -44,7 +43,7 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
   };
 
   const handleCopyInviteLink = () => {
-    navigator.clipboard.writeText(`https://bolteekalam.com/battles/invite?id=${Date.now()}`);
+    navigator.clipboard.writeText(`https://www.bolateeworld.in/#battles/invite?id=${Date.now()}`);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
@@ -64,11 +63,15 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
                 कवि संग्राम 1-on-1 द्वंद्व चुनौती
               </h3>
               <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold block">
-                प्रतिद्वंद्वी को आमंत्रित करें एवं अपनी रचना प्रस्तुत करें (+50 Pts)
+                पंजीकृत कवि को चुनें या व्हाट्सएप/लिंक से इनवाइट करें (+20 Pts)
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800">
+          <button 
+            onClick={onClose} 
+            aria-label="चैलेंज मॉडल बंद करें"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -78,7 +81,7 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
             <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
             <h4 className="font-bold text-slate-900 dark:text-slate-100 text-base">चुनौती सफलतापूर्वक भेज दी गई है!</h4>
             <p className="text-xs text-slate-600 dark:text-slate-300">
-              आपकी रचना कवि संग्राम मंच पर 1-on-1 बैटल में लाइव हो गई है। (+50 पॉइंट्स आपके खाते में जोड़े गए)
+              आपकी रचना कवि संग्राम मंच पर 1-on-1 बैटल में लाइव हो गई है।
             </p>
           </div>
         ) : (
@@ -96,16 +99,17 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
               />
             </div>
 
-            {/* Select Opponent or Invite via WhatsApp */}
+            {/* Select Opponent from Registered Platform Users */}
             <div className="space-y-2">
-              <label className="font-bold block text-slate-700 dark:text-slate-300">प्रतिद्वंद्वी चुनें या व्हाट्सएप/लिंक से इनवाइट करें:</label>
+              <label className="font-bold block text-slate-700 dark:text-slate-300">पंजीकृत कवि को चुनें या व्हाट्सएप/लिंक से इनवाइट करें:</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <select
                   value={targetOpponent}
                   onChange={(e) => setTargetOpponent(e.target.value)}
-                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700"
+                  aria-label="प्रतिद्वंद्वी चुनें"
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                 >
-                  {sampleOpponents.map(op => (
+                  {registeredPlatformUsers.map(op => (
                     <option key={op.id} value={`${op.name} (${op.username})`}>
                       {op.name} ({op.username})
                     </option>
@@ -115,6 +119,7 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
                 <button
                   type="button"
                   onClick={handleCopyInviteLink}
+                  aria-label="इनवाइट लिंक कॉपी करें"
                   className="p-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold rounded-xl flex items-center justify-center gap-1.5 border border-emerald-500/30 transition"
                 >
                   <Copy className="w-4 h-4" />
@@ -130,7 +135,7 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
                 type="text"
                 value={poemTitle}
                 onChange={(e) => setPoemTitle(e.target.value)}
-                placeholder="उदा. विरह की पहली भोर"
+                placeholder="उदा. 80वाँ स्वतंत्रता दिवस हुंकार"
                 className="w-full p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                 required
               />
@@ -151,10 +156,11 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
 
             <button
               type="submit"
+              aria-label="चुनौती भेजें"
               className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 transition active:scale-95 mt-2"
             >
               <Swords className="w-4 h-4" />
-              <span>चुनौती भेजें एवं बैटल में भाग लें (+50 Pts)</span>
+              <span>चुनौती भेजें एवं बैटल में भाग लें (+20 Pts)</span>
             </button>
           </form>
         )}
