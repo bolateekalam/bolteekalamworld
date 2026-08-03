@@ -395,7 +395,10 @@ function AppContent() {
       title: newPost.title,
       category: newPost.category,
       content: newPost.content,
-      tags: newPost.tags
+      tags: newPost.tags,
+      authorName: userProfile.name || 'साहित्य साधक',
+      authorUsername: userProfile.username || '@writer',
+      authorAvatar: userProfile.avatar || ''
     }, currentUser?.email || 'user-anon');
   };
 

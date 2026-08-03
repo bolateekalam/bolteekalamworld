@@ -8,7 +8,7 @@ const isValidUUID = (str) => {
   return uuidRegex.test(str);
 };
 
-// 1. Fetch Posts from Supabase (Fallback to Mock Posts if DB empty)
+// 1. Fetch Posts from Supabase (Fallback to Combined Feed if DB empty)
 export const fetchPostsFromDB = async () => {
   try {
     const { data, error } = await supabase
@@ -23,17 +23,17 @@ export const fetchPostsFromDB = async () => {
     return data.map(p => ({
       id: p.id,
       author: {
-        id: p.profiles?.id || 'unknown',
-        name: p.profiles?.name || 'अज्ञात लेखक',
-        username: p.profiles?.username || '@writer',
-        avatar: p.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+        id: p.user_id || p.profiles?.id || 'unknown',
+        name: p.author_name || p.profiles?.name || 'अज्ञात लेखक',
+        username: p.author_username || p.profiles?.username || '@writer',
+        avatar: p.author_avatar || p.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
         badge: 'verifiedAuthor',
         city: p.profiles?.city || 'प्रयागराज',
-        followers: 1200
+        followers: 0
       },
-      title: p.title,
-      category: p.category,
-      content: p.content,
+      title: p.title || 'बिना शीर्षक',
+      category: p.category || 'कविता',
+      content: p.content || '',
       tags: p.tags || ['हिंदीसाहित्य'],
       likes: p.likes_count || 0,
       isLiked: false,
@@ -42,7 +42,7 @@ export const fetchPostsFromDB = async () => {
       views: p.views_count || 0,
       readingTime: '2 मिनट',
       isEditorialPick: p.is_editorial_pick || false,
-      createdAt: new Date(p.created_at).toLocaleDateString('hi-IN')
+      createdAt: p.created_at ? new Date(p.created_at).toLocaleDateString('hi-IN') : new Date().toLocaleDateString('hi-IN')
     }));
   } catch (err) {
     console.error('Error fetching posts:', err);
@@ -50,14 +50,17 @@ export const fetchPostsFromDB = async () => {
   }
 };
 
-// 2. Create New Post in Supabase DB
+// 2. Create New Post in Supabase DB with Author Metadata attached
 export const createPostInDB = async (postData, userId) => {
   try {
     const payload = {
       title: postData.title || 'बिना शीर्षक',
       category: postData.category || 'कविता',
       content: postData.content || '',
-      tags: postData.tags || ['बोलतीकलम']
+      tags: postData.tags || ['बोलतीकलम'],
+      author_name: postData.authorName || 'बोलती कलम लेखक',
+      author_username: postData.authorUsername || '@writer',
+      author_avatar: postData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'
     };
 
     // Try to get authenticated Supabase user session UUID
@@ -75,7 +78,6 @@ export const createPostInDB = async (postData, userId) => {
 
     if (error) {
       console.warn('Supabase insert warning:', error.message);
-      // Fallback try without user_id if foreign key or RLS failed on user_id
       if (payload.user_id) {
         delete payload.user_id;
         const { data: fallbackData } = await supabase.from('posts').insert([payload]).select();
@@ -105,15 +107,10 @@ export const deletePostFromDB = async (postId) => {
   }
 };
 
-// 4. Update Profile in Supabase DB (Valid UUID Only)
+// 4. Update Profile in Supabase DB
 export const updateUserProfileInDB = async (userProfile, userId) => {
   try {
-    if (!userId || !isValidUUID(userId)) {
-      return false;
-    }
-    
     const payload = {
-      id: userId,
       name: userProfile.name,
       username: userProfile.username,
       avatar_url: userProfile.avatar,
@@ -121,6 +118,10 @@ export const updateUserProfileInDB = async (userProfile, userId) => {
       bio: userProfile.bio,
       birthday: userProfile.birthday
     };
+
+    if (userId && isValidUUID(userId)) {
+      payload.id = userId;
+    }
 
     const { error } = await supabase
       .from('profiles')
