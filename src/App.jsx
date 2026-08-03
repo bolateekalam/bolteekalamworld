@@ -118,16 +118,14 @@ function AppContent() {
       bio: 'हिंदी साहित्य एवं काव्य का नया साधक। अभी अपनी पहली कविता पोस्ट करने जा रहा हूँ।',
       city: 'प्रयागराज',
       joined: 'अगस्त 2026',
-      birthday: '03 अगस्त 2026',
-      followers: 0,
-      following: 0,
-      streak: 0,
-      points: 0,
-      badges: ['नया साहित्य साधक ✒️']
+      points: 100,
+      followers: 12,
+      following: 5,
+      streak: 3
     };
   });
 
-  // Search State
+  // Search Query State
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('all');
 
@@ -164,45 +162,29 @@ function AppContent() {
 
   // 1. Supabase OAuth Session Listener for Instant Google Login Restore
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        const gUser = session.user;
-        const userEmail = gUser.email || '';
-        
+        const userEmail = session.user.email || '';
         const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
         
+        let existingPoints = 100;
+        try {
+          const savedProf = localStorage.getItem('bolteekalam_user_profile');
+          if (savedProf) {
+            const parsed = JSON.parse(savedProf);
+            if (parsed.points !== undefined) existingPoints = parsed.points;
+          }
+        } catch (e) {}
+
         const googleProfile = {
-          name: gUser.user_metadata?.full_name || userEmail.split('@')[0] || 'गूगल लेखक',
-          username: `@${userEmail.split('@')[0] || 'writer'}`,
+          name: session.user.user_metadata?.full_name || 'गूगल यूज़र',
+          username: `@${(session.user.user_metadata?.full_name || 'writer').toLowerCase().replace(/\s+/g, '_')}`,
           email: userEmail,
-          avatar: gUser.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+          avatar: session.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
           role: 'user',
           city: 'प्रयागराज',
           isVerified: true,
-          points: 0,
-          phone: localStorage.getItem(`user_phone_${userEmail}`) || ''
-        };
-
-        handleLoginSuccess(googleProfile, !!hasCompletedOnboarding);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const gUser = session.user;
-        const userEmail = gUser.email || '';
-        
-        const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
-
-        const googleProfile = {
-          name: gUser.user_metadata?.full_name || userEmail.split('@')[0] || 'गूगल लेखक',
-          username: `@${userEmail.split('@')[0] || 'writer'}`,
-          email: userEmail,
-          avatar: gUser.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-          role: 'user',
-          city: 'प्रयागराज',
-          isVerified: true,
-          points: 0,
+          points: existingPoints,
           phone: localStorage.getItem(`user_phone_${userEmail}`) || ''
         };
 
@@ -226,9 +208,10 @@ function AppContent() {
   // 3. Real-time Points Ledger System & Toast Notification
   const handleRewardPoints = (amount, reason) => {
     setUserProfile(prev => {
+      const currentPts = prev.points || 0;
       const updated = {
         ...prev,
-        points: (prev.points || 0) + amount
+        points: currentPts + amount
       };
       localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updated));
       return updated;
@@ -248,49 +231,43 @@ function AppContent() {
     localStorage.setItem('bolteekalam_active_user', JSON.stringify(userObj));
 
     const userEmail = userObj.email || '';
+    const storedPhone = localStorage.getItem(`user_phone_${userEmail}`);
+    const storedDob = localStorage.getItem(`user_dob_${userEmail}`);
 
-    if (userObj.role === 'admin') {
-      setUserRole('admin');
-      const adminProf = {
-        name: 'बोलती कलम वर्ल्ड',
-        username: '@bolteekalamworld',
-        email: 'admin@bolteekalam.com',
-        phone: '+91 9876500000',
-        points: 99999,
-        role: 'admin'
-      };
-      setUserProfile(prev => ({ ...prev, ...adminProf }));
-      localStorage.setItem('bolteekalam_user_profile', JSON.stringify(adminProf));
-      setActiveView('admin');
-    } else {
-      setUserRole('user');
-      const storedPhone = localStorage.getItem(`user_phone_${userEmail}`) || userObj.phone || '';
-      const storedDOB = localStorage.getItem(`user_dob_${userEmail}`) || userObj.birthday || '';
-
-      const updatedProf = {
-        ...userProfile,
-        name: userObj.name || userProfile.name,
-        email: userObj.email || userProfile.email,
-        phone: storedPhone || userProfile.phone,
-        birthday: storedDOB || userProfile.birthday || '03 अगस्त 2026',
-        username: userObj.username || userProfile.username,
-        avatar: userObj.avatar || userProfile.avatar,
-        city: userObj.city || userProfile.city,
-        points: userObj.points !== undefined ? userObj.points : (userProfile.points || 0)
-      };
-
-      setUserProfile(updatedProf);
-      localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updatedProf));
-
-      const hasCompletedOnboarding = isAlreadyOnboarded || localStorage.getItem(`onboarding_completed_${userEmail}`);
-
-      if (!hasCompletedOnboarding && (!storedPhone || storedPhone.length < 10)) {
-        setPendingFirstTimeUser(userObj);
-        setShowFirstTimeModal(true);
-      } else {
-        setShowFirstTimeModal(false);
-        setActiveView('profile');
+    let currentSavedPoints = 100;
+    try {
+      const savedProf = localStorage.getItem('bolteekalam_user_profile');
+      if (savedProf) {
+        const parsed = JSON.parse(savedProf);
+        if (parsed.points !== undefined) currentSavedPoints = parsed.points;
       }
+    } catch (e) {}
+
+    const targetPoints = Math.max(currentSavedPoints, userObj.points || 0);
+
+    const updatedProf = {
+      ...userProfile,
+      name: userObj.name || userProfile.name,
+      email: userEmail,
+      phone: storedPhone || userObj.phone || userProfile.phone,
+      birthday: storedDob || userObj.birthday || userProfile.birthday || '03 अगस्त 2026',
+      username: userObj.username || userProfile.username,
+      avatar: userObj.avatar || userProfile.avatar,
+      city: userObj.city || userProfile.city,
+      points: targetPoints
+    };
+
+    setUserProfile(updatedProf);
+    localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updatedProf));
+
+    const hasCompletedOnboarding = isAlreadyOnboarded || localStorage.getItem(`onboarding_completed_${userEmail}`);
+
+    if (!hasCompletedOnboarding && (!storedPhone || storedPhone.length < 10)) {
+      setPendingFirstTimeUser(userObj);
+      setShowFirstTimeModal(true);
+    } else {
+      setShowFirstTimeModal(false);
+      setActiveView('profile');
     }
   };
 
@@ -298,11 +275,11 @@ function AppContent() {
     const userEmail = draftUser.email || '';
     const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
 
-    if (hasCompletedOnboarding) {
-      handleLoginSuccess(draftUser, true);
-    } else {
+    if (!hasCompletedOnboarding) {
       setPendingFirstTimeUser(draftUser);
       setShowFirstTimeModal(true);
+    } else {
+      handleLoginSuccess(draftUser, true);
     }
   };
 
@@ -321,6 +298,15 @@ function AppContent() {
       localStorage.setItem(`user_dob_${userEmail}`, completedUser.birthday);
     }
 
+    let currentSavedPoints = 100;
+    try {
+      const savedProf = localStorage.getItem('bolteekalam_user_profile');
+      if (savedProf) {
+        const parsed = JSON.parse(savedProf);
+        if (parsed.points !== undefined) currentSavedPoints = parsed.points;
+      }
+    } catch (e) {}
+
     const updated = {
       ...userProfile,
       name: completedUser.name,
@@ -330,7 +316,7 @@ function AppContent() {
       city: completedUser.city,
       avatar: completedUser.avatar,
       username: completedUser.username || `@${completedUser.name.toLowerCase().replace(/\s+/g, '_')}`,
-      points: 50,
+      points: Math.max(currentSavedPoints + 50, 150),
       followers: 0,
       following: 0,
       streak: 1
@@ -360,14 +346,6 @@ function AppContent() {
       }
       updateUserProfileInDB(updatedProfile, currentUser.email || currentUser.id);
     }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('bolteekalam_active_user');
-    setCurrentUser(null);
-    setUserRole('user');
-    setActiveView('feed');
   };
 
   const handleOpenCreatePostProtected = () => {
@@ -434,77 +412,97 @@ function AppContent() {
 
   const handleSavePost = (updatedPost) => {
     setPosts(prev => prev.map(p => p.id === updatedPost.id ? updatedPost : p));
-    setEditingPost(null);
+
+    try {
+      const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+      if (savedUserPosts) {
+        const existingUserPosts = JSON.parse(savedUserPosts);
+        const updatedUserPosts = existingUserPosts.map(p => p.id === updatedPost.id ? updatedPost : p);
+        localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserPosts));
+      }
+    } catch (e) {}
   };
 
-  const handleDeletePost = async (postId) => {
-    if (window.confirm('क्या आप निश्चित रूप से इस रचना को हटाना चाहते हैं?')) {
-      setPosts(prev => prev.filter(p => p.id !== postId));
+  const handleDeletePost = (postId) => {
+    setPosts(prev => prev.filter(p => p.id !== postId));
+    deletePostFromDB(postId);
 
-      try {
-        const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
-        if (savedUserPosts) {
-          const existingUserPosts = JSON.parse(savedUserPosts);
-          const updatedUserPosts = existingUserPosts.filter(p => p.id !== postId);
-          localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserPosts));
-        }
-      } catch (e) {}
-
-      await deletePostFromDB(postId);
-    }
+    try {
+      const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+      if (savedUserPosts) {
+        const existingUserPosts = JSON.parse(savedUserPosts);
+        const updatedUserPosts = existingUserPosts.filter(p => p.id !== postId);
+        localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserPosts));
+      }
+    } catch (e) {}
   };
 
-  const openCertificateModal = (data) => {
-    setCertificateData(data);
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setUserRole('user');
+    localStorage.removeItem('bolteekalam_active_user');
+    setActiveView('feed');
   };
 
-  const handleSimulateReferral = (refereeName) => {
-    handleRewardPoints(100, `मित्र (${refereeName}) को बोलती कलम पर आमंत्रित करने पर`);
+  const openCertificateModal = (type, titleStr = 'काव्य शिरोमणि सम्मान 2026') => {
+    setCertificateData({
+      userName: userProfile.name,
+      awardType: type === 'battle' ? 'काव्य संग्राम विजेता' : type === 'challenge' ? 'साप्ताहिक चुनौती विजेता' : 'वर्ष का श्रेष्ठ कवि',
+      title: titleStr,
+      points: userProfile.points || 500,
+      issueDate: '03 अगस्त 2026'
+    });
+  };
+
+  const handleSearchSubmit = (query) => {
+    setSearchQuery(query);
+    setActiveView('search');
   };
 
   const handleSubscribeYouTube = () => {
-    handleRewardPoints(25, 'आधिकारिक YouTube चैनल सब्सक्राइब करने पर');
-    setShowYouTubeModal(false);
+    handleRewardPoints(20, 'यूट्यूब चैनल सब्सक्राइब करने पर');
+    window.open('https://www.youtube me', '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-inter transition-colors duration-200 selection:bg-rose-500 selection:text-white pb-20 md:pb-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-inter">
       
-      {/* Real-time Floating Points Toast Banner Notification */}
+      {/* Top Floating Toast Notification for Points Reward */}
       {pointsToast && (
-        <div className="fixed top-20 right-4 z-50 bg-gradient-to-r from-amber-500 to-rose-600 text-slate-950 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-300 font-bold animate-in slide-in-from-top duration-300">
-          <Trophy className="w-6 h-6 text-slate-950 animate-bounce shrink-0" />
+        <div className="fixed top-20 right-4 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300 border border-emerald-400">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
+            🎁
+          </div>
           <div>
-            <div className="text-sm font-black flex items-center gap-1">
-              🎉 +{pointsToast.amount} Pts अर्जित!
+            <div className="font-extrabold text-sm flex items-center gap-1">
+              <span>+{pointsToast.amount} Pts अर्जित!</span>
+              <Sparkles className="w-4 h-4 text-amber-300" />
             </div>
-            <span className="text-[11px] text-slate-900 font-semibold block">{pointsToast.reason}</span>
+            <div className="text-[11px] text-emerald-100 font-semibold">
+              {pointsToast.reason}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Global Navigation Header */}
+      {/* Top Main Navigation Bar */}
       <Navbar
-        onOpenCreatePost={handleOpenCreatePostProtected}
-        activeView={activeView}
-        setActiveView={setActiveView}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchType={searchType}
-        setSearchType={setSearchType}
-        unreadNotifications={unreadNotifications}
-        setUnreadNotifications={setUnreadNotifications}
-        userRole={userRole}
-        setUserRole={setUserRole}
         currentUser={currentUser}
+        userRole={userRole}
         onOpenAuthModal={() => setShowAuthModal(true)}
         onLogout={handleLogout}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        unreadNotifications={unreadNotifications}
+        setUnreadNotifications={setUnreadNotifications}
+        onSearchSubmit={handleSearchSubmit}
+        userPoints={userProfile.points}
       />
 
-      {/* Main App Layout */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 flex-1 w-full flex gap-6">
+      {/* Main Layout Container */}
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex gap-6">
         
-        {/* Left Sticky Sidebar (Desktop) */}
+        {/* Left Sidebar Navigation (Desktop) */}
         <Sidebar
           activeView={activeView}
           setActiveView={setActiveView}
@@ -524,45 +522,39 @@ function AppContent() {
           {activeView === 'feed' && (
             <HomeFeedView
               posts={posts}
-              dailyChallenge={weeklyChallenge}
-              poetryBattle={mockPoetryBattle}
-              onOpenCertificate={openCertificateModal}
-              setActiveView={setActiveView}
-              onEditPost={(p) => setEditingPost(p)}
-              onDeletePost={handleDeletePost}
-              onOpenBirthdayCard={(u) => setBirthdayUser(u)}
-              userProfile={userProfile}
+              weeklyChallenge={weeklyChallenge}
               patrioticBanner={patrioticBanner}
-              requireAuth={requireAuth}
-            />
-          )}
-
-          {activeView === 'dailyChallenge' && (
-            <DailyChallengeView
-              dailyChallenge={weeklyChallenge}
+              onOpenCreatePost={handleOpenCreatePostProtected}
               onOpenCertificate={openCertificateModal}
-              requireAuth={requireAuth}
-            />
-          )}
-
-          {activeView === 'battles' && (
-            <PoetryBattlesView 
-              poetryBattle={mockPoetryBattle} 
-              requireAuth={requireAuth}
               onRewardPoints={handleRewardPoints}
             />
           )}
 
-          {activeView === 'competitions' && (
-            <CompetitionsView
-              competitions={mockCompetitions}
-              onOpenCertificate={openCertificateModal}
+          {activeView === 'daily' && (
+            <DailyChallengeView
+              weeklyChallenge={weeklyChallenge}
               onOpenCreatePost={handleOpenCreatePostProtected}
+              onRewardPoints={handleRewardPoints}
+            />
+          )}
+
+          {activeView === 'battles' && (
+            <PoetryBattlesView
+              onRewardPoints={handleRewardPoints}
+              onOpenCreatePost={handleOpenCreatePostProtected}
+              currentUser={currentUser}
+            />
+          )}
+
+          {activeView === 'competitions' && (
+            <CompetitionsView 
+              competitions={mockCompetitions} 
+              onRewardPoints={handleRewardPoints}
             />
           )}
 
           {activeView === 'events' && (
-            <EventsView
+            <EventsView 
               events={mockEvents}
               onOpenCertificate={openCertificateModal}
               onSubscribeYouTube={() => requireAuth(handleSubscribeYouTube)}
@@ -596,32 +588,23 @@ function AppContent() {
             />
           )}
 
+          {activeView === 'admin' && (
+            <AdminDashboardView
+              weeklyChallenge={weeklyChallenge}
+              setWeeklyChallenge={setWeeklyChallenge}
+              patrioticBanner={patrioticBanner}
+              setPatrioticBanner={setPatrioticBanner}
+            />
+          )}
+
           {activeView === 'search' && (
             <SearchResultsView
               query={searchQuery}
-              searchType={searchType}
               posts={posts}
               onOpenCertificate={openCertificateModal}
-              onEditPost={(p) => setEditingPost(p)}
-              onDeletePost={handleDeletePost}
-            />
-          )}
-
-          {activeView === 'admin' && (
-            <AdminDashboardView
-              posts={posts}
-              onDeletePost={handleDeletePost}
-              onEditPost={(p) => setEditingPost(p)}
-              onPublishChallenge={(topic, prompt) => {
-                setWeeklyChallenge(prev => ({ ...prev, topic, title: topic, prompt }));
-              }}
-              onUpdateBanner={(tag, title, description, bgImage) => {
-                setPatrioticBanner({ tag, title, description, bgImage });
-              }}
             />
           )}
         </main>
-
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
@@ -631,7 +614,7 @@ function AppContent() {
         onOpenCreatePost={handleOpenCreatePostProtected}
       />
 
-      {/* Global Interactive Modals */}
+      {/* Modals & Dialogs */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
@@ -641,68 +624,81 @@ function AppContent() {
 
       <FirstTimeUserModal
         isOpen={showFirstTimeModal}
-        user={pendingFirstTimeUser}
-        onCompleteProfile={handleCompleteFirstTimeProfile}
+        onClose={() => setShowFirstTimeModal(false)}
+        onSaveProfile={handleCompleteFirstTimeProfile}
+        initialData={pendingFirstTimeUser}
       />
 
       <CreatePostModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onPostCreated={handlePostCreated}
-        onOpenAiAssistant={() => {}}
         userProfile={userProfile}
       />
 
-      <EditProfileModal
-        isOpen={showEditProfileModal}
-        onClose={() => setShowEditProfileModal(false)}
-        userProfile={userProfile}
-        onSaveProfile={handleSaveProfileAndSyncDB}
-      />
+      {editingPost && (
+        <EditPostModal
+          isOpen={true}
+          onClose={() => setEditingPost(null)}
+          post={editingPost}
+          onSave={handleSavePost}
+        />
+      )}
 
-      <EditPostModal
-        isOpen={!!editingPost}
-        onClose={() => setEditingPost(null)}
-        post={editingPost}
-        onSavePost={handleSavePost}
-      />
+      {showEditProfileModal && (
+        <EditProfileModal
+          isOpen={true}
+          onClose={() => setShowEditProfileModal(false)}
+          userProfile={userProfile}
+          onSaveProfile={handleSaveProfileAndSyncDB}
+        />
+      )}
 
-      <ReferEarnModal
-        isOpen={showReferEarnModal}
-        onClose={() => setShowReferEarnModal(false)}
-        userPoints={userProfile.points}
-        onSimulateReferral={handleSimulateReferral}
-      />
+      {showReferEarnModal && (
+        <ReferEarnModal
+          isOpen={true}
+          onClose={() => setShowReferEarnModal(false)}
+          userProfile={userProfile}
+          onRewardPoints={handleRewardPoints}
+        />
+      )}
 
-      <BirthdayCardModal
-        isOpen={!!birthdayUser}
-        onClose={() => setBirthdayUser(null)}
-        birthdayUser={birthdayUser}
-      />
+      {birthdayUser && (
+        <BirthdayCardModal
+          isOpen={true}
+          onClose={() => setBirthdayUser(null)}
+          birthdayUser={birthdayUser}
+        />
+      )}
 
-      <YouTubeSubscribeModal
-        isOpen={showYouTubeModal}
-        onClose={() => setShowYouTubeModal(false)}
-        onConfirmSubscribe={handleSubscribeYouTube}
-      />
+      {showYouTubeModal && (
+        <YouTubeSubscribeModal
+          isOpen={true}
+          onClose={() => setShowYouTubeModal(false)}
+          onSubscribeSuccess={handleSubscribeYouTube}
+        />
+      )}
 
-      <MagazineViewerModal
-        isOpen={showMagazineModal}
-        onClose={() => setShowMagazineModal(false)}
-      />
+      {showMagazineModal && (
+        <MagazineViewerModal
+          isOpen={true}
+          onClose={() => setShowMagazineModal(false)}
+        />
+      )}
 
-      <CertificateGenerator
-        isOpen={!!certificateData}
-        onClose={() => setCertificateData(null)}
-        certificateData={certificateData}
-        userPoints={userProfile.points}
-      />
+      {certificateData && (
+        <CertificateGenerator
+          isOpen={true}
+          onClose={() => setCertificateData(null)}
+          data={certificateData}
+        />
+      )}
 
     </div>
   );
 }
 
-export default function App() {
+export function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
@@ -711,3 +707,5 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
+export default App;
