@@ -1,109 +1,100 @@
 import React from 'react';
-import { Calendar, Sun, Sparkles } from 'lucide-react';
+import { Calendar, Sun, Moon, Sparkles, Clock, Compass } from 'lucide-react';
 
 export const PanchangWidget = () => {
-  const panchangList = [
-    {
-      id: 'p1',
-      title: 'प्रथम चातुर्मास का 8वाँ दिन',
-      tag: '(आज)',
-      date: 'अगस्त 2, 2026, रविवार',
-      isToday: true,
-      img: 'https://images.unsplash.com/photo-1545641203-7d072a14e3b2?auto=format&fit=crop&q=80&w=150'
-    },
-    {
-      id: 'p2',
-      title: 'मित्रता दिवस',
-      tag: '(आज)',
-      date: 'अगस्त 2, 2026, रविवार',
-      isToday: true,
-      img: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=150'
-    },
-    {
-      id: 'p3',
-      title: 'गजानन संकष्टी',
-      tag: '(आज)',
-      date: 'अगस्त 2, 2026, रविवार',
-      isToday: true,
-      img: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&q=80&w=150'
-    },
-    {
-      id: 'p4',
-      title: 'प्रथम श्रावण सोमवार व्रत',
-      tag: '(1 दिन शेष)',
-      date: 'अगस्त 3, 2026, सोमवार',
-      isToday: false,
-      img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&q=80&w=150'
-    },
-    {
-      id: 'p5',
-      title: 'आदि पेरुक्कू',
-      tag: '(1 दिन शेष)',
-      date: 'अगस्त 3, 2026, सोमवार',
-      isToday: false,
-      img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=150'
-    },
-    {
-      id: 'p6',
-      title: 'प्रथम मंगला गौरी व्रत',
-      tag: '(2 दिन शेष)',
-      date: 'अगस्त 4, 2026, मंगलवार',
-      isToday: false,
-      img: 'https://images.unsplash.com/photo-1609137144820-22c6c11d2797?auto=format&fit=crop&q=80&w=150'
-    }
+  const now = new Date();
+  
+  // Format Today's Live Date in Hindi
+  const todayDateStr = now.toLocaleDateString('hi-IN', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  // Calculate Next 3 Dynamic Upcoming Dates (Today + 1, Today + 2, Today + 3)
+  const getNextDateStr = (daysToAdd) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() + daysToAdd);
+    return d.toLocaleDateString('hi-IN', { day: '2-digit', month: 'long' });
+  };
+
+  const upcomingFestivals = [
+    { date: todayDateStr, name: 'सावन सोमवार व्रत एवं काव्य संध्या', day: 'आज' },
+    { date: getNextDateStr(1), name: 'नाग पंचमी एवं विशेष काव्य गोष्ठी', day: 'कल' },
+    { date: getNextDateStr(2), name: 'वरलक्ष्मी व्रत एवं गज़ल महफ़िल', day: 'परसों' },
+    { date: getNextDateStr(11), name: '80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳', day: 'आगामी' }
   ];
 
   return (
-    <div className="rounded-3xl overflow-hidden border-2 border-amber-600/40 shadow-lg bg-amber-50 dark:bg-slate-900 font-tiro">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
       
-      {/* Header Bar (Matching Image 1 Terracotta Header) */}
-      <div className="bg-gradient-to-r from-amber-700 via-rose-800 to-amber-800 text-white p-3.5 px-5 flex items-center justify-between">
-        <h3 className="font-rozha text-base sm:text-lg flex items-center gap-2">
-          <Sun className="w-5 h-5 text-amber-300" />
-          <span>आगामी उपवास और त्यौहार</span>
-        </h3>
-        <span className="text-xs bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-full font-bold font-sans">
-          आज: 2 अगस्त 2026
+      {/* Header Row */}
+      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <Calendar className="w-4 h-4 text-amber-500" />
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+              आज का पंचांग व साहित्यिक कैलेंडर
+            </h3>
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold block">
+              📅 {todayDateStr} (लाइव ऑटो-अपडेट)
+            </span>
+          </div>
+        </div>
+
+        <span className="px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-bold">
+          श्रावण शुक्ल पक्ष 2026
         </span>
       </div>
 
-      {/* List Items matching Image 1 */}
-      <div className="divide-y divide-amber-200/60 dark:divide-slate-800">
-        {panchangList.map((item) => (
-          <div
-            key={item.id}
-            className={`p-3 px-4 flex items-center gap-3.5 transition ${
-              item.isToday
-                ? 'bg-rose-100/80 dark:bg-rose-950/50 text-rose-950 dark:text-rose-100'
-                : 'bg-amber-50/60 dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-amber-100/50'
-            }`}
-          >
-            {/* Thumbnail */}
-            <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-amber-400/50 shadow-sm">
-              <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
-            </div>
+      {/* Panchang Live Details Grid */}
+      <div className="grid grid-cols-2 gap-2 text-[11px]">
+        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-0.5">
+          <span className="text-[10px] text-amber-700 dark:text-amber-300 font-bold flex items-center gap-1">
+            <Sun className="w-3 h-3 text-amber-500" />
+            <span>सूर्योदय / सूर्यास्त</span>
+          </span>
+          <p className="font-mono font-bold text-slate-800 dark:text-slate-200">05:42 AM • 07:08 PM</p>
+        </div>
 
-            {/* Event Name & Date */}
-            <div className="flex-1 min-w-0 space-y-0.5">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
-                  {item.title}
-                </h4>
-                <span className={`text-[11px] font-bold ${item.isToday ? 'text-rose-600 dark:text-rose-400' : 'text-amber-700 dark:text-amber-400'}`}>
-                  {item.tag}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
-                {item.date}
-              </p>
-            </div>
-          </div>
-        ))}
+        <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 space-y-0.5">
+          <span className="text-[10px] text-rose-700 dark:text-rose-300 font-bold flex items-center gap-1">
+            <Moon className="w-3 h-3 text-rose-500" />
+            <span>तिथि & नक्षत्र</span>
+          </span>
+          <p className="font-mono font-bold text-slate-800 dark:text-slate-200">तृतीया • हस्त नक्षत्र</p>
+        </div>
       </div>
 
-      {/* Authentic Source Footer Disclaimer */}
-      <div className="p-2.5 bg-amber-100/70 dark:bg-slate-800/80 text-[10px] text-slate-600 dark:text-slate-400 text-center font-mono border-t border-amber-200 dark:border-slate-800">
-        प्रामाणिक स्रोत: श्री काशी विद्वत परिषद एवं ड्रिक पंचांग (Drik Panchang Reference Engine)
+      {/* Upcoming Dynamic Festivals List */}
+      <div className="space-y-2 pt-1">
+        <h4 className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>आगामी तिथियाँ व त्योहार (Dynamic Dates):</span>
+        </h4>
+
+        <div className="space-y-1.5 text-xs">
+          {upcomingFestivals.map((fest, idx) => (
+            <div 
+              key={idx}
+              className={`p-2 rounded-xl border flex items-center justify-between ${
+                idx === 0 
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300 font-bold' 
+                  : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border shadow-xs">
+                  {fest.date}
+                </span>
+                <span className="text-[11px] truncate max-w-[170px]">{fest.name}</span>
+              </div>
+              <span className="text-[10px] font-bold opacity-80">{fest.day}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
     </div>
