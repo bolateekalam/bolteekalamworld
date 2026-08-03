@@ -487,6 +487,7 @@ function AppContent() {
 
       {/* Top Main Navigation Bar */}
       <Navbar
+        onOpenCreatePost={handleOpenCreatePostProtected}
         currentUser={currentUser}
         userRole={userRole}
         onOpenAuthModal={() => setShowAuthModal(true)}
@@ -690,7 +691,9 @@ function AppContent() {
         <CertificateGenerator
           isOpen={true}
           onClose={() => setCertificateData(null)}
-          data={certificateData}
+          certificateData={certificateData}
+          onOpenCreatePost={handleOpenCreatePostProtected}
+          userPoints={userProfile.points}
         />
       )}
 

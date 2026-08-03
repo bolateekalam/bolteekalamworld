@@ -5,7 +5,7 @@ import { jsPDF } from 'jspdf';
 import confetti from 'canvas-confetti';
 import { useLanguage } from '../context/LanguageContext';
 
-export const CertificateGenerator = ({ isOpen, onClose, certificateData, userPoints = 4890 }) => {
+export const CertificateGenerator = ({ isOpen, onClose, certificateData, userPoints = 4890, onOpenCreatePost }) => {
   const { t } = useLanguage();
   const certRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -82,8 +82,18 @@ export const CertificateGenerator = ({ isOpen, onClose, certificateData, userPoi
                 सर्टिफिकेट अनलॉक करने के लिए {requiredPoints.toLocaleString()} Points आवश्यक हैं!
               </h4>
               <p className="text-xs text-slate-300 max-w-md font-tiro">
-                आपके वर्तमान पॉइंट्स: <strong>{userPoints.toLocaleString()} pts</strong>। साप्ताहिक चुनौतियों और काव्य संग्राम में भाग लेकर पॉइंट्स अर्जित करें।
+                आपके वर्तमान पॉइंट्स: <strong>{userPoints.toLocaleString()} pts</strong>। नई रचनाएँ लिखकर, साप्ताहिक चुनौतियों और काव्य संग्राम में भाग लेकर पॉइंट्स अर्जित करें।
               </p>
+              <button
+                onClick={() => {
+                  onClose();
+                  if (onOpenCreatePost) onOpenCreatePost();
+                }}
+                className="mt-2 px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg flex items-center gap-2 transition active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>+ नई रचना लिखकर पॉइंट्स अर्जित करें (+10 Pts)</span>
+              </button>
             </div>
           )}
 
