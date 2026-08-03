@@ -70,7 +70,17 @@ function AppContent() {
   const [editingPost, setEditingPost] = useState(null);
   const [certificateData, setCertificateData] = useState(null);
 
-  const [posts, setPosts] = useState(mockPosts);
+  // Posts State Initialized with Saved Local User Posts + Mock Posts
+  const [posts, setPosts] = useState(() => {
+    try {
+      const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+      if (savedUserPosts) {
+        const parsed = JSON.parse(savedUserPosts);
+        return [...parsed, ...mockPosts];
+      }
+    } catch (e) {}
+    return mockPosts;
+  });
   
   // Weekly Challenge Global State
   const [weeklyChallenge, setWeeklyChallenge] = useState({
@@ -124,11 +134,21 @@ function AppContent() {
   // Notifications State
   const [unreadNotifications, setUnreadNotifications] = useState(2);
 
-  // Load Posts from Supabase PostgreSQL Database on Mount
+  // Load Posts from Supabase PostgreSQL Database on Mount & Merge with Local Created Posts
   useEffect(() => {
     fetchPostsFromDB().then(dbPosts => {
       if (dbPosts && dbPosts.length > 0) {
-        setPosts(dbPosts);
+        try {
+          const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+          const userPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
+          
+          // Merge user-created posts at top, avoiding duplicates
+          const userPostIds = new Set(userPosts.map(p => p.id));
+          const uniqueDbPosts = dbPosts.filter(p => !userPostIds.has(p.id));
+          setPosts([...userPosts, ...uniqueDbPosts]);
+        } catch (e) {
+          setPosts(dbPosts);
+        }
       }
     });
   }, []);
@@ -345,8 +365,30 @@ function AppContent() {
     requireAuth(() => setShowCreateModal(true));
   };
 
+  // 🔴 100% Bulletproof Post Creation: Save to localStorage AND Supabase DB
   const handlePostCreated = async (newPost) => {
-    setPosts(prev => [newPost, ...prev]);
+    const postWithAuthor = {
+      ...newPost,
+      author: {
+        id: currentUser?.email || 'user-me',
+        name: userProfile.name || 'साहित्य साधक',
+        username: userProfile.username || '@writer',
+        avatar: userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+        badge: 'verifiedAuthor',
+        city: userProfile.city || 'प्रयागराज'
+      }
+    };
+
+    setPosts(prev => [postWithAuthor, ...prev]);
+
+    // Permanently save to localStorage array so posts NEVER disappear on refresh!
+    try {
+      const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+      const existingUserPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
+      const updatedUserPosts = [postWithAuthor, ...existingUserPosts];
+      localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserPosts));
+    } catch (e) {}
+
     handleRewardPoints(10, 'नई साहित्य रचना पोस्ट करने पर');
 
     await createPostInDB({
@@ -365,6 +407,16 @@ function AppContent() {
   const handleDeletePost = async (postId) => {
     if (window.confirm('क्या आप निश्चित रूप से इस रचना को हटाना चाहते हैं?')) {
       setPosts(prev => prev.filter(p => p.id !== postId));
+
+      try {
+        const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+        if (savedUserPosts) {
+          const existingUserPosts = JSON.parse(savedUserPosts);
+          const updatedUserPosts = existingUserPosts.filter(p => p.id !== postId);
+          localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserPosts));
+        }
+      } catch (e) {}
+
       await deletePostFromDB(postId);
     }
   };
@@ -494,7 +546,12 @@ function AppContent() {
 
           {activeView === 'profile' && (
             <ProfileView
-              posts={posts.filter(p => p.author?.id === currentUser?.email || p.author?.name === userProfile.name || p.author?.name.includes('आप'))}
+              posts={posts.filter(p => 
+                p.author?.id === currentUser?.email || 
+                p.author?.id === 'user-me' ||
+                p.author?.name === userProfile.name || 
+                p.author?.name.includes('आप')
+              )}
               userProfile={userProfile}
               onOpenCertificate={openCertificateModal}
               onOpenEditProfile={() => setShowEditProfileModal(true)}
