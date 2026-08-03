@@ -78,49 +78,38 @@ export const HomeFeedView = ({
         <DailyChallenge 
           challenge={dailyChallenge} 
           onOpenCertificate={onOpenCertificate} 
-          setActiveView={setActiveView}
-          requireAuth={requireAuth}
         />
       )}
 
-      {/* 2. Poetry Battle Arena Preview */}
-      {poetryBattle && (
-        <PoetryBattle battle={poetryBattle} requireAuth={requireAuth} />
-      )}
+      {/* 2. Category Chips Filter Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <button
+          onClick={() => setSelectedCategory('all')}
+          className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+            selectedCategory === 'all'
+              ? 'bg-rose-600 text-white shadow-md shadow-rose-900/20'
+              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 border border-slate-200 dark:border-slate-800'
+          }`}
+        >
+          सभी रचनाएँ ({posts.length})
+        </button>
 
-      {/* 3. Categories Horizontal Filter Navigation */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-sm">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {mockCategories.map((cat) => (
           <button
-            onClick={() => setSelectedCategory('all')}
-            aria-label="सभी रचनाएँ देखें"
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-              selectedCategory === 'all'
+            key={cat.id}
+            onClick={() => setSelectedCategory(cat.name)}
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+              selectedCategory === cat.name
                 ? 'bg-rose-600 text-white shadow-md shadow-rose-900/20'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 border border-slate-200 dark:border-slate-800'
             }`}
           >
-            सभी रचनाएँ (All)
+            {cat.icon} {cat.name}
           </button>
-
-          {mockCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              aria-label={`${cat.hi} श्रेणी की रचनाएँ देखें`}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                selectedCategory === cat.id
-                  ? 'bg-rose-600 text-white shadow-md shadow-rose-900/20 font-bold'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              {cat.hi}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
-      {/* 4. Literature Feed Posts List */}
+      {/* 3. Main Posts Stream */}
       <div className="space-y-4">
         {filteredPosts.map((post) => (
           <PostCard 
@@ -129,7 +118,6 @@ export const HomeFeedView = ({
             onOpenCertificate={onOpenCertificate} 
             onEditPost={onEditPost}
             onDeletePost={onDeletePost}
-            requireAuth={requireAuth}
           />
         ))}
       </div>
