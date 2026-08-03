@@ -1,6 +1,13 @@
 import { supabase } from './supabase';
 import { mockPosts, mockDailyChallenge, mockPoetryBattle } from '../data/mockPosts';
 
+// Helper to check valid UUID
+const isValidUUID = (str) => {
+  if (!str || typeof str !== 'string') return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+};
+
 // 1. Fetch Posts from Supabase (Fallback to Mock Posts if DB empty)
 export const fetchPostsFromDB = async () => {
   try {
@@ -46,17 +53,20 @@ export const fetchPostsFromDB = async () => {
 // 2. Create New Post in Supabase DB
 export const createPostInDB = async (postData, userId) => {
   try {
+    const payload = {
+      title: postData.title,
+      category: postData.category,
+      content: postData.content,
+      tags: postData.tags || ['बोलतीकलम']
+    };
+
+    if (isValidUUID(userId)) {
+      payload.user_id = userId;
+    }
+
     const { data, error } = await supabase
       .from('posts')
-      .insert([
-        {
-          user_id: userId,
-          title: postData.title,
-          category: postData.category,
-          content: postData.content,
-          tags: postData.tags || ['बोलतीकलम']
-        }
-      ])
+      .insert([payload])
       .select();
 
     if (error) throw error;
@@ -83,12 +93,13 @@ export const deletePostFromDB = async (postId) => {
   }
 };
 
-// 4. Update Profile in Supabase DB
+// 4. Update Profile in Supabase DB (Valid UUID Only)
 export const updateUserProfileInDB = async (userProfile, userId) => {
   try {
-    if (!userId) return false;
+    if (!userId || !isValidUUID(userId)) {
+      return false;
+    }
     
-    // Clean upsert payload compatible with Supabase profiles table schema
     const payload = {
       id: userId,
       name: userProfile.name,
