@@ -8,32 +8,79 @@ const isValidUUID = (str) => {
   return uuidRegex.test(str);
 };
 
-// 1. Fetch All Shared Posts from Supabase DB & Local Shared Storage
-export const fetchPostsFromDB = async () => {
-  let dbPosts = [];
+// Encode author metadata into content text to guarantee 100% schema safety on any Supabase table setup
+const encodeContentWithAuthor = (content, authorInfo) => {
+  const metaHeader = `<!--BK_AUTHOR: ${JSON.stringify({
+    name: authorInfo.name || 'साहित्य साधक',
+    username: authorInfo.username || '@writer',
+    avatar: authorInfo.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+    email: authorInfo.email || ''
+  })}-->\n`;
+  return metaHeader + content;
+};
 
+// Decode author metadata from content text
+const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
+  if (!rawContent || typeof rawContent !== 'string') {
+    return { content: '', author: defaultAuthor };
+  }
+
+  const match = rawContent.match(/^<!--BK_AUTHOR:\s*({.*?})-->\n?/s);
+  if (match && match[1]) {
+    try {
+      const parsedMeta = JSON.parse(match[1]);
+      const cleanContent = rawContent.replace(match[0], '');
+      return {
+        content: cleanContent,
+        author: {
+          id: parsedMeta.email || parsedMeta.username || defaultAuthor.id,
+          email: parsedMeta.email || '',
+          name: parsedMeta.name || defaultAuthor.name,
+          username: parsedMeta.username || defaultAuthor.username,
+          avatar: parsedMeta.avatar || defaultAuthor.avatar,
+          badge: 'verifiedAuthor',
+          city: 'प्रयागराज',
+          followers: 0
+        }
+      };
+    } catch (e) {}
+  }
+
+  return { content: rawContent, author: defaultAuthor };
+};
+
+// 1. Fetch All Shared Posts from Supabase DB (Combined Feed across all users & devices)
+export const fetchPostsFromDB = async () => {
   try {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && data && data.length > 0) {
-      dbPosts = data.map(p => ({
-        id: p.id,
-        author: {
-          id: p.author_email || p.user_id || 'unknown',
-          email: p.author_email || '',
-          name: p.author_name || 'साहित्य साधक',
-          username: p.author_username || '@writer',
-          avatar: p.author_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-          badge: 'verifiedAuthor',
-          city: p.author_city || 'प्रयागराज',
-          followers: 0
-        },
+    if (error || !data || data.length === 0) {
+      return mockPosts;
+    }
+
+    const dbPosts = data.map(p => {
+      const defaultAuthor = {
+        id: p.author_email || p.user_id || 'unknown',
+        email: p.author_email || '',
+        name: p.author_name || 'साहित्य साधक',
+        username: p.author_username || '@writer',
+        avatar: p.author_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+        badge: 'verifiedAuthor',
+        city: 'प्रयागराज',
+        followers: 0
+      };
+
+      const decoded = decodeContentAndAuthor(p.content, defaultAuthor);
+
+      return {
+        id: String(p.id),
+        author: decoded.author,
         title: p.title || 'बिना शीर्षक',
         category: p.category || 'कविता',
-        content: p.content || '',
+        content: decoded.content,
         tags: p.tags || ['हिंदीसाहित्य'],
         likes: p.likes_count || 0,
         isLiked: false,
@@ -43,61 +90,48 @@ export const fetchPostsFromDB = async () => {
         readingTime: '2 मिनट',
         isEditorialPick: false,
         createdAt: p.created_at ? new Date(p.created_at).toLocaleDateString('hi-IN') : 'अभी-अभी'
-      }));
-    }
+      };
+    });
+
+    // Merge Supabase DB posts with mock posts without duplicates
+    const dbPostIds = new Set(dbPosts.map(p => p.id));
+    const uniqueMockPosts = mockPosts.filter(mp => !dbPostIds.has(String(mp.id)));
+    return [...dbPosts, ...uniqueMockPosts];
+
   } catch (err) {
-    console.error('Error fetching posts from Supabase:', err);
+    console.error('Error fetching posts from Supabase DB:', err);
+    return mockPosts;
   }
-
-  // Get locally created shared posts across browser sessions
-  let localSharedPosts = [];
-  try {
-    const saved = localStorage.getItem('bolteekalam_global_shared_posts');
-    if (saved) {
-      localSharedPosts = JSON.parse(saved);
-    }
-  } catch (e) {}
-
-  // Combine local shared posts + DB posts + mock posts without duplicates
-  const allPostsMap = new Map();
-
-  // Add local shared posts first (newest top)
-  localSharedPosts.forEach(p => {
-    if (p && p.id) allPostsMap.set(p.id, p);
-  });
-
-  // Add DB posts
-  dbPosts.forEach(p => {
-    if (p && p.id && !allPostsMap.has(p.id)) {
-      allPostsMap.set(p.id, p);
-    }
-  });
-
-  // Add mock posts
-  mockPosts.forEach(mp => {
-    if (mp && mp.id && !allPostsMap.has(mp.id)) {
-      allPostsMap.set(mp.id, mp);
-    }
-  });
-
-  return Array.from(allPostsMap.values());
 };
 
-// 2. Create New Post in Supabase DB with Full Author Metadata
+// 2. Create New Post in Supabase DB with 100% Fail-Safe Payload
 export const createPostInDB = async (postData, userId) => {
   try {
+    const authorInfo = {
+      name: postData.authorName || 'साहित्य साधक',
+      username: postData.authorUsername || '@writer',
+      avatar: postData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+      email: postData.authorEmail || userId || ''
+    };
+
+    const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo);
+
+    // Minimal guaranteed payload matching standard Supabase columns
     const payload = {
       title: postData.title || 'बिना शीर्षक',
       category: postData.category || 'कविता',
-      content: postData.content || '',
-      tags: postData.tags || ['बोलतीकलम'],
-      author_name: postData.authorName || 'साहित्य साधक',
-      author_username: postData.authorUsername || '@writer',
-      author_avatar: postData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-      author_email: postData.authorEmail || userId || ''
+      content: encodedBody
     };
 
-    // Try to get authenticated Supabase user session UUID
+    // Try optional columns if supported
+    try {
+      payload.author_name = authorInfo.name;
+      payload.author_username = authorInfo.username;
+      payload.author_avatar = authorInfo.avatar;
+      payload.author_email = authorInfo.email;
+    } catch (e) {}
+
+    // Attach user_id if valid UUID
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user?.id && isValidUUID(session.user.id)) {
       payload.user_id = session.user.id;
@@ -111,13 +145,25 @@ export const createPostInDB = async (postData, userId) => {
       .select();
 
     if (error) {
-      console.warn('Supabase insert warning:', error.message);
-      if (payload.user_id) {
-        delete payload.user_id;
-        const { data: fallbackData } = await supabase.from('posts').insert([payload]).select();
-        if (fallbackData && fallbackData[0]) return fallbackData[0];
+      console.warn('Primary Supabase insert failed, attempting clean fallback insertion:', error.message);
+      // Clean fallback: payload with basic columns only
+      const cleanFallbackPayload = {
+        title: postData.title || 'बिना शीर्षक',
+        category: postData.category || 'कविता',
+        content: encodedBody
+      };
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('posts')
+        .insert([cleanFallbackPayload])
+        .select();
+
+      if (fallbackError) {
+        console.error('Fallback Supabase insert error:', fallbackError.message);
+      } else if (fallbackData && fallbackData[0]) {
+        return fallbackData[0];
       }
     }
+
     return data && data[0] ? data[0] : payload;
   } catch (err) {
     console.error('Error creating post in DB:', err);

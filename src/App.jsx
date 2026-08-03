@@ -139,16 +139,7 @@ function AppContent() {
     const syncPosts = () => {
       fetchPostsFromDB().then(dbPosts => {
         if (dbPosts && dbPosts.length > 0) {
-          try {
-            const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
-            const userPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
-            
-            const userPostIds = new Set(userPosts.map(p => p.id));
-            const uniqueDbPosts = dbPosts.filter(p => !userPostIds.has(p.id));
-            setPosts([...userPosts, ...uniqueDbPosts]);
-          } catch (e) {
-            setPosts(dbPosts);
-          }
+          setPosts(dbPosts);
         }
       });
     };
@@ -422,7 +413,7 @@ function AppContent() {
 
     handleRewardPoints(10, 'नई साहित्य रचना पोस्ट करने पर');
 
-    await createPostInDB({
+    const created = await createPostInDB({
       title: newPost.title,
       category: newPost.category,
       content: newPost.content,
@@ -432,6 +423,13 @@ function AppContent() {
       authorAvatar: userProfile.avatar || '',
       authorEmail
     }, authorEmail);
+
+    // Refresh DB posts immediately so all clients get the synced feed
+    fetchPostsFromDB().then(dbPosts => {
+      if (dbPosts && dbPosts.length > 0) {
+        setPosts(dbPosts);
+      }
+    });
   };
 
   const handleSavePost = (updatedPost) => {
