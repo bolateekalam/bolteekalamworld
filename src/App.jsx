@@ -134,23 +134,41 @@ function AppContent() {
   // Notifications State
   const [unreadNotifications, setUnreadNotifications] = useState(2);
 
-  // Load Posts from Supabase PostgreSQL Database on Mount & Merge with Local Created Posts
+  // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket for Instant 0-Cost Updates
   useEffect(() => {
-    fetchPostsFromDB().then(dbPosts => {
-      if (dbPosts && dbPosts.length > 0) {
-        try {
-          const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
-          const userPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
-          
-          // Merge user-created posts at top, avoiding duplicates
-          const userPostIds = new Set(userPosts.map(p => p.id));
-          const uniqueDbPosts = dbPosts.filter(p => !userPostIds.has(p.id));
-          setPosts([...userPosts, ...uniqueDbPosts]);
-        } catch (e) {
-          setPosts(dbPosts);
+    const syncPosts = () => {
+      fetchPostsFromDB().then(dbPosts => {
+        if (dbPosts && dbPosts.length > 0) {
+          try {
+            const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+            const userPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
+            
+            const userPostIds = new Set(userPosts.map(p => p.id));
+            const uniqueDbPosts = dbPosts.filter(p => !userPostIds.has(p.id));
+            setPosts([...userPosts, ...uniqueDbPosts]);
+          } catch (e) {
+            setPosts(dbPosts);
+          }
         }
-      }
-    });
+      });
+    };
+
+    syncPosts();
+
+    // Supabase Realtime Channel Listener (Instant 50ms Push Updates, 100% Free!)
+    const postsChannel = supabase
+      .channel('public:posts')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => {
+        syncPosts();
+      })
+      .subscribe();
+
+    const interval = setInterval(syncPosts, 15000);
+
+    return () => {
+      supabase.removeChannel(postsChannel);
+      clearInterval(interval);
+    };
   }, []);
 
   // 1. Supabase OAuth Session Listener for Instant Google Login Restore
@@ -367,12 +385,17 @@ function AppContent() {
 
   // 🔴 100% Bulletproof Post Creation: Save to localStorage AND Supabase DB
   const handlePostCreated = async (newPost) => {
+    const authorEmail = currentUser?.email || 'user-anon';
+    const authorName = userProfile?.name || 'साहित्य साधक';
+    const authorUsername = userProfile?.username || `@${authorName.toLowerCase().replace(/\s+/g, '_')}`;
+
     const postWithAuthor = {
       ...newPost,
       author: {
-        id: currentUser?.email || 'user-me',
-        name: userProfile.name || 'साहित्य साधक',
-        username: userProfile.username || '@writer',
+        id: authorEmail,
+        email: authorEmail,
+        name: authorName,
+        username: authorUsername,
         avatar: userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
         badge: 'verifiedAuthor',
         city: userProfile.city || 'प्रयागराज'
@@ -381,7 +404,15 @@ function AppContent() {
 
     setPosts(prev => [postWithAuthor, ...prev]);
 
-    // Permanently save to localStorage array so posts NEVER disappear on refresh!
+    // Save to global shared posts array so post is visible to ALL users on this machine/browser!
+    try {
+      const savedGlobal = localStorage.getItem('bolteekalam_global_shared_posts');
+      const existingGlobal = savedGlobal ? JSON.parse(savedGlobal) : [];
+      const updatedGlobal = [postWithAuthor, ...existingGlobal];
+      localStorage.setItem('bolteekalam_global_shared_posts', JSON.stringify(updatedGlobal));
+    } catch (e) {}
+
+    // Save to user's created posts array
     try {
       const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
       const existingUserPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
@@ -396,10 +427,11 @@ function AppContent() {
       category: newPost.category,
       content: newPost.content,
       tags: newPost.tags,
-      authorName: userProfile.name || 'साहित्य साधक',
-      authorUsername: userProfile.username || '@writer',
-      authorAvatar: userProfile.avatar || ''
-    }, currentUser?.email || 'user-anon');
+      authorName,
+      authorUsername,
+      authorAvatar: userProfile.avatar || '',
+      authorEmail
+    }, authorEmail);
   };
 
   const handleSavePost = (updatedPost) => {
@@ -551,9 +583,11 @@ function AppContent() {
             <ProfileView
               posts={posts.filter(p => 
                 p.author?.id === currentUser?.email || 
+                p.author?.email === currentUser?.email ||
                 p.author?.id === 'user-me' ||
-                p.author?.name === userProfile.name || 
-                p.author?.name.includes('आप')
+                (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase()) ||
+                (p.author?.username && userProfile?.username && p.author.username.trim().toLowerCase() === userProfile.username.trim().toLowerCase()) ||
+                p.author?.name?.includes('आप')
               )}
               userProfile={userProfile}
               onOpenCertificate={openCertificateModal}

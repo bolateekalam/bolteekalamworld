@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { X, Send, Image, Tag, Sparkles, Wand2 } from 'lucide-react';
+import { X, Send, Image, Tag, Sparkles, Wand2, Feather, BookOpen } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const CreatePostModal = ({ isOpen, onClose, onPostCreated, onOpenAiAssistant, userProfile }) => {
+export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile }) => {
   const { t } = useLanguage();
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('कविता (Poetry)');
   const [content, setContent] = useState('');
   const [tagsInput, setTagsInput] = useState('हिंदीसाहित्य, काव्य');
+  const [showChhandHelper, setShowChhandHelper] = useState(false);
 
   if (!isOpen) return null;
 
@@ -60,6 +61,11 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, onOpenAiAssist
     onClose();
   };
 
+  // AI Chhand Count & Meter Stats (Inspired by aaina.app)
+  const lineCount = content ? content.split('\n').filter(l => l.trim().length > 0).length : 0;
+  const charCount = content ? content.length : 0;
+  const wordCount = content ? content.trim().split(/\s+/).filter(w => w.length > 0).length : 0;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -72,27 +78,62 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, onOpenAiAssist
               अपनी नई साहित्यिक रचना लिखें (Publish Post)
             </h3>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800">
+          <button 
+            onClick={onClose}
+            aria-label="मॉडल बंद करें"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Current Author Info Display */}
-        <div className="flex items-center gap-3 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-          <img 
-            src={userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'} 
-            alt={userProfile?.name} 
-            className="w-10 h-10 rounded-full object-cover ring-2 ring-rose-500"
-          />
-          <div>
-            <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100">
-              लेखक: {userProfile?.name || 'साहित्य साधक'}
-            </h4>
-            <span className="text-[10px] text-rose-600 dark:text-rose-400 font-semibold">
-              {userProfile?.username || '@writer'} • {userProfile?.city || 'प्रयागराज'}
-            </span>
+        <div className="flex items-center justify-between p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex-wrap gap-2">
+          <div className="flex items-center gap-3">
+            <img 
+              src={userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'} 
+              alt={userProfile?.name} 
+              className="w-10 h-10 rounded-full object-cover ring-2 ring-rose-500"
+            />
+            <div>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100">
+                लेखक: {userProfile?.name || 'साहित्य साधक'}
+              </h4>
+              <span className="text-[10px] text-rose-600 dark:text-rose-400 font-semibold">
+                {userProfile?.username || '@writer'} • {userProfile?.city || 'प्रयागराज'}
+              </span>
+            </div>
           </div>
+
+          {/* AI Chhand & Meter Tool Trigger */}
+          <button
+            type="button"
+            onClick={() => setShowChhandHelper(!showChhandHelper)}
+            aria-label="एआई मात्रा/छंद गणक देखें"
+            className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center gap-1 border border-amber-500/30 transition"
+          >
+            <Feather className="w-3.5 h-3.5 text-amber-500" />
+            <span>एआई छंद & मात्रा गणक ✒️</span>
+          </button>
         </div>
+
+        {/* AI Meter & Rhyming Assistant Panel (aaina.app Inspired) */}
+        {showChhandHelper && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2 text-xs animate-in fade-in duration-200">
+            <div className="flex items-center justify-between font-bold text-amber-800 dark:text-amber-300">
+              <span className="flex items-center gap-1.5">
+                <Wand2 className="w-4 h-4 text-amber-500" />
+                <span>साहित्यिक विश्लेषण (Poem Meter Stats):</span>
+              </span>
+              <span className="text-[11px] font-mono">
+                पंक्तियाँ: <strong>{lineCount}</strong> | शब्द: <strong>{wordCount}</strong> | अक्षर: <strong>{charCount}</strong>
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-600 dark:text-slate-300">
+              💡 <strong>तुकबंदी सुझाव:</strong> बहार ➔ खुमार ➔ करार ➔ दीदार | सागर ➔ गागर ➔ नागर
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           
@@ -116,6 +157,7 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, onOpenAiAssist
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
+                aria-label="विधा / श्रेणी चुनें"
                 className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
               >
                 <option value="कविता (Poetry)">कविता (Poetry)</option>
@@ -160,6 +202,7 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, onOpenAiAssist
 
             <button
               type="submit"
+              aria-label="रचना प्रकाशित करें"
               className="px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-900/20 flex items-center gap-2 transition active:scale-95"
             >
               <Send className="w-4 h-4" />

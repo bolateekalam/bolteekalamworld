@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { mockPosts, mockDailyChallenge, mockPoetryBattle } from '../data/mockPosts';
+import { mockPosts } from '../data/mockPosts';
 
 // Helper to check valid UUID
 const isValidUUID = (str) => {
@@ -8,49 +8,82 @@ const isValidUUID = (str) => {
   return uuidRegex.test(str);
 };
 
-// 1. Fetch Posts from Supabase (Fallback to Combined Feed if DB empty)
+// 1. Fetch All Shared Posts from Supabase DB & Local Shared Storage
 export const fetchPostsFromDB = async () => {
+  let dbPosts = [];
+
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select('*, profiles(*)')
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return mockPosts;
+    if (!error && data && data.length > 0) {
+      dbPosts = data.map(p => ({
+        id: p.id,
+        author: {
+          id: p.author_email || p.user_id || 'unknown',
+          email: p.author_email || '',
+          name: p.author_name || 'साहित्य साधक',
+          username: p.author_username || '@writer',
+          avatar: p.author_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+          badge: 'verifiedAuthor',
+          city: p.author_city || 'प्रयागराज',
+          followers: 0
+        },
+        title: p.title || 'बिना शीर्षक',
+        category: p.category || 'कविता',
+        content: p.content || '',
+        tags: p.tags || ['हिंदीसाहित्य'],
+        likes: p.likes_count || 0,
+        isLiked: false,
+        bookmarks: p.bookmarks_count || 0,
+        isBookmarked: false,
+        views: p.views_count || 1,
+        readingTime: '2 मिनट',
+        isEditorialPick: false,
+        createdAt: p.created_at ? new Date(p.created_at).toLocaleDateString('hi-IN') : 'अभी-अभी'
+      }));
     }
-
-    return data.map(p => ({
-      id: p.id,
-      author: {
-        id: p.user_id || p.profiles?.id || 'unknown',
-        name: p.author_name || p.profiles?.name || 'अज्ञात लेखक',
-        username: p.author_username || p.profiles?.username || '@writer',
-        avatar: p.author_avatar || p.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-        badge: 'verifiedAuthor',
-        city: p.profiles?.city || 'प्रयागराज',
-        followers: 0
-      },
-      title: p.title || 'बिना शीर्षक',
-      category: p.category || 'कविता',
-      content: p.content || '',
-      tags: p.tags || ['हिंदीसाहित्य'],
-      likes: p.likes_count || 0,
-      isLiked: false,
-      bookmarks: p.bookmarks_count || 0,
-      isBookmarked: false,
-      views: p.views_count || 0,
-      readingTime: '2 मिनट',
-      isEditorialPick: p.is_editorial_pick || false,
-      createdAt: p.created_at ? new Date(p.created_at).toLocaleDateString('hi-IN') : new Date().toLocaleDateString('hi-IN')
-    }));
   } catch (err) {
-    console.error('Error fetching posts:', err);
-    return mockPosts;
+    console.error('Error fetching posts from Supabase:', err);
   }
+
+  // Get locally created shared posts across browser sessions
+  let localSharedPosts = [];
+  try {
+    const saved = localStorage.getItem('bolteekalam_global_shared_posts');
+    if (saved) {
+      localSharedPosts = JSON.parse(saved);
+    }
+  } catch (e) {}
+
+  // Combine local shared posts + DB posts + mock posts without duplicates
+  const allPostsMap = new Map();
+
+  // Add local shared posts first (newest top)
+  localSharedPosts.forEach(p => {
+    if (p && p.id) allPostsMap.set(p.id, p);
+  });
+
+  // Add DB posts
+  dbPosts.forEach(p => {
+    if (p && p.id && !allPostsMap.has(p.id)) {
+      allPostsMap.set(p.id, p);
+    }
+  });
+
+  // Add mock posts
+  mockPosts.forEach(mp => {
+    if (mp && mp.id && !allPostsMap.has(mp.id)) {
+      allPostsMap.set(mp.id, mp);
+    }
+  });
+
+  return Array.from(allPostsMap.values());
 };
 
-// 2. Create New Post in Supabase DB with Author Metadata attached
+// 2. Create New Post in Supabase DB with Full Author Metadata
 export const createPostInDB = async (postData, userId) => {
   try {
     const payload = {
@@ -58,9 +91,10 @@ export const createPostInDB = async (postData, userId) => {
       category: postData.category || 'कविता',
       content: postData.content || '',
       tags: postData.tags || ['बोलतीकलम'],
-      author_name: postData.authorName || 'बोलती कलम लेखक',
+      author_name: postData.authorName || 'साहित्य साधक',
       author_username: postData.authorUsername || '@writer',
-      author_avatar: postData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'
+      author_avatar: postData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+      author_email: postData.authorEmail || userId || ''
     };
 
     // Try to get authenticated Supabase user session UUID
