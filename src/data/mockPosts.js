@@ -15,9 +15,9 @@ export const mockPosts = [
   {
     id: 'post-founder-1',
     author: {
-      id: 'author-samjera',
-      name: 'समजेरा जी (संस्थापक)',
-      username: '@samjera_founder',
+      id: 'author-sanjayrai',
+      name: 'संजय राय (संस्थापक)',
+      username: '@sanjayrai_founder',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
       badge: 'founder',
       city: 'प्रयागराज',
@@ -29,7 +29,7 @@ export const mockPosts = [
     content: `शब्द ही चेतना हैं, शब्द ही संस्कृति के संवाहक हैं। 'बोलती कलम' का उद्देश्य हर उस रचनाकार को एक पवित्र मंच प्रदान करना है, जिसकी पंक्तियों में समाज को बदलने और अंतर्मन को झकझोरने का सामर्थ्य है।
 
 साहित्य की यह यात्रा अविरल बहती रहेगी। सभी कवियों, साहित्यकारों और पाठकों को नव-साहित्यिक युग की अनंत शुभकामनाएँ!`,
-    tags: ['संस्थापकसंदेश', 'बोलतीकलम', 'समजेराजी', 'हिंदीसाहित्य'],
+    tags: ['संस्थापकसंदेश', 'बोलतीकलम', 'संजयराय', 'हिंदीसाहित्य'],
     likes: 12450,
     isLiked: true,
     bookmarks: 3400,
@@ -43,7 +43,7 @@ export const mockPosts = [
         id: 'c1',
         author: 'आकाश कुमार सिंह (डिजिटल मीडिया)',
         avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
-        content: 'संस्थापक समजेरा जी के दूरदर्शी विचारों से प्रेरित होकर डिजिटल मीडिया के क्षेत्र में बोलती कलम नए आयाम स्थापित कर रहा है। 🙏',
+        content: 'संस्थापक संजय राय जी के दूरदर्शी विचारों से प्रेरित होकर डिजिटल मीडिया के क्षेत्र में बोलती कलम नए आयाम स्थापित कर रहा है। 🙏',
         createdAt: '45 मिनट पहले',
         likes: 420,
         isPinned: true
@@ -118,7 +118,7 @@ export const mockPosts = [
 export const mockDailyChallenge = {
   id: 'dc-101',
   date: '02 अगस्त 2026',
-  topic: 'बरسات का पहला ख़त',
+  topic: 'बरसात का पहला ख़त',
   description: 'इस सप्ताह का विषय "बरसात का पहला ख़त" है। अपनी भावनाओं को 100-200 शब्दों में कविता, शायरी या लघु-कथा के रूप में लिखें।',
   timeLeft: '4 दिन 14 घंटे',
   totalSubmissions: 342,

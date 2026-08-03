@@ -506,6 +506,7 @@ function AppContent() {
         onClose={() => setShowCreateModal(false)}
         onPostCreated={handlePostCreated}
         onOpenAiAssistant={() => {}}
+        userProfile={userProfile}
       />
 
       <EditProfileModal

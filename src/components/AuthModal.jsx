@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Lock, Mail, User, MapPin, Sparkles, LogIn, UserPlus, CheckCircle2, ShieldCheck, Phone, KeyRound, AlertTriangle, Crown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup' | 'admin'
+  const [showAdminTab, setShowAdminTab] = useState(false);
   const [step, setStep] = useState(1);
 
   // Login Form State
@@ -28,21 +29,31 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
   const [authError, setAuthError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  useEffect(() => {
+    // Check secret hash #admin in URL to reveal admin login
+    if (window.location.hash === '#admin') {
+      setShowAdminTab(true);
+      setActiveTab('admin');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setAuthError('');
 
-    // Check Master Super Admin Credentials
-    if (loginEmail.trim().toLowerCase() === 'admin@bolteekalam.com' || loginEmail.trim().toLowerCase() === 'admin') {
-      if (loginPassword === 'admin123' || loginPassword === 'admin') {
+    const cleanInput = loginEmail.trim().toLowerCase();
+
+    // Secret Master Super Admin Access Key Check
+    if (cleanInput === 'admin@bolteekalam.com' || cleanInput === 'admin' || cleanInput === 'sanjayrai') {
+      if (loginPassword === 'admin' || loginPassword === 'admin123' || loginPassword === 'bolteekalam@admin2026') {
         const adminUser = {
-          name: 'बोलती कलम वर्ल्ड',
-          username: '@bolteekalamworld',
+          name: 'बोलती कलम सुपर एडमिन',
+          username: '@super_admin',
           email: 'admin@bolteekalam.com',
           phone: '+91 9876500000',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
           role: 'admin',
           city: 'प्रयागराज (मुख्यालय)',
           isVerified: true,
@@ -52,20 +63,20 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         onClose();
         return;
       } else {
-        setAuthError('गलत एडमिन पासवर्ड!');
+        setAuthError('गलत एडमिन पासवर्ड! कृपया सही पासवर्ड दर्ज करें।');
         return;
       }
     }
 
     // Normal Verified User Login
     const normalUser = {
-      name: loginEmail.split('@')[0] || 'सत्यापित लेखक',
+      name: loginEmail.split('@')[0] || 'साहित्य साधक',
       username: `@${loginEmail.split('@')[0] || 'writer'}`,
       email: loginEmail,
       phone: '+91 9812345678',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
       role: 'user',
-      city: 'नई दिल्ली',
+      city: 'प्रयागराज',
       isVerified: true,
       points: 100
     };
@@ -78,13 +89,13 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     e.preventDefault();
     setAuthError('');
 
-    if (adminEmail.trim().toLowerCase() === 'admin@bolteekalam.com' && (adminPassword === 'admin' || adminPassword === 'admin123')) {
+    if ((adminEmail.trim().toLowerCase() === 'admin@bolteekalam.com' || adminEmail.trim().toLowerCase() === 'admin') && (adminPassword === 'admin' || adminPassword === 'admin123' || adminPassword === 'bolteekalam@admin2026')) {
       const adminUser = {
         name: 'बोलती कलम सुपर एडमिन',
         username: '@super_admin',
         email: 'admin@bolteekalam.com',
         phone: '+91 9876500000',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
         role: 'admin',
         city: 'प्रयागराज (मुख्यालय)',
         isVerified: true,
@@ -93,7 +104,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       onLoginSuccess(adminUser);
       onClose();
     } else {
-      setAuthError('गलत एडमिन ईमेल या पासवर्ड! (Demo Admin: admin@bolteekalam.com / admin)');
+      setAuthError('गलत एडमिन पासवर्ड! (Super Admin Secret Password: admin या bolteekalam@admin2026)');
     }
   };
 
@@ -101,7 +112,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     try {
       setSuccessMsg('गूगल ऑथेंटिकेशन से कनेक्ट हो रहा है...');
       
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin
@@ -223,7 +234,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         )}
 
         {/* Tab Switcher */}
-        <div className="grid grid-cols-3 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[11px] font-bold">
+        <div className={`grid ${showAdminTab ? 'grid-cols-3' : 'grid-cols-2'} p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[11px] font-bold`}>
           <button
             onClick={() => { setActiveTab('login'); setStep(1); setAuthError(''); setSuccessMsg(''); }}
             className={`py-2 rounded-xl transition ${activeTab === 'login' ? 'bg-white dark:bg-slate-900 text-rose-600 shadow' : 'text-slate-500'}`}
@@ -236,12 +247,15 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
           >
             ✍️ नया खाता
           </button>
-          <button
-            onClick={() => { setActiveTab('admin'); setStep(1); setAuthError(''); setSuccessMsg(''); }}
-            className={`py-2 rounded-xl transition ${activeTab === 'admin' ? 'bg-amber-500 text-slate-950 shadow' : 'text-amber-600 dark:text-amber-400 font-bold'}`}
-          >
-            👑 एडमिन पोर्टल
-          </button>
+
+          {showAdminTab && (
+            <button
+              onClick={() => { setActiveTab('admin'); setStep(1); setAuthError(''); setSuccessMsg(''); }}
+              className={`py-2 rounded-xl transition ${activeTab === 'admin' ? 'bg-amber-500 text-slate-950 shadow' : 'text-amber-600 dark:text-amber-400 font-bold'}`}
+            >
+              👑 एडमिन
+            </button>
+          )}
         </div>
 
         {authError && (
@@ -310,11 +324,11 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
             </div>
 
             <div>
-              <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">सुपर एडमिन ईमेल:</label>
+              <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">सुपर एडमिन ईमेल / आईडी:</label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-amber-500 absolute left-3 top-3" />
                 <input
-                  type="email"
+                  type="text"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   placeholder="admin@bolteekalam.com"
