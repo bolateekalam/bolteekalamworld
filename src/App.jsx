@@ -1119,16 +1119,25 @@ class ErrorBoundary extends React.Component {
             बोलती कलम (bolateeworld.in)
           </h1>
           <p className="text-sm text-slate-300 max-w-md">
-            वेबसाइट लोड करने में अस्थायी समस्या आई है। कृपया नीचे दिए गए बटन पर क्लिक करके रीफ्रेश करें।
+            वेबसाइट लोड करने में समस्या आई है।
           </p>
+
+          {this.state.error && (
+            <div className="p-3 rounded-xl bg-slate-900 border border-rose-500/30 text-rose-300 text-xs font-mono max-w-lg overflow-x-auto text-left">
+              {this.state.error.toString()}
+            </div>
+          )}
+
           <button
             onClick={() => {
-              localStorage.removeItem('bolteekalam_active_user');
-              window.location.reload();
+              try {
+                localStorage.clear();
+              } catch (e) {}
+              window.location.href = '/';
             }}
-            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg transition"
+            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg transition active:scale-95"
           >
-            🔄 रीफ्रेश करें (Clear Cache & Reload)
+            🔄 रीफ्रेश करें (Clear Local Storage & Reset App)
           </button>
         </div>
       );
