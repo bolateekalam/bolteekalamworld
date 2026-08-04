@@ -67,7 +67,6 @@ function AppContent() {
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showReferEarnModal, setShowReferEarnModal] = useState(false);
   const [showYouTubeModal, setShowYouTubeModal] = useState(false);
-  const [birthdayUser, setBirthdayUser] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
   const [certificateData, setCertificateData] = useState(null);
 
@@ -835,7 +834,6 @@ function AppContent() {
           onOpenReferEarn={() => requireAuth(() => setShowReferEarnModal(true))}
           onOpenYouTube={() => requireAuth(() => setShowYouTubeModal(true))}
           userPoints={userProfile.points}
-          onOpenBirthdayCard={(u) => setBirthdayUser(u)}
           currentUser={currentUser}
           onOpenAuthModal={() => setShowAuthModal(true)}
         />
@@ -1007,13 +1005,7 @@ function AppContent() {
         />
       )}
 
-      {birthdayUser && (
-        <BirthdayCardModal
-          isOpen={true}
-          onClose={() => setBirthdayUser(null)}
-          birthdayUser={birthdayUser}
-        />
-      )}
+
 
       {showYouTubeModal && (
         <YouTubeSubscribeModal
