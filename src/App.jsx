@@ -226,26 +226,26 @@ function AppContent() {
   const handleOpenAuthorProfile = (author) => {
     if (!author) return;
     const cleanUsername = author.username ? author.username.replace(/^@/, '') : author.name.toLowerCase().replace(/\s+/g, '_');
-    window.location.hash = `@${cleanUsername}`;
-    document.title = `${author.name || 'लेखक'} (@${cleanUsername}) — बोलती कलम`;
+    window.location.hash = `${cleanUsername}`;
+    document.title = `${author.name || 'लेखक'} (${cleanUsername}) — बोलती कलम`;
     setSelectedAuthor(author);
     setShowPublicProfileModal(true);
   };
 
   const handleCloseAuthorProfile = () => {
     setShowPublicProfileModal(false);
-    if (window.location.hash.startsWith('#/@')) {
+    if (window.location.hash) {
       history.replaceState(null, '', window.location.pathname);
     }
     document.title = 'बोलती कलम — हिंदी साहित्य एवं काव्य मंच';
   };
 
-  // URL Hash Listener for Strict Unique Username SEO Deep-linking (e.g. bolteekalamvoice.in/#/@sanjayrai_founder)
+  // URL Hash Listener for Clean Username SEO Deep-linking (e.g. bolteekalamvoice.in/#/sanjayrai or /#/kajal)
   useEffect(() => {
     const handleHashRoute = () => {
       const hash = window.location.hash;
-      if (hash && hash.startsWith('#/@')) {
-        const usernameQuery = decodeURIComponent(hash.replace('#/@', '')).trim().toLowerCase();
+      if (hash && hash.length > 1) {
+        const usernameQuery = decodeURIComponent(hash.replace(/^#\/?@?/, '')).trim().toLowerCase();
         
         // 1. Strict Match by unique author.username
         const matchedPost = posts.find(p => {
@@ -256,10 +256,17 @@ function AppContent() {
         if (matchedPost) {
           setSelectedAuthor(matchedPost.author);
           setShowPublicProfileModal(true);
-          document.title = `${matchedPost.author.name} (@${usernameQuery}) — बोलती कलम`;
+          document.title = `${matchedPost.author.name} (${usernameQuery}) — बोलती कलम`;
         } else {
-          // 2. Fallback lookup for registered unique usernames
+          // 2. Lookup for registered platform authors
           const mockWritersByUsername = {
+            'sanjayrai': {
+              name: 'संजय राय (संस्थापक)',
+              username: '@sanjayrai',
+              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
+              city: 'प्रयागराज',
+              bio: 'बोलती कलम साहित्य मंच के संस्थापक एवं वरिष्ठ साहित्यकार।'
+            },
             'sanjayrai_founder': {
               name: 'संजय राय (संस्थापक)',
               username: '@sanjayrai_founder',
@@ -274,12 +281,12 @@ function AppContent() {
               city: 'नई दिल्ली',
               bio: 'बोलती कलम डिजिटल मीडिया प्रमुख एवं युवा कवि।'
             },
-            'saraswati_pathak': {
-              name: 'सरस्वती पाठक (काव्य शिरोमणि)',
-              username: '@saraswati_pathak',
-              avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300',
-              city: 'वाराणसी',
-              bio: 'काव्य शिरोमणि सम्मान प्राप्त वरिष्ठ हिंदी कवयित्री।'
+            'bolteekalamworld': {
+              name: 'बोलती कलम (आधिकारिक)',
+              username: '@bolteekalamworld',
+              avatar: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=300',
+              city: 'प्रयागराज',
+              bio: 'बोलती कलम आधिकारिक मंच - हिंदी साहित्य एवं काव्य मंच।'
             },
             'kajal': {
               name: 'काजल गुप्ता',

@@ -13,9 +13,9 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge,
   const [submitted, setSubmitted] = useState(false);
 
   const registeredPlatformUsers = [
-    { id: 'u-sanjay', name: 'संजय राय', username: '@sanjayrai_founder' },
-    { id: 'u-akash', name: 'आकाश कुमार सिंह', username: '@akash_cofounder' },
-    { id: 'u-saraswati', name: 'सरस्वती पाठक', username: '@saraswati_pathak' }
+    { id: 'u-sanjay', name: 'संजय राय (संस्थापक)', username: '@sanjayrai' },
+    { id: 'u-akash', name: 'आकाश कुमार सिंह (सह-संस्थापक)', username: '@akash_cofounder' },
+    { id: 'u-kajal', name: 'काजल गुप्ता', username: '@kajal' }
   ];
 
   if (!isOpen) return null;
@@ -23,6 +23,16 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge,
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!poemTitle.trim() || !poemContent.trim()) return;
+
+    // Strict Max 5 Invites Per Day Enforcer
+    const todayDate = new Date().toISOString().split('T')[0];
+    const dailyKey = `daily_battle_invites_${todayDate}`;
+    const sentCount = parseInt(localStorage.getItem(dailyKey) || '0', 10);
+
+    if (sentCount >= 5) {
+      alert('आप आज 5 काव्य चुनौतियों की अधिकतम दैनिक सीमा (Daily 5 Invites Limit) पूरी कर चुके हैं!\nकृपया कल नई चुनौती भेजें।');
+      return;
+    }
 
     const opponentName = customOpponent.trim() ? customOpponent : targetOpponent;
     const challengeData = {
@@ -36,6 +46,8 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge,
       time: 'अभी-अभी शुरू हुआ',
       status: 'LIVE'
     };
+
+    localStorage.setItem(dailyKey, (sentCount + 1).toString());
 
     if (onSubmitChallenge) onSubmitChallenge(challengeData);
     if (onCreateChallenge) onCreateChallenge(challengeData);

@@ -7,6 +7,9 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { mockCategories } from '../data/mockPosts';
 
+import NotificationDrawer from './NotificationDrawer';
+import HelpSupportModal from './HelpSupportModal';
+
 export const Navbar = ({ 
   onOpenCreatePost, 
   activeView, 
@@ -28,6 +31,7 @@ export const Navbar = ({
   const { theme, toggleTheme } = useTheme();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -217,7 +221,7 @@ export const Navbar = ({
                   {/* Option 4: सहायता एवं सहायता केंद्र (Help) */}
                   <button
                     onClick={() => {
-                      alert('बोलती कलम सहायता एवं मार्गदर्शन केंद्र:\n\nइमेल: support@bolteekalam.com\nहेल्पलाइन: +91 9812345678 (सुबह 9 से शाम 6 बजे तक)\nपता: प्रयागराज, उत्तर प्रदेश');
+                      setShowHelpModal(true);
                       setShowUserDropdown(false);
                     }}
                     aria-label="सहायता केंद्र खोलें"
@@ -265,6 +269,12 @@ export const Navbar = ({
         </div>
 
       </div>
+
+      {/* Help & Support Social Modal */}
+      <HelpSupportModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+      />
     </header>
   );
 };
