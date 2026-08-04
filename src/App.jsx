@@ -17,7 +17,7 @@ import NotificationDrawer from './components/NotificationDrawer';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
-import { fetchPostsFromDB, createPostInDB, deletePostFromDB, updateUserProfileInDB, fetchWeeklyChallengeFromDB } from './lib/dataService';
+import { fetchPostsFromDB, createPostInDB, deletePostFromDB, archivePostInDB, updateUserProfileInDB, fetchWeeklyChallengeFromDB } from './lib/dataService';
 
 import HomeFeedView from './views/HomeFeedView';
 import DailyChallengeView from './views/DailyChallengeView';
@@ -437,6 +437,17 @@ function AppContent() {
     } catch (e) {}
   };
 
+  const handleToggleArchivePost = (postId) => {
+    setPosts(prev => prev.map(p => {
+      if (p.id === postId) {
+        const updatedArchived = !p.isArchived;
+        archivePostInDB(p.id, p.content, p.author, updatedArchived);
+        return { ...p, isArchived: updatedArchived };
+      }
+      return p;
+    }));
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
     setUserRole('user');
@@ -586,6 +597,7 @@ function AppContent() {
               onOpenReferEarn={() => setShowReferEarnModal(true)}
               onEditPost={(p) => setEditingPost(p)}
               onDeletePost={handleDeletePost}
+              onToggleArchivePost={handleToggleArchivePost}
             />
           )}
 

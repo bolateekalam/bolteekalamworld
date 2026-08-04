@@ -8,21 +8,22 @@ const isValidUUID = (str) => {
   return uuidRegex.test(str);
 };
 
-// Encode author metadata into content text to guarantee 100% schema safety on any Supabase table setup
-const encodeContentWithAuthor = (content, authorInfo) => {
+// Encode author metadata and archived status into content text for 100% schema safety
+const encodeContentWithAuthor = (content, authorInfo, isArchived = false) => {
   const metaHeader = `<!--BK_AUTHOR: ${JSON.stringify({
     name: authorInfo.name || 'साहित्य साधक',
     username: authorInfo.username || '@writer',
     avatar: authorInfo.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-    email: authorInfo.email || ''
+    email: authorInfo.email || '',
+    isArchived: !!isArchived
   })}-->\n`;
   return metaHeader + content;
 };
 
-// Decode author metadata from content text
+// Decode author metadata and archived status from content text
 const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
   if (!rawContent || typeof rawContent !== 'string') {
-    return { content: '', author: defaultAuthor };
+    return { content: '', author: defaultAuthor, isArchived: false };
   }
 
   const match = rawContent.match(/^<!--BK_AUTHOR:\s*({.*?})-->\n?/s);
@@ -32,6 +33,7 @@ const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
       const cleanContent = rawContent.replace(match[0], '');
       return {
         content: cleanContent,
+        isArchived: !!parsedMeta.isArchived,
         author: {
           id: parsedMeta.email || parsedMeta.username || defaultAuthor.id,
           email: parsedMeta.email || '',
@@ -46,65 +48,76 @@ const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
     } catch (e) {}
   }
 
-  return { content: rawContent, author: defaultAuthor };
+  return { content: rawContent, author: defaultAuthor, isArchived: false };
 };
 
-// 1. Fetch All Shared Posts from Supabase DB (Combined Feed across all users & devices)
+// 1. Fetch All Shared Posts from Supabase DB & Local Shared Storage
 export const fetchPostsFromDB = async () => {
+  let dbPosts = [];
+
   try {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return mockPosts;
+    if (!error && data && data.length > 0) {
+      dbPosts = data.map(p => {
+        const defaultAuthor = {
+          id: p.author_email || p.user_id || 'unknown',
+          email: p.author_email || '',
+          name: p.author_name || 'साहित्य साधक',
+          username: p.author_username || '@writer',
+          avatar: p.author_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+          badge: 'verifiedAuthor',
+          city: 'प्रयागराज',
+          followers: 0
+        };
+
+        const decoded = decodeContentAndAuthor(p.content, defaultAuthor);
+
+        return {
+          id: String(p.id),
+          author: decoded.author,
+          title: p.title || 'बिना शीर्षक',
+          category: p.category || 'कविता',
+          content: decoded.content,
+          isArchived: decoded.isArchived,
+          tags: p.tags || ['हिंदीसाहित्य'],
+          likes: p.likes_count || 0,
+          isLiked: false,
+          bookmarks: p.bookmarks_count || 0,
+          isBookmarked: false,
+          views: p.views_count || 1,
+          readingTime: '2 मिनट',
+          isEditorialPick: false,
+          createdAt: p.created_at ? new Date(p.created_at).toLocaleDateString('hi-IN') : 'अभी-अभी'
+        };
+      });
     }
-
-    const dbPosts = data.map(p => {
-      const defaultAuthor = {
-        id: p.author_email || p.user_id || 'unknown',
-        email: p.author_email || '',
-        name: p.author_name || 'साहित्य साधक',
-        username: p.author_username || '@writer',
-        avatar: p.author_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-        badge: 'verifiedAuthor',
-        city: 'प्रयागराज',
-        followers: 0
-      };
-
-      const decoded = decodeContentAndAuthor(p.content, defaultAuthor);
-
-      return {
-        id: String(p.id),
-        author: decoded.author,
-        title: p.title || 'बिना शीर्षक',
-        category: p.category || 'कविता',
-        content: decoded.content,
-        tags: p.tags || ['हिंदीसाहित्य'],
-        likes: p.likes_count || 0,
-        isLiked: false,
-        bookmarks: p.bookmarks_count || 0,
-        isBookmarked: false,
-        views: p.views_count || 1,
-        readingTime: '2 मिनट',
-        isEditorialPick: false,
-        createdAt: p.created_at ? new Date(p.created_at).toLocaleDateString('hi-IN') : 'अभी-अभी'
-      };
-    });
-
-    // Merge Supabase DB posts with mock posts without duplicates
-    const dbPostIds = new Set(dbPosts.map(p => p.id));
-    const uniqueMockPosts = mockPosts.filter(mp => !dbPostIds.has(String(mp.id)));
-    return [...dbPosts, ...uniqueMockPosts];
-
   } catch (err) {
     console.error('Error fetching posts from Supabase DB:', err);
-    return mockPosts;
   }
+
+  // Combine DB posts + mock posts without duplicates
+  const allPostsMap = new Map();
+
+  // Add DB posts first (newest top)
+  dbPosts.forEach(p => {
+    if (p && p.id) allPostsMap.set(p.id, p);
+  });
+
+  // Add mock posts
+  mockPosts.forEach(mp => {
+    if (mp && mp.id && !allPostsMap.has(String(mp.id))) {
+      allPostsMap.set(String(mp.id), mp);
+    }
+  });
+
+  return Array.from(allPostsMap.values());
 };
 
-// 2. Create New Post in Supabase DB with 100% Fail-Safe Payload
+// 2. Create New Post in Supabase DB with Guaranteed Clean Payload
 export const createPostInDB = async (postData, userId) => {
   try {
     const authorInfo = {
@@ -114,64 +127,65 @@ export const createPostInDB = async (postData, userId) => {
       email: postData.authorEmail || userId || ''
     };
 
-    const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo);
+    const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo, false);
 
-    // Minimal guaranteed payload matching standard Supabase columns
-    const payload = {
+    // Guaranteed clean payload matching basic Supabase columns
+    const cleanPayload = {
       title: postData.title || 'बिना शीर्षक',
       category: postData.category || 'कविता',
       content: encodedBody
     };
 
-    // Try optional columns if supported
-    try {
-      payload.author_name = authorInfo.name;
-      payload.author_username = authorInfo.username;
-      payload.author_avatar = authorInfo.avatar;
-      payload.author_email = authorInfo.email;
-    } catch (e) {}
-
-    // Attach user_id if valid UUID
+    // Attach user_id only if valid UUID
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user?.id && isValidUUID(session.user.id)) {
-      payload.user_id = session.user.id;
-    } else if (isValidUUID(userId)) {
-      payload.user_id = userId;
+      cleanPayload.user_id = session.user.id;
     }
 
     const { data, error } = await supabase
       .from('posts')
-      .insert([payload])
+      .insert([cleanPayload])
       .select();
 
     if (error) {
-      console.warn('Primary Supabase insert failed, attempting clean fallback insertion:', error.message);
-      // Clean fallback: payload with basic columns only
-      const cleanFallbackPayload = {
-        title: postData.title || 'बिना शीर्षक',
-        category: postData.category || 'कविता',
-        content: encodedBody
-      };
-      const { data: fallbackData, error: fallbackError } = await supabase
+      console.warn('Primary Supabase insert warning:', error.message);
+      // Fallback without user_id in case of RLS foreign key issue
+      delete cleanPayload.user_id;
+      const { data: fallbackData } = await supabase
         .from('posts')
-        .insert([cleanFallbackPayload])
+        .insert([cleanPayload])
         .select();
 
-      if (fallbackError) {
-        console.error('Fallback Supabase insert error:', fallbackError.message);
-      } else if (fallbackData && fallbackData[0]) {
+      if (fallbackData && fallbackData[0]) {
         return fallbackData[0];
       }
     }
 
-    return data && data[0] ? data[0] : payload;
+    return data && data[0] ? data[0] : cleanPayload;
   } catch (err) {
     console.error('Error creating post in DB:', err);
     return null;
   }
 };
 
-// 3. Delete Post from Supabase DB
+// 3. Toggle Archive Status of Post in Supabase DB
+export const archivePostInDB = async (postId, currentContent, authorInfo, isArchived) => {
+  try {
+    const encodedBody = encodeContentWithAuthor(currentContent, authorInfo, isArchived);
+    const { error } = await supabase
+      .from('posts')
+      .update({ content: encodedBody })
+      .eq('id', postId);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Error archiving post in DB:', err);
+    return false;
+  }
+};
+
+// 4. Delete Post from Supabase DB
 export const deletePostFromDB = async (postId) => {
   try {
     const { error } = await supabase
@@ -187,7 +201,7 @@ export const deletePostFromDB = async (postId) => {
   }
 };
 
-// 4. Update Profile in Supabase DB
+// 5. Update Profile in Supabase DB
 export const updateUserProfileInDB = async (userProfile, userId) => {
   try {
     const payload = {
@@ -217,7 +231,7 @@ export const updateUserProfileInDB = async (userProfile, userId) => {
   }
 };
 
-// 5. Fetch Active Weekly Challenge
+// 6. Fetch Active Weekly Challenge
 export const fetchWeeklyChallengeFromDB = async () => {
   try {
     const { data, error } = await supabase
@@ -260,7 +274,7 @@ export const fetchWeeklyChallengeFromDB = async () => {
   }
 };
 
-// 6. Publish New Weekly Challenge to Supabase DB (Admin)
+// 7. Publish New Weekly Challenge to Supabase DB (Admin)
 export const publishWeeklyChallengeToDB = async (topic, prompt) => {
   try {
     await supabase

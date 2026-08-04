@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   User, ShieldCheck, Flame, BookOpen, Bookmark, Award, Trophy,
   Eye, Heart, Sparkles, MapPin, Calendar, Share2, Copy, Check, 
-  Gift, Lock, Package, Edit3, Send, Phone, Mail, UserPlus, UserCheck 
+  Gift, Lock, Package, Edit3, Send, Phone, Mail, UserPlus, UserCheck, Archive
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import PostCard from '../components/PostCard';
@@ -15,7 +15,8 @@ export const ProfileView = ({
   onOpenEditProfile, 
   onOpenReferEarn,
   onEditPost,
-  onDeletePost
+  onDeletePost,
+  onToggleArchivePost
 }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('works');
@@ -23,45 +24,32 @@ export const ProfileView = ({
   const [shippingAddress, setShippingAddress] = useState('');
   const [isKitRequested, setIsKitRequested] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
-  const [isFollowingProfile, setIsFollowingProfile] = useState(false);
-  const [followerCount, setFollowerCount] = useState(userProfile?.followers || 0);
 
   const profile = userProfile || {
     name: 'साहित्य साधक',
-    email: 'user@bolteekalam.com',
-    phone: '+91 9876543210',
-    username: '@writer_user',
+    email: 'writer@bolteekalam.com',
+    phone: '',
+    username: '@writer',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
     cover: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200',
     badge: 'verifiedAuthor',
-    bio: 'काव्य-रसिक, लेखक एवं हिंदी साहित्य प्रेमी। शब्दों के माध्यम से अंतर्मन की वेदना और समाज की चेतना को उजागर करने का विनम्र प्रयास।',
+    bio: 'हिंदी साहित्य एवं काव्य का साधक। बोलती कलम मंच पर नियमित रचनाकार।',
     city: 'प्रयागराज',
-    joined: 'जनवरी 2026',
-    birthday: '03 अगस्त 2026',
-    followers: 0,
-    following: 0,
-    streak: 0,
-    points: 0,
-    badges: ['Verified Author', 'साहित्य साधक']
+    joined: 'अगस्त 2026',
+    points: 100,
+    followers: 12,
+    following: 5,
+    streak: 3
   };
 
-  const handleToggleFollow = () => {
-    if (isFollowingProfile) {
-      setIsFollowingProfile(false);
-      setFollowerCount(prev => Math.max(0, prev - 1));
-    } else {
-      setIsFollowingProfile(true);
-      setFollowerCount(prev => prev + 1);
-    }
-  };
-
-  const handleSharePortfolio = () => {
-    navigator.clipboard.writeText(window.location.href);
+  const handleCopyPortfolioLink = () => {
+    const link = `https://www.bolateeworld.in/#profile/${profile.username.replace(/^@/, '')}`;
+    navigator.clipboard.writeText(link);
     setCopiedPortfolio(true);
     setTimeout(() => setCopiedPortfolio(false), 2000);
   };
 
-  const handleRequestKit = (e) => {
+  const handleKitSubmit = (e) => {
     e.preventDefault();
     if (!shippingAddress.trim()) return;
     setIsKitRequested(true);
@@ -70,295 +58,179 @@ export const ProfileView = ({
   return (
     <div className="space-y-6">
       
-      {/* Profile Header Banner */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+      {/* 1. Author Royal Header Banner Card */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
         
         {/* Cover Photo */}
-        <div className="h-44 w-full bg-rose-900 relative">
-          <img src={profile.cover} alt="Cover" className="w-full h-full object-cover opacity-70" />
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            <button
-              onClick={onOpenEditProfile}
-              aria-label="प्रोफ़ाइल संपादित करें"
-              className="px-3.5 py-1.5 rounded-full bg-slate-950/80 text-white text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 hover:bg-slate-950"
-            >
-              <Edit3 className="w-3.5 h-3.5 text-rose-400" />
-              <span>{t('profile.editProfile')}</span>
-            </button>
-
-            <button
-              onClick={handleSharePortfolio}
-              aria-label="प्रोफ़ाइल लिंक शेयर करें"
-              className="px-3.5 py-1.5 rounded-full bg-slate-950/80 text-white text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 hover:bg-slate-950"
-            >
-              {copiedPortfolio ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5 text-amber-400" />}
-              <span>{copiedPortfolio ? 'कॉपी हुआ!' : 'शेयर'}</span>
-            </button>
-          </div>
+        <div className="h-44 sm:h-52 bg-slate-800 relative">
+          <img 
+            src={profile.cover || 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200'} 
+            alt="Cover" 
+            className="w-full h-full object-cover opacity-80"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+          
+          <button
+            onClick={onOpenEditProfile}
+            aria-label="प्रोफ़ाइल संपादित करें"
+            className="absolute top-4 right-4 px-3.5 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-bold backdrop-blur-md border border-white/20 flex items-center gap-1.5 transition active:scale-95"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-amber-400" />
+            <span>प्रोफ़ाइल बदलें</span>
+          </button>
         </div>
 
-        {/* Profile Details Bar */}
-        <div className="p-6 relative pt-0">
-          <div className="flex items-end justify-between -mt-14 mb-4 flex-wrap gap-3">
-            
+        {/* Profile Details Container */}
+        <div className="px-6 pb-6 pt-0 relative">
+          
+          {/* Avatar & Badges */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between -mt-16 sm:-mt-20 gap-4 mb-4">
             <div className="relative">
               <img 
-                src={profile.avatar} 
+                src={profile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'} 
                 alt={profile.name} 
-                className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-900 object-cover shadow-xl"
+                className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-4 ring-white dark:ring-slate-900 shadow-2xl bg-white"
               />
-              <span className="absolute bottom-1 right-1 p-1 bg-amber-500 text-slate-950 rounded-full" title={profile.badge}>
-                <ShieldCheck className="w-4 h-4 fill-amber-400" />
-              </span>
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center border-2 border-white dark:border-slate-900 shadow">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
             </div>
 
-            {/* Stats & Action Badges */}
-            <div className="flex items-center gap-2 flex-wrap">
-              
-              {/* Follow Button */}
+            {/* Quick Actions & Share Link */}
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={handleToggleFollow}
-                aria-label={isFollowingProfile ? "अनफ़ॉलो करें" : "फ़ॉलो करें"}
-                className={`px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95 ${
-                  isFollowingProfile
-                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
-                    : 'bg-rose-600 hover:bg-rose-700 text-white'
-                }`}
+                onClick={handleCopyPortfolioLink}
+                aria-label="पोर्टफ़ोलियो लिंक कॉपी करें"
+                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 border border-slate-200 dark:border-slate-700"
               >
-                {isFollowingProfile ? (
-                  <>
-                    <UserCheck className="w-4 h-4 text-emerald-500" />
-                    <span>फ़ॉलो कर रहे हैं</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" />
-                    <span>+ फॉलो (Follow)</span>
-                  </>
-                )}
+                {copiedPortfolio ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedPortfolio ? 'लिंक कॉपी हो गया!' : 'प्रोफ़ाइल लिंक शेयर करें'}</span>
               </button>
 
               <button
                 onClick={onOpenReferEarn}
-                aria-label="मित्र को आमंत्रित करें"
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition"
+                aria-label="मित्रों को आमंत्रित करें और पॉइंट्स पाएँ"
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow transition active:scale-95"
               >
-                <Gift className="w-4 h-4 text-slate-950 animate-bounce" />
-                <span>{t('nav.referEarn')} (+100 Pts)</span>
-              </button>
-
-              <div className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-xs flex items-center gap-1.5">
-                <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <span>{profile.streak || 0} दिन Streak</span>
-              </div>
-
-              {/* Clickable Points Badge Opening PointsExplanationModal */}
-              <button
-                onClick={() => setShowPointsModal(true)}
-                aria-label="पॉइंट्स नियम व विवरण देखें"
-                className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-semibold text-xs flex items-center gap-1.5 font-outfit border border-rose-500/30 transition active:scale-95 cursor-pointer"
-                title="पॉइंट्स नियम व विवरण देखने हेतु क्लिक करें"
-              >
-                <Award className="w-4 h-4 text-rose-500" />
-                <span>{(profile.points || 0).toLocaleString()} पॉइंट्स ℹ️</span>
+                <Gift className="w-4 h-4" />
+                <span>मित्रों को जोड़ें (+100 Pts)</span>
               </button>
             </div>
-
           </div>
 
+          {/* Name & Bio Details */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-rozha text-slate-900 dark:text-slate-100">
-                {profile.name}
-              </h1>
-              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 text-[10px] font-bold">
-                {t('badges.verifiedAuthor')}
-              </span>
-              <span className="text-xs text-slate-400">({profile.email})</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 font-rozha">
+                  {profile.name}
+                </h2>
+                <span className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-bold border border-rose-500/20">
+                  सत्यापित लेखक
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-semibold pt-0.5">
+                <span>{profile.username || '@writer'}</span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                  {profile.city || 'प्रयागराज'}
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-amber-500" />
+                  सदस्य: {profile.joined || 'अगस्त 2026'}
+                </span>
+              </div>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300 font-tiro max-w-2xl leading-relaxed">
-              {profile.bio}
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-tiro max-w-2xl">
+              {profile.bio || 'हिंदी साहित्य एवं काव्य का नया साधक। अभी अपनी पहली कविता पोस्ट करने जा रहा हूँ।'}
             </p>
 
-            <div className="flex items-center gap-4 text-xs text-slate-500 pt-1 flex-wrap">
-              {profile.phone && (
-                <span className="flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300">
-                  <Phone className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>{profile.phone}</span>
+            {/* Email & Verified Phone Badge */}
+            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-1">
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                <ShieldCheck className="w-4 h-4" />
+                <span>फोन: {profile.phone || 'ऑथराइज्ड यूज़र (+91 9812345678)'}</span>
+              </span>
+              {profile.email && (
+                <span className="flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>{profile.email}</span>
                 </span>
               )}
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-rose-500" />
-                <span>{profile.city}</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                <span>जन्मदिन: {profile.birthday || '03 अगस्त 2026'}</span>
-              </span>
-              <span><strong>{followerCount.toLocaleString()}</strong> फ़ॉलोअर्स</span>
-              <span><strong>{profile.following || 0}</strong> फ़ॉलोइंग</span>
-            </div>
-
-            {/* Achievement Badges Showcase */}
-            <div className="flex flex-wrap gap-1.5 pt-3">
-              {profile.badges.map((b, idx) => (
-                <span key={idx} className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  <span>{b}</span>
-                </span>
-              ))}
             </div>
           </div>
 
-        </div>
-
-        {/* Milestone Unlocks & Bolti Kalam Kit System */}
-        <div className="p-6 border-t border-slate-200 dark:border-slate-800 space-y-4 bg-slate-50/50 dark:bg-slate-800/20">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-500" />
-              <span>{t('profile.milestoneTitle')}</span>
-            </h3>
-            <button 
-              onClick={() => setShowPointsModal(true)}
-              className="text-xs font-mono font-bold text-amber-500 underline"
-            >
-              वर्तमान पॉइंट्स: {profile.points || 0} pts (नियम देखें)
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          {/* Stats Bar */}
+          <div className="grid grid-cols-4 gap-2 sm:gap-4 mt-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-center">
             
-            {/* Milestone 1: 1,000 Pts */}
+            {/* Interactive Points Modal Trigger */}
             <div 
-              onClick={() => onOpenCertificate({
-                recipientName: profile.name,
-                title: 'साहित्य साधक सम्मान',
-                category: '1,000 Points Milestone Award',
-                type: 'Milestone Cert Level 1',
-                date: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
-                certificateId: 'BK-MS-1000',
-                requiredPoints: 1000
-              })}
-              className={`p-4 rounded-2xl border cursor-pointer transition ${
-                profile.points >= 1000
-                  ? 'bg-white dark:bg-slate-900 border-amber-500/50 shadow-sm hover:border-amber-500'
-                  : 'bg-slate-100 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-60'
-              }`}
+              onClick={() => setShowPointsModal(true)}
+              className="space-y-0.5 cursor-pointer p-1 rounded-xl hover:bg-amber-500/10 transition group"
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-rose-600">1,000 Points</span>
-                {profile.points >= 1000 ? <Check className="w-4 h-4 text-emerald-500" /> : <Lock className="w-4 h-4 text-slate-400" />}
+              <div className="flex items-center justify-center gap-1 text-amber-600 dark:text-amber-400 font-bold text-sm sm:text-base group-hover:scale-105 transition">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>{profile.points || 0}</span>
               </div>
-              <h4 className="font-bold text-slate-900 dark:text-slate-100">साहित्य साधक प्रमाण-पत्र</h4>
-              <p className="text-[11px] text-slate-500 mt-1">अनलॉक: डिजिटल सर्टिफिकेट 🎓</p>
+              <p className="text-[10px] text-slate-500 font-semibold underline decoration-dotted">
+                अर्जित पॉइंट्स (नियम देखें) ℹ️
+              </p>
             </div>
 
-            {/* Milestone 2: 2,500 Pts */}
-            <div 
-              onClick={() => onOpenCertificate({
-                recipientName: profile.name,
-                title: 'वरिष्ठ रचनाकार सम्मान',
-                category: '2,500 Points Senior Milestone',
-                type: 'Milestone Cert Level 2',
-                date: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
-                certificateId: 'BK-MS-2500',
-                requiredPoints: 2500
-              })}
-              className={`p-4 rounded-2xl border cursor-pointer transition ${
-                profile.points >= 2500
-                  ? 'bg-white dark:bg-slate-900 border-amber-500/50 shadow-sm hover:border-amber-500'
-                  : 'bg-slate-100 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-60'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-rose-600">2,500 Points</span>
-                {profile.points >= 2500 ? <Check className="w-4 h-4 text-emerald-500" /> : <Lock className="w-4 h-4 text-slate-400" />}
+            <div className="space-y-0.5">
+              <div className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+                {posts.filter(p => !p.isArchived).length}
               </div>
-              <h4 className="font-bold text-slate-900 dark:text-slate-100">वरिष्ठ रचनाकार प्रमाण-पत्र</h4>
-              <p className="text-[11px] text-slate-500 mt-1">अनलॉक: मास्टर सर्टिफिकेट 📜</p>
+              <p className="text-[10px] text-slate-500 font-semibold">रचनाएँ</p>
             </div>
 
-            {/* Milestone 3: 5,000 Pts Bolti Kalam Kit */}
-            <div 
-              onClick={() => onOpenCertificate({
-                recipientName: profile.name,
-                title: 'महाकवि सम्मान & बोलती कलम किट',
-                category: '5,000 Points Grand Master Milestone',
-                type: 'Bolti Kalam Kit Award',
-                date: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
-                certificateId: 'BK-MS-5000',
-                requiredPoints: 5000
-              })}
-              className={`p-4 rounded-2xl border cursor-pointer transition ${
-                profile.points >= 5000
-                  ? 'bg-amber-500/10 border-amber-500 shadow-md'
-                  : 'bg-slate-100 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-60'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-amber-500 flex items-center gap-1">
-                  <Package className="w-3.5 h-3.5" />
-                  <span>5,000 Points</span>
-                </span>
-                {profile.points >= 5000 ? <Check className="w-4 h-4 text-emerald-500" /> : <Lock className="w-4 h-4 text-slate-400" />}
+            <div className="space-y-0.5">
+              <div className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+                {profile.followers || 0}
               </div>
-              <h4 className="font-bold text-slate-900 dark:text-slate-100">बोलती कलम किट + मेडल</h4>
-              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-semibold">अनलॉक: बुक + किट होम डिलीवरी 📦</p>
+              <p className="text-[10px] text-slate-500 font-semibold">फ़ॉलोअर्स</p>
             </div>
 
+            <div className="space-y-0.5">
+              <div className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+                {profile.streak || 1} दिन
+              </div>
+              <p className="text-[10px] text-slate-500 font-semibold">लगातार सक्रिय</p>
+            </div>
           </div>
-
-          {/* Bolti Kalam Kit Shipment Claim Form */}
-          {profile.points >= 4000 && (
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-amber-500/40 space-y-2">
-              <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                <Package className="w-4 h-4" />
-                <span>बोलती कलम किट (Bolti Kalam Kit) होम डिलीवरी मँगवाएँ</span>
-              </h4>
-              {isKitRequested ? (
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 text-xs font-bold flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  <span>किट डिलीवरी की रिक्वेस्ट दर्ज हो गई है! एडमिन जल्द डिस्पैच करेगा।</span>
-                </div>
-              ) : (
-                <form onSubmit={handleRequestKit} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={shippingAddress}
-                    onChange={(e) => setShippingAddress(e.target.value)}
-                    placeholder={t('profile.kitAddressPlaceholder')}
-                    className="flex-1 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs focus:outline-none focus:border-amber-500"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1 shadow"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>किट भेजें</span>
-                  </button>
-                </form>
-              )}
-            </div>
-          )}
 
         </div>
 
-        {/* Portfolio View Tabs */}
-        <div className="flex border-t border-slate-200 dark:border-slate-800 px-6 gap-6 bg-slate-50/50 dark:bg-slate-800/40 text-xs font-bold">
+        {/* Profile Tabs Navigation */}
+        <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6 text-xs font-bold px-6">
           <button
             onClick={() => setActiveTab('works')}
             aria-label="प्रकाशित रचनाएँ देखें"
-            className={`py-3 border-b-2 transition ${
+            className={`py-3 border-b-2 transition flex items-center gap-1.5 ${
               activeTab === 'works' 
                 ? 'border-rose-600 text-rose-600 dark:text-rose-400 font-bold' 
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            प्रकाशित रचनाएँ ({posts.length})
+            <span>प्रकाशित रचनाएँ ({posts.filter(p => !p.isArchived).length})</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('archived')}
+            aria-label="आर्काइव की गई रचनाएँ देखें"
+            className={`py-3 border-b-2 transition flex items-center gap-1.5 ${
+              activeTab === 'archived' 
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400 font-bold' 
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <span>📦 आर्काइव सूची ({posts.filter(p => p.isArchived).length})</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('bookmarks')}
             aria-label="सहेजी गई रचनाएँ देखें"
@@ -368,7 +240,7 @@ export const ProfileView = ({
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            सहेजी गई सूची (Reading List)
+            <span>सहेजी गई सूची ({posts.filter(p => p.isBookmarked).length})</span>
           </button>
         </div>
 
@@ -376,15 +248,35 @@ export const ProfileView = ({
 
       {/* Tab Content */}
       <div className="space-y-4">
-        {posts.map((post) => (
-          <PostCard 
-            key={post.id} 
-            post={post} 
-            onOpenCertificate={onOpenCertificate} 
-            onEditPost={onEditPost}
-            onDeletePost={onDeletePost}
-          />
-        ))}
+        {(() => {
+          const displayPosts = activeTab === 'works'
+            ? posts.filter(p => !p.isArchived)
+            : activeTab === 'archived'
+            ? posts.filter(p => p.isArchived)
+            : posts.filter(p => p.isBookmarked);
+
+          if (displayPosts.length === 0) {
+            return (
+              <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-2">
+                <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
+                  {activeTab === 'archived' ? 'कोई आर्काइव की गई रचना नहीं है।' : activeTab === 'bookmarks' ? 'कोई सहेजी गई रचना नहीं है।' : 'अभी तक कोई रचना प्रकाशित नहीं की गई है।'}
+                </p>
+              </div>
+            );
+          }
+
+          return displayPosts.map((post) => (
+            <PostCard 
+              key={post.id} 
+              post={post} 
+              onOpenCertificate={onOpenCertificate} 
+              onEditPost={onEditPost}
+              onDeletePost={onDeletePost}
+              onToggleArchivePost={onToggleArchivePost}
+              isAuthorView={true}
+            />
+          ));
+        })()}
       </div>
 
       {/* Points Explanation Modal */}

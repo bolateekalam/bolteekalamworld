@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { 
   Heart, Bookmark, Share2, MessageCircle, Play, Pause, 
   Eye, Clock, CheckCircle2, ShieldCheck, Flag, Copy, 
-  Send, Sparkles, UserPlus, UserCheck, Volume2, Music, Quote, Edit3, Trash2
+  Send, Sparkles, UserPlus, UserCheck, Volume2, Music, Quote, Edit3, Trash2, Archive
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
 
-export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, requireAuth }) => {
+export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, isAuthorView, requireAuth }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
@@ -281,16 +281,32 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, re
             <Flag className="w-4 h-4" />
           </button>
 
-          {/* Delete Post Button (for author or admin) */}
-          {isUserOwnPost && (
-            <button
-              onClick={() => onDeletePost && onDeletePost(post.id)}
-              aria-label="रचना डिलीट करें"
-              className="p-2 rounded-full text-slate-500 hover:text-rose-600 transition"
-              title="रचना डिलीट करें"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+          {/* Archive / Unarchive & Delete Buttons for Author */}
+          {(isAuthorView || isUserOwnPost) && (
+            <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-2">
+              <button
+                onClick={() => onToggleArchivePost && onToggleArchivePost(post.id)}
+                aria-label={post.isArchived ? "अन-आर्काइव करें" : "आर्काइव करें"}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition ${
+                  post.isArchived 
+                    ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/30' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                }`}
+                title={post.isArchived ? "अन-आर्काइव करें (फ़ीड पर लाएँ)" : "आर्काइव करें (फ़ीड से छिपाएँ)"}
+              >
+                <Archive className="w-3.5 h-3.5" />
+                <span>{post.isArchived ? 'अन-आर्काइव' : 'आर्काइव'}</span>
+              </button>
+
+              <button
+                onClick={() => onDeletePost && onDeletePost(post.id)}
+                aria-label="रचना डिलीट करें"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
+                title="रचना पूरी तरह डिलीट करें"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           )}
         </div>
       </div>

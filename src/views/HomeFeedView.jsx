@@ -32,9 +32,11 @@ export const HomeFeedView = ({
     bgImage: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800'
   };
 
+  const publicActivePosts = posts.filter(p => !p.isArchived);
+
   const filteredPosts = selectedCategory === 'all' 
-    ? posts 
-    : posts.filter(p => p.category === selectedCategory);
+    ? publicActivePosts 
+    : publicActivePosts.filter(p => p.category === selectedCategory);
 
   return (
     <div className="space-y-6">
