@@ -238,27 +238,42 @@ function AppContent() {
   const handleOpenAuthorProfile = (author) => {
     if (!author) return;
     const cleanUsername = author.username ? author.username.replace(/^@/, '') : author.name.toLowerCase().replace(/\s+/g, '_');
-    window.location.hash = `${cleanUsername}`;
-    document.title = `${author.name || 'लेखक'} (${cleanUsername}) — बोलती कलम`;
+    
+    // Set clean URL without showing '#' symbol
+    try {
+      history.pushState(null, '', `/${cleanUsername}`);
+    } catch (e) {
+      window.location.hash = `${cleanUsername}`;
+    }
+    document.title = `${author.name || 'लेखक'} (@${cleanUsername}) — बोलती कलम | bolteekalamvoice.in`;
     setSelectedAuthor(author);
     setShowPublicProfileModal(true);
   };
 
   const handleCloseAuthorProfile = () => {
     setShowPublicProfileModal(false);
-    if (window.location.hash) {
-      history.replaceState(null, '', window.location.pathname);
+    try {
+      history.pushState(null, '', '/');
+    } catch (e) {
+      if (window.location.hash) history.replaceState(null, '', window.location.pathname);
     }
-    document.title = 'बोलती कलम — हिंदी साहित्य एवं काव्य मंच';
+    document.title = 'बोलती कलम (bolteekalamvoice.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
   };
 
-  // URL Hash Listener for Clean Username SEO Deep-linking (e.g. bolteekalamvoice.in/#/sanjayrai or /#/kajal)
+  // URL Pathname & Hash Listener for Clean Username SEO Deep-linking (e.g. bolteekalamvoice.in/sanjayrai or /kajal)
   useEffect(() => {
     const handleHashRoute = () => {
+      const path = window.location.pathname;
       const hash = window.location.hash;
-      if (hash && hash.length > 1) {
-        const usernameQuery = decodeURIComponent(hash.replace(/^#\/?@?/, '')).trim().toLowerCase();
-        
+      let usernameQuery = '';
+
+      if (path && path.length > 1 && path !== '/') {
+        usernameQuery = decodeURIComponent(path.replace(/^\/@?/, '')).trim().toLowerCase();
+      } else if (hash && hash.length > 1) {
+        usernameQuery = decodeURIComponent(hash.replace(/^#\/?@?/, '')).trim().toLowerCase();
+      }
+
+      if (usernameQuery) {
         // 1. Strict Match by unique author.username
         const matchedPost = posts.find(p => {
           const authorUser = p.author?.username?.toLowerCase().replace(/^@/, '');
@@ -268,7 +283,7 @@ function AppContent() {
         if (matchedPost) {
           setSelectedAuthor(matchedPost.author);
           setShowPublicProfileModal(true);
-          document.title = `${matchedPost.author.name} (${usernameQuery}) — बोलती कलम`;
+          document.title = `${matchedPost.author.name} (@${usernameQuery}) — बोलती कलम`;
         } else {
           // 2. Lookup for registered platform authors
           const mockWritersByUsername = {

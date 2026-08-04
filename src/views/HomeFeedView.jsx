@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Sparkles, Flame, Swords, Filter, Heart, Sun, Feather, Calendar, Award, Mic, Volume2, ShieldCheck, Play, UserCheck, ArrowRight } from 'lucide-react';
+import { Sparkles, Flame, Swords, Filter, Heart, Sun, Feather, Calendar, Award, Mic, Volume2, ShieldCheck, Play, UserCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import DailyChallenge from '../components/DailyChallenge';
 import PoetryBattle from '../components/PoetryBattle';
 import PostCard from '../components/PostCard';
-import PanchangWidget from '../components/PanchangWidget';
 import LiteraryMembershipCardModal from '../components/LiteraryMembershipCardModal';
 import { mockCategories } from '../data/mockPosts';
 
@@ -20,7 +19,6 @@ export const HomeFeedView = ({
   onOpenPoetryChallenge,
   onLikePost,
   userProfile,
-  patrioticBanner,
   requireAuth
 }) => {
   const { t } = useLanguage();
@@ -28,19 +26,10 @@ export const HomeFeedView = ({
   const [showMembershipModal, setShowMembershipModal] = useState(false);
   const [playingAudioId, setPlayingAudioId] = useState(null);
 
-  const todayFormattedDate = new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' });
-
-  const bannerData = patrioticBanner || {
-    tag: '80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳',
-    title: 'समस्त देशवासियों को 80वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!',
-    description: 'बोलती वर्ल्ड (bolateeworld.in) पर 80वें स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें।',
-    bgImage: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800'
-  };
-
   const featuredWriters = [
     { name: 'संजय राय (संस्थापक)', username: '@sanjayrai', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200', city: 'प्रयागराज' },
     { name: 'काजल गुप्ता', username: '@kajal', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200', city: 'लखनऊ' },
-    { name: 'आकाश कुमार सिंह', username: '@akash_cofounder', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200', city: 'नई दिल्ली' }
+    { name: 'आकाश कुमार सिंह (डिजिटल प्रमुख)', username: '@akash_cofounder', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200', city: 'नई दिल्ली' }
   ];
 
   const audioRecitations = [
@@ -65,73 +54,57 @@ export const HomeFeedView = ({
   return (
     <div className="space-y-6">
       
-      {/* 50-50 Split Top Grid: Festive Banner & Authentic Panchang Widget */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* 🌟 Top Hero: 6-Month Free Digital Literary Membership Banner */}
+      <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-950 via-rose-900 to-slate-950 border-2 border-amber-400/40 text-white shadow-2xl flex items-center justify-between flex-wrap gap-5 relative overflow-hidden">
         
-        {/* Left 50%: Dynamic Festive Banner */}
-        <div 
-          className="p-5 rounded-3xl text-white shadow-xl flex flex-col justify-between border border-orange-500/40 min-h-[220px] relative overflow-hidden bg-cover bg-center"
-          style={{ backgroundImage: `linear-gradient(to right, rgba(154, 46, 12, 0.92), rgba(159, 18, 57, 0.88), rgba(4, 120, 87, 0.88)), url("${bannerData.bgImage || 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800'}")` }}
-        >
-          <div className="space-y-2 relative z-10">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-200">
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>{bannerData.tag || 'बोलती वर्ल्ड विशेषांक 🇮🇳'}</span>
-            </div>
-            <h3 className="text-lg font-bold font-rozha text-white leading-tight">
-              {bannerData.title}
-            </h3>
-            <p className="text-xs text-orange-100 font-tiro leading-relaxed">
-              {bannerData.description}
-            </p>
-          </div>
-
-          <div className="relative z-10 pt-2 flex items-center justify-between text-[11px] font-bold text-amber-200">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-amber-300" />
-              <span>आज: {todayFormattedDate}</span>
-            </span>
-          </div>
+        {/* Background Accent */}
+        <div className="absolute -right-6 -top-6 opacity-10 text-amber-400 pointer-events-none">
+          <Award className="w-56 h-56" />
         </div>
 
-        {/* Right 50%: Authentic Indian Panchang & Upcoming Festivals Widget */}
-        <PanchangWidget />
-
-      </div>
-
-      {/* 6-Month Free Literary Membership Banner Card */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-900 via-rose-950 to-slate-950 border-2 border-amber-400/40 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 relative overflow-hidden">
-        <div className="space-y-1.5 max-w-lg z-10">
+        <div className="space-y-2 max-w-xl z-10">
           <div className="flex items-center gap-2">
-            <Award className="w-5 h-5 text-amber-400" />
             <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold text-[10px] border border-amber-400/40 uppercase tracking-wider">
-              bolateeworld.in 6-माह नि:शुल्क सदस्यता
+              bolteekalamvoice.in • 6-माह नि:शुल्क सदस्यता
             </span>
           </div>
-          <h3 className="text-lg font-bold font-rozha text-amber-300">
-            बोलती वर्ल्ड 6-माह राष्ट्रीय साहित्यिक सदस्यता कार्ड
-          </h3>
-          <p className="text-xs text-rose-200 font-tiro">
-            आज ही अपना 6-माह नि:शुल्क सदस्यता कार्ड जनरेट करें, PNG इमेज डाउनलोड करें और WhatsApp स्टेटस पर शेयर करें!
+
+          <h2 className="text-xl sm:text-2xl font-bold font-rozha text-amber-300 leading-tight">
+            बोलती कलम — 6-माह नि:शुल्क डिजिटल साहित्यिक सदस्यता पत्र
+          </h2>
+
+          <p className="text-xs sm:text-sm text-rose-200 font-tiro leading-relaxed">
+            बोलती कलम (bolteekalamvoice.in) पर आज ही अपना 6-माह नि:शुल्क राष्ट्रीय साहित्यिक सदस्यता पत्र जनरेट करें, HD PNG इमेज डाउनलोड करें और WhatsApp स्टेटस पर शेयर करें!
           </p>
+
+          <div className="flex items-center gap-4 text-xs font-bold text-emerald-400 pt-1">
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>प्रथम 6 माह 100% नि:शुल्क</span>
+            </span>
+            <span className="flex items-center gap-1 text-amber-300">
+              <ShieldCheck className="w-4 h-4" />
+              <span>डिजिटल प्रमाणित</span>
+            </span>
+          </div>
         </div>
 
         <button
           onClick={() => setShowMembershipModal(true)}
-          className="z-10 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition"
+          className="z-10 px-5 py-3 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs sm:text-sm flex items-center gap-2 shadow-xl active:scale-95 transition"
         >
           <Award className="w-4 h-4" />
-          <span>🪪 6-माह कार्ड जनरेट करें (PNG)</span>
+          <span>🪪 6-माह सदस्यता पत्र देखें (PNG)</span>
         </button>
       </div>
 
       {/* Writers of the Day Spotlight */}
       <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+          <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
             <UserCheck className="w-4 h-4 text-rose-600" />
             <span>🏆 आज के प्रमुख साहित्य साधक (Writers of the Day)</span>
-          </h4>
+          </h3>
           <button 
             onClick={() => setActiveView('leaderboard')}
             className="text-[11px] text-rose-600 dark:text-rose-400 font-bold hover:underline flex items-center gap-0.5"
@@ -150,9 +123,8 @@ export const HomeFeedView = ({
             >
               <img src={w.avatar} alt={w.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-rose-500 shrink-0" />
               <div className="min-w-0 flex-1">
-                <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{w.name}</h5>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{w.name}</h4>
                 <span className="text-[10px] text-rose-600 dark:text-rose-400 font-semibold block">{w.username}</span>
-                <span className="text-[9px] text-slate-400 block">📍 {w.city}</span>
               </div>
             </div>
           ))}
@@ -164,7 +136,7 @@ export const HomeFeedView = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Mic className="w-4 h-4 text-rose-400 animate-pulse" />
-            <h4 className="text-xs font-bold text-white">🎙️ दैनिक ओपन माइक व काव्य पाठ (Voice Recitations)</h4>
+            <h3 className="text-xs font-bold text-white">🎙️ दैनिक ओपन माइक व काव्य पाठ (Voice Recitations)</h3>
           </div>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold">लाइव ऑडियो</span>
         </div>
@@ -173,7 +145,7 @@ export const HomeFeedView = ({
           {audioRecitations.map((rec) => (
             <div key={rec.id} className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-between">
               <div className="space-y-0.5">
-                <h5 className="text-xs font-bold text-rose-200">{rec.title}</h5>
+                <h4 className="text-xs font-bold text-rose-200">{rec.title}</h4>
                 <span className="text-[10px] text-slate-400 block">पाठक: {rec.author} ({rec.voice})</span>
               </div>
               <button

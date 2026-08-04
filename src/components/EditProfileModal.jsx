@@ -62,13 +62,42 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert('फ़ाइल की साइज 2MB से कम रखें ताकि वेबसाइट तेज़ चले!');
+      if (file.size > 10 * 1024 * 1024) {
+        alert('कृपया 10MB से कम की छवि चुनें!');
         return;
       }
+
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatar(reader.result);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 400; // Resize to 400x400 for crisp avatar
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG 0.85 quality (~80-120KB) so custom avatar overwrites Google avatar permanently
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          setAvatar(compressedDataUrl);
+        };
+        img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     }

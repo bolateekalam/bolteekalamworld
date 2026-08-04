@@ -50,22 +50,22 @@ export const Navbar = ({
         {/* Brand Logo & Title */}
         <div 
           onClick={() => setActiveView('feed')}
-          className="flex items-center gap-2.5 cursor-pointer shrink-0"
+          className="flex items-center gap-2.5 cursor-pointer shrink-0 group"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 via-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-900/20">
-            <Feather className="w-5 h-5 transform -rotate-45" />
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-rose-600 to-rose-950 flex items-center justify-center text-amber-200 shadow-md shadow-rose-900/30 border border-amber-400/40 group-hover:scale-105 transition-transform">
+            <Feather className="w-5 h-5 transform -rotate-45 text-amber-300 drop-shadow" />
           </div>
           <div className="hidden sm:block">
             <div className="flex items-center gap-1.5">
               <h1 className="font-rozha text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-none">
-                बोलती वर्ल्ड
+                बोलती कलम
               </h1>
-              <span className="px-1.5 py-0.2 text-[9px] font-extrabold bg-gradient-to-r from-amber-500 to-rose-600 text-white rounded-md uppercase tracking-wider">
-                bolateeworld.in
+              <span className="px-1.5 py-0.2 text-[9px] font-extrabold bg-gradient-to-r from-rose-600 to-amber-600 text-white rounded-md uppercase tracking-wider shadow-sm">
+                bolteekalamvoice.in
               </span>
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-tiro">
-              राष्ट्रीय साहित्यिक डिजिटल मंच
+              राष्ट्रीय डिजिटल साहित्यिक मंच
             </p>
           </div>
         </div>
