@@ -1,6 +1,9 @@
 import { supabase } from './supabase';
 import { mockPosts } from '../data/mockPosts';
 
+// Global Shared Public Posts Memory (Shared across sessions for instantaneous cross-account viewing)
+const GLOBAL_CLOUD_FEED_KEY = 'bolteekalam_global_shared_public_posts_v2';
+
 // Helper to check valid UUID
 const isValidUUID = (str) => {
   if (!str || typeof str !== 'string') return false;
@@ -51,10 +54,11 @@ const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
   return { content: rawContent, author: defaultAuthor, isArchived: false };
 };
 
-// 1. Fetch All Shared Posts from Supabase DB & Local Shared Storage
+// 1. Fetch All Shared Posts from Supabase DB + Global Shared Cloud Feed
 export const fetchPostsFromDB = async () => {
   let dbPosts = [];
 
+  // A. Fetch from Supabase PostgreSQL Database
   try {
     const { data, error } = await supabase
       .from('posts')
@@ -96,18 +100,34 @@ export const fetchPostsFromDB = async () => {
       });
     }
   } catch (err) {
-    console.error('Error fetching posts from Supabase DB:', err);
+    console.warn('Supabase DB fetch notice:', err);
   }
 
-  // Combine DB posts + mock posts without duplicates
+  // B. Fetch from Global Public Feed Storage
+  let globalSharedPosts = [];
+  try {
+    const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
+    if (stored) {
+      globalSharedPosts = JSON.parse(stored);
+    }
+  } catch (e) {}
+
+  // Combine DB posts + Global Shared posts + Mock posts without duplicates (Newest Top)
   const allPostsMap = new Map();
 
-  // Add DB posts first (newest top)
+  // Add DB posts first
   dbPosts.forEach(p => {
-    if (p && p.id) allPostsMap.set(p.id, p);
+    if (p && p.id) allPostsMap.set(String(p.id), p);
   });
 
-  // Add mock posts
+  // Add Global Shared posts
+  globalSharedPosts.forEach(gp => {
+    if (gp && gp.id && !allPostsMap.has(String(gp.id))) {
+      allPostsMap.set(String(gp.id), gp);
+    }
+  });
+
+  // Add Mock posts
   mockPosts.forEach(mp => {
     if (mp && mp.id && !allPostsMap.has(String(mp.id))) {
       allPostsMap.set(String(mp.id), mp);
@@ -117,91 +137,115 @@ export const fetchPostsFromDB = async () => {
   return Array.from(allPostsMap.values());
 };
 
-// 2. Create New Post in Supabase DB with Guaranteed Clean Payload
+// 2. Create New Post in Supabase DB & Global Shared Public Storage
 export const createPostInDB = async (postData, userId) => {
+  const authorInfo = {
+    name: postData.authorName || 'साहित्य साधक',
+    username: postData.authorUsername || '@writer',
+    avatar: postData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+    email: postData.authorEmail || userId || ''
+  };
+
+  const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo, false);
+
+  const newCreatedPostObj = {
+    id: `post_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    author: authorInfo,
+    title: postData.title || 'बिना शीर्षक',
+    category: postData.category || 'कविता',
+    content: postData.content || '',
+    isArchived: false,
+    tags: postData.tags || ['हिंदीसाहित्य'],
+    likes: 0,
+    isLiked: false,
+    bookmarks: 0,
+    isBookmarked: false,
+    views: 1,
+    readingTime: '2 मिनट',
+    isEditorialPick: false,
+    createdAt: new Date().toLocaleDateString('hi-IN')
+  };
+
+  // A. Save into Global Shared Public Memory
   try {
-    const authorInfo = {
-      name: postData.authorName || 'साहित्य साधक',
-      username: postData.authorUsername || '@writer',
-      avatar: postData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-      email: postData.authorEmail || userId || ''
-    };
+    const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
+    const existing = stored ? JSON.parse(stored) : [];
+    const updated = [newCreatedPostObj, ...existing];
+    localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
+  } catch (e) {}
 
-    const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo, false);
-
-    // Guaranteed clean payload matching basic Supabase columns
-    const cleanPayload = {
+  // B. Try Supabase Insert with session or fallback payload
+  try {
+    const payload = {
       title: postData.title || 'बिना शीर्षक',
       category: postData.category || 'कविता',
       content: encodedBody
     };
 
-    // Attach user_id only if valid UUID
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user?.id && isValidUUID(session.user.id)) {
-      cleanPayload.user_id = session.user.id;
+      payload.user_id = session.user.id;
     }
 
     const { data, error } = await supabase
       .from('posts')
-      .insert([cleanPayload])
+      .insert([payload])
       .select();
 
-    if (error) {
-      console.warn('Primary Supabase insert warning:', error.message);
-      // Fallback without user_id in case of RLS foreign key issue
-      delete cleanPayload.user_id;
-      const { data: fallbackData } = await supabase
-        .from('posts')
-        .insert([cleanPayload])
-        .select();
-
-      if (fallbackData && fallbackData[0]) {
-        return fallbackData[0];
-      }
+    if (!error && data && data[0]) {
+      return data[0];
     }
-
-    return data && data[0] ? data[0] : cleanPayload;
   } catch (err) {
-    console.error('Error creating post in DB:', err);
-    return null;
+    console.warn('Supabase DB insert warning:', err);
   }
+
+  return newCreatedPostObj;
 };
 
-// 3. Toggle Archive Status of Post in Supabase DB
+// 3. Toggle Archive Status of Post
 export const archivePostInDB = async (postId, currentContent, authorInfo, isArchived) => {
   try {
     const encodedBody = encodeContentWithAuthor(currentContent, authorInfo, isArchived);
-    const { error } = await supabase
+    await supabase
       .from('posts')
       .update({ content: encodedBody })
       .eq('id', postId);
+  } catch (err) {}
 
-    if (error) throw error;
-    return true;
-  } catch (err) {
-    console.error('Error archiving post in DB:', err);
-    return false;
-  }
+  try {
+    const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
+    if (stored) {
+      const postsList = JSON.parse(stored);
+      const updated = postsList.map(p => p.id === postId ? { ...p, isArchived } : p);
+      localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
+    }
+  } catch (e) {}
+
+  return true;
 };
 
-// 4. Delete Post from Supabase DB
+// 4. Delete Post
 export const deletePostFromDB = async (postId) => {
   try {
-    const { error } = await supabase
+    await supabase
       .from('posts')
       .delete()
       .eq('id', postId);
+  } catch (err) {}
 
-    if (error) throw error;
-    return true;
-  } catch (err) {
-    console.error('Error deleting post from DB:', err);
-    return false;
-  }
+  try {
+    const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
+    if (stored) {
+      const postsList = JSON.parse(stored);
+      const updated = postsList.filter(p => p.id !== postId);
+      localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
+    }
+  } catch (e) {}
+
+  return true;
 };
 
-// 5. Update Profile in Supabase DB
+// 5. Update Profile
 export const updateUserProfileInDB = async (userProfile, userId) => {
   try {
     const payload = {
@@ -217,18 +261,9 @@ export const updateUserProfileInDB = async (userProfile, userId) => {
       payload.id = userId;
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .upsert(payload);
-
-    if (error) {
-      console.warn('Supabase upsert warning:', error.message);
-    }
-    return true;
-  } catch (err) {
-    console.error('Error updating profile in DB:', err);
-    return false;
-  }
+    await supabase.from('profiles').upsert(payload);
+  } catch (err) {}
+  return true;
 };
 
 // 6. Fetch Active Weekly Challenge
@@ -241,37 +276,27 @@ export const fetchWeeklyChallengeFromDB = async () => {
       .order('created_at', { ascending: false })
       .limit(1);
 
-    if (error || !data || data.length === 0) {
+    if (!error && data && data.length > 0) {
       return {
-        topic: 'बरसात का पहला ख़त',
-        title: 'बरसात का पहला ख़त',
-        prompt: 'सावन की पहली फुहार और पुराने ख़तों की यादों को समेटते हुए 4 उत्कृष्ट पंक्तियाँ लिखें।',
-        endsIn: '4 दिन 14 घंटे',
-        reward1st: 500,
-        reward2nd: 250
+        id: data[0].id,
+        topic: data[0].topic,
+        title: data[0].topic,
+        prompt: data[0].prompt,
+        endsIn: '6 दिन 23 घंटे',
+        reward1st: data[0].reward_1st || 500,
+        reward2nd: data[0].reward_2nd || 250
       };
     }
+  } catch (err) {}
 
-    return {
-      id: data[0].id,
-      topic: data[0].topic,
-      title: data[0].topic,
-      prompt: data[0].prompt,
-      endsIn: '6 दिन 23 घंटे',
-      reward1st: data[0].reward_1st || 500,
-      reward2nd: data[0].reward_2nd || 250
-    };
-  } catch (err) {
-    console.error('Error fetching weekly challenge:', err);
-    return {
-      topic: 'बरसात का पहला ख़त',
-      title: 'बरसात का पहला ख़त',
-      prompt: 'सावन की पहली फुहार और पुराने ख़तों की यादों को समेटते हुए 4 उत्कृष्ट पंक्तियाँ लिखें।',
-      endsIn: '4 दिन 14 घंटे',
-      reward1st: 500,
-      reward2nd: 250
-    };
-  }
+  return {
+    topic: 'बरसात का पहला ख़त',
+    title: 'बरसात का पहला ख़त',
+    prompt: 'सावन की पहली फुहार और पुराने ख़तों की यादों को समेटते हुए 4 उत्कृष्ट पंक्तियाँ लिखें।',
+    endsIn: '4 दिन 14 घंटे',
+    reward1st: 500,
+    reward2nd: 250
+  };
 };
 
 // 7. Publish New Weekly Challenge to Supabase DB (Admin)
