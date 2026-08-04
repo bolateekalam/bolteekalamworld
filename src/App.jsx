@@ -192,7 +192,7 @@ function AppContent() {
           phone: localStorage.getItem(`user_phone_${userEmail}`) || ''
         };
 
-        handleLoginSuccess(googleProfile, !!hasCompletedOnboarding);
+        handleLoginSuccess(googleProfile, true);
       }
     });
 
@@ -230,7 +230,7 @@ function AppContent() {
   };
 
   // 4. Handle Successful Login & Store Session Permanently
-  const handleLoginSuccess = (userObj, isAlreadyOnboarded = false) => {
+  const handleLoginSuccess = (userObj, isDirectLogin = false) => {
     setCurrentUser(userObj);
     localStorage.setItem('bolteekalam_active_user', JSON.stringify(userObj));
 
@@ -264,7 +264,16 @@ function AppContent() {
     setUserProfile(updatedProf);
     localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updatedProf));
 
-    const hasCompletedOnboarding = isAlreadyOnboarded || localStorage.getItem(`onboarding_completed_${userEmail}`);
+    // If Google 1-Click Login: DIRECT ACCESS INTO APP WITH ZERO POPUPS
+    if (isDirectLogin) {
+      localStorage.setItem(`onboarding_completed_${userEmail}`, 'true');
+      setShowFirstTimeModal(false);
+      setShowAuthModal(false);
+      setActiveView('profile');
+      return;
+    }
+
+    const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
 
     if (!hasCompletedOnboarding && (!storedPhone || storedPhone.length < 10)) {
       setPendingFirstTimeUser(userObj);

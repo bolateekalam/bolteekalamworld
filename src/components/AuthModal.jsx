@@ -146,12 +146,8 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
 
       setTimeout(() => {
         onClose();
-        if (onFirstTimeUser) {
-          onFirstTimeUser(googleUserDraft);
-        } else {
-          onLoginSuccess(googleUserDraft);
-        }
-      }, 600);
+        onLoginSuccess(googleUserDraft, true);
+      }, 500);
 
     } catch (err) {
       console.error('Google Auth Error:', err);
