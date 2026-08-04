@@ -259,83 +259,108 @@ function AppContent() {
     document.title = 'बोलती कलम (bolteekalamvoice.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
   };
 
-  // URL Pathname & Hash Listener for Clean Username SEO Deep-linking (e.g. bolteekalamvoice.in/sanjayrai or /kajal)
+  // URL Pathname & Hash Listener for Resilient SPA Navigation & Deep-linking
   useEffect(() => {
     const handleHashRoute = () => {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      let usernameQuery = '';
+      try {
+        const rawPath = (window.location.pathname || '/').toLowerCase();
+        const rawHash = (window.location.hash || '').toLowerCase();
 
-      if (path && path.length > 1 && path !== '/') {
-        usernameQuery = decodeURIComponent(path.replace(/^\/@?/, '')).trim().toLowerCase();
-      } else if (hash && hash.length > 1) {
-        usernameQuery = decodeURIComponent(hash.replace(/^#\/?@?/, '')).trim().toLowerCase();
-      }
+        // 1. Direct Page Views Navigation Mapping
+        if (rawPath.includes('/poetry-battle') || rawHash.includes('poetry-battle')) {
+          setActiveView('battles');
+          return;
+        }
+        if (rawPath.includes('/sahityik-chunautiyan') || rawHash.includes('sahityik-chunautiyan')) {
+          setActiveView('daily');
+          return;
+        }
+        if (rawPath.includes('/sahityik-darpan') || rawHash.includes('sahityik-darpan')) {
+          setActiveView('competitions');
+          return;
+        }
+        if (rawPath.includes('/events') || rawHash.includes('events')) {
+          setActiveView('events');
+          return;
+        }
+        if (rawPath.includes('/leaderboard') || rawHash.includes('leaderboard')) {
+          setActiveView('leaderboard');
+          return;
+        }
+        if (rawPath.includes('/magazine') || rawHash.includes('magazine')) {
+          setActiveView('magazine');
+          return;
+        }
+        if (rawPath === '/profile' || rawHash === '#/profile') {
+          setActiveView('profile');
+          return;
+        }
 
-      if (usernameQuery) {
-        // 1. Strict Match by unique author.username
-        const matchedPost = posts.find(p => {
-          const authorUser = p.author?.username?.toLowerCase().replace(/^@/, '');
-          return authorUser === usernameQuery;
-        });
+        // 2. Profile Deep Links: /profile/username or /username
+        let usernameQuery = '';
+        if (rawPath.startsWith('/profile/')) {
+          usernameQuery = rawPath.replace('/profile/', '').replace(/^@/, '').trim();
+        } else if (rawPath && rawPath.length > 1 && rawPath !== '/') {
+          usernameQuery = decodeURIComponent(rawPath.replace(/^\/@?/, '')).trim();
+        } else if (rawHash && rawHash.length > 1) {
+          usernameQuery = decodeURIComponent(rawHash.replace(/^#\/?@?/, '')).trim();
+        }
 
-        if (matchedPost) {
-          setSelectedAuthor(matchedPost.author);
-          setShowPublicProfileModal(true);
-          document.title = `${matchedPost.author.name} (@${usernameQuery}) — बोलती कलम`;
-        } else {
-          // 2. Lookup for registered platform authors
-          const mockWritersByUsername = {
-            'sanjayrai': {
-              name: 'संजय राय (संस्थापक)',
-              username: '@sanjayrai',
-              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
-              city: 'प्रयागराज',
-              bio: 'बोलती कलम साहित्य मंच के संस्थापक एवं वरिष्ठ साहित्यकार।'
-            },
-            'sanjayrai_founder': {
-              name: 'संजय राय (संस्थापक)',
-              username: '@sanjayrai_founder',
-              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
-              city: 'प्रयागराज',
-              bio: 'बोलती कलम साहित्य मंच के संस्थापक एवं वरिष्ठ साहित्यकार।'
-            },
-            'akash_cofounder': {
-              name: 'आकाश कुमार सिंह (सह-संस्थापक)',
-              username: '@akash_cofounder',
-              avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300',
-              city: 'नई दिल्ली',
-              bio: 'बोलती कलम डिजिटल मीडिया प्रमुख एवं युवा कवि।'
-            },
-            'bolteekalamworld': {
-              name: 'बोलती कलम (आधिकारिक)',
-              username: '@bolteekalamworld',
-              avatar: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=300',
-              city: 'प्रयागराज',
-              bio: 'बोलती कलम आधिकारिक मंच - हिंदी साहित्य एवं काव्य मंच।'
-            },
-            'kajal': {
-              name: 'काजल गुप्ता',
-              username: '@kajal',
-              avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-              city: 'लखनऊ',
-              bio: 'हिंदी कवयित्री एवं बोलती कलम मंच की नियमित रचनाकार।'
-            }
-          };
+        if (usernameQuery) {
+          const matchedPost = posts.find(p => {
+            const authorUser = p.author?.username?.toLowerCase().replace(/^@/, '');
+            return authorUser === usernameQuery;
+          });
 
-          const matchedMockWriter = mockWritersByUsername[usernameQuery];
-          if (matchedMockWriter) {
-            setSelectedAuthor(matchedMockWriter);
+          if (matchedPost) {
+            setSelectedAuthor(matchedPost.author);
             setShowPublicProfileModal(true);
-            document.title = `${matchedMockWriter.name} (${matchedMockWriter.username}) — बोलती कलम`;
+            document.title = `${matchedPost.author.name} (@${usernameQuery}) — बोलती कलम`;
+          } else {
+            const mockWritersByUsername = {
+              'sanjayrai': {
+                name: 'संजय राय (संस्थापक)',
+                username: '@sanjayrai',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
+                city: 'प्रयागराज',
+                bio: 'बोलती कलम साहित्य मंच के संस्थापक एवं वरिष्ठ साहित्यकार।'
+              },
+              'akash_cofounder': {
+                name: 'आकाश कुमार सिंह',
+                username: '@akash_cofounder',
+                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300',
+                city: 'नई दिल्ली',
+                bio: 'बोलती कलम डिजिटल मीडिया प्रमुख एवं युवा कवि।'
+              },
+              'bolateeworld': {
+                name: 'बोलती कलम (आधिकारिक)',
+                username: '@bolateeworld',
+                avatar: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=300',
+                city: 'प्रयागराज',
+                bio: 'बोलती कलम आधिकारिक मंच - हिंदी साहित्य एवं काव्य मंच।'
+              }
+            };
+
+            const matchedMockWriter = mockWritersByUsername[usernameQuery];
+            if (matchedMockWriter) {
+              setSelectedAuthor(matchedMockWriter);
+              setShowPublicProfileModal(true);
+              document.title = `${matchedMockWriter.name} (${matchedMockWriter.username}) — बोलती कलम`;
+            }
           }
         }
+      } catch (e) {
+        console.error("Router error:", e);
       }
     };
 
     handleHashRoute();
+    window.addEventListener('popstate', handleHashRoute);
     window.addEventListener('hashchange', handleHashRoute);
-    return () => window.removeEventListener('hashchange', handleHashRoute);
+    return () => {
+      window.removeEventListener('popstate', handleHashRoute);
+      window.removeEventListener('hashchange', handleHashRoute);
+    };
   }, [posts]);
 
   const handleOpenPoetryChallenge = (targetAuthor) => {
