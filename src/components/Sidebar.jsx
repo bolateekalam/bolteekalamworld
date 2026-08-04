@@ -1,31 +1,32 @@
 import React from 'react';
 import { 
   Home, Swords, Flame, Trophy, Calendar, Award, 
-  BookOpen, Shield, User, Bookmark, Heart, Grid, Cake
+  BookOpen, Shield, User
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const Sidebar = ({ activeView, setActiveView, userRole, onOpenBirthdayCard }) => {
+export const Sidebar = ({ activeView, setActiveView, userRole, userProfile }) => {
   const { t } = useLanguage();
-
-  const birthdayAuthor = {
-    name: 'लोकेश शर्मा',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
-    city: 'जयपुर',
-    date: '02 अगस्त (आज)'
-  };
+  const usernameClean = (userProfile?.username || 'writer').replace(/^[@#]/, '');
 
   const navItems = [
-    { id: 'feed', label: t('nav.feed'), icon: Home },
-    { id: 'battles', label: t('nav.battles'), icon: Swords, badge: 'LIVE', badgeColor: 'bg-rose-600' },
-    { id: 'dailyChallenge', label: 'साप्ताहिक चुनौती', icon: Flame, badge: 'WEEKLY', badgeColor: 'bg-amber-500' },
-    { id: 'competitions', label: t('nav.competitions'), icon: Trophy },
-    { id: 'events', label: t('nav.events'), icon: Calendar },
-    { id: 'leaderboard', label: t('nav.leaderboard'), icon: Award },
-    { id: 'magazine', label: t('nav.magazine'), icon: BookOpen },
-    { id: 'profile', label: t('nav.profile'), icon: User },
-    ...(userRole === 'admin' ? [{ id: 'admin', label: t('nav.admin'), icon: Shield }] : [])
+    { id: 'feed', label: 'होम', icon: Home, path: '/' },
+    { id: 'battles', label: 'काव्य दंगल', icon: Swords, badge: 'LIVE', badgeColor: 'bg-rose-600', path: '/poetry-battle' },
+    { id: 'dailyChallenge', label: 'साप्ताहिक चुनौती', icon: Flame, badge: 'WEEKLY', badgeColor: 'bg-amber-500', path: '/sahityik-chunautiyan' },
+    { id: 'competitions', label: 'साहित्यिक दर्पण', icon: Trophy, path: '/sahityik-darpan' },
+    { id: 'events', label: 'साहित्यिक आयोजन', icon: Calendar, path: '/events' },
+    { id: 'leaderboard', label: 'साहित्य साधक सूची', icon: Award, path: '/leaderboard' },
+    { id: 'magazine', label: 'पत्रिका', icon: BookOpen, path: '/magazine' },
+    { id: 'profile', label: 'मेरा प्रोफ़ाइल', icon: User, path: `/profile/${usernameClean}` },
+    ...(userRole === 'admin' ? [{ id: 'admin', label: 'एडमिन पैनल', icon: Shield, path: '/admin' }] : [])
   ];
+
+  const handleItemClick = (item) => {
+    setActiveView(item.id);
+    try {
+      history.pushState(null, '', item.path);
+    } catch (e) {}
+  };
 
   return (
     <aside className="w-64 shrink-0 hidden md:block">
@@ -45,7 +46,7 @@ export const Sidebar = ({ activeView, setActiveView, userRole, onOpenBirthdayCar
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveView(item.id)}
+                  onClick={() => handleItemClick(item)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive 
                       ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold border-l-4 border-rose-600' 

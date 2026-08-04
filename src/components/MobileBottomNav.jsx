@@ -19,10 +19,25 @@ export const MobileBottomNav = ({ activeView, setActiveView, onOpenCreatePost })
         const Icon = item.icon;
         const isActive = activeView === item.id;
 
+        const pathMap = {
+          feed: '/',
+          battles: '/poetry-battle',
+          dailyChallenge: '/sahityik-chunautiyan',
+          leaderboard: '/leaderboard',
+          profile: '/profile'
+        };
+
+        const handleMobileClick = () => {
+          setActiveView(item.id);
+          try {
+            history.pushState(null, '', pathMap[item.id] || '/');
+          } catch (e) {}
+        };
+
         return (
           <button
             key={item.id}
-            onClick={() => setActiveView(item.id)}
+            onClick={handleMobileClick}
             aria-label={`${item.label} नेविगेशन देखें`}
             className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
               isActive 
