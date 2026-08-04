@@ -1069,13 +1069,58 @@ function AppContent() {
   );
 }
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("React ErrorBoundary caught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-950 text-white text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-rose-600/20 border border-rose-500 flex items-center justify-center text-rose-500 text-2xl font-bold">
+            ⚠️
+          </div>
+          <h1 className="text-xl font-bold font-rozha text-amber-300">
+            बोलती कलम (bolateeworld.in)
+          </h1>
+          <p className="text-sm text-slate-300 max-w-md">
+            वेबसाइट लोड करने में अस्थायी समस्या आई है। कृपया नीचे दिए गए बटन पर क्लिक करके रीफ्रेश करें।
+          </p>
+          <button
+            onClick={() => {
+              localStorage.removeItem('bolteekalam_active_user');
+              window.location.reload();
+            }}
+            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg transition"
+          >
+            🔄 रीफ्रेश करें (Clear Cache & Reload)
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function App() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AppContent />
-      </LanguageProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
