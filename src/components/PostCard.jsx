@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
 
-export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, isAuthorView, requireAuth }) => {
+export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, isAuthorView, requireAuth }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
@@ -79,12 +79,15 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
 
       {/* Author Header Row */}
       <div className="flex items-start justify-between gap-3 mb-4 pt-1">
-        <div className="flex items-center gap-3 min-w-0">
+        <div 
+          onClick={() => onOpenAuthorProfile && onOpenAuthorProfile(post.author)}
+          className="flex items-center gap-3 min-w-0 cursor-pointer group/author"
+        >
           <div className="relative shrink-0">
             <img 
-              src={post.author.avatar} 
+              src={post.author.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'} 
               alt={post.author.name} 
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-2 ring-rose-500/30"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-2 ring-rose-500/30 group-hover/author:ring-rose-500 transition"
             />
             {post.author.badge && (
               <span className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 rounded-full p-0.5 shadow" title={getBadgeLabel(post.author.badge)}>
@@ -95,8 +98,8 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-rose-600 cursor-pointer truncate">
-                {post.author.name}
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 group-hover/author:text-rose-600 cursor-pointer truncate transition">
+                {post.author.name || 'साहित्य साधक'}
               </h3>
               {post.author.badge && (
                 <span className="text-[9px] sm:text-[10px] px-2 py-0.2 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold shrink-0">
@@ -106,7 +109,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
             </div>
 
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 truncate font-medium">
-              <span>{post.author.username}</span>
+              <span className="group-hover/author:text-rose-500">{post.author.username || '@writer'}</span>
               <span>•</span>
               <span>{post.author.city}</span>
               <span>•</span>

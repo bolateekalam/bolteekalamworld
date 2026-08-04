@@ -15,6 +15,7 @@ export const HomeFeedView = ({
   setActiveView,
   onEditPost,
   onDeletePost,
+  onOpenAuthorProfile,
   onOpenBirthdayCard,
   userProfile,
   patrioticBanner,
