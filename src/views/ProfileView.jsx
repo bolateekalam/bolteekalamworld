@@ -107,7 +107,7 @@ export const ProfileView = ({
                 className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-rose-700 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition active:scale-95 border border-amber-400/40"
               >
                 <Award className="w-4 h-4 text-amber-300" />
-                <span>🪪 मेरा 1-वर्षीय सदस्यता कार्ड (नि:शुल्क)</span>
+                <span>🪪 मेरा 6-माह सदस्यता कार्ड (नि:शुल्क)</span>
               </button>
 
               <button
@@ -143,7 +143,7 @@ export const ProfileView = ({
               </div>
 
               <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-semibold pt-0.5">
-                <span>{profile.username || '@writer'}</span>
+                <span>{(profile.username || 'writer').replace(/^[@#]/, '')}</span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-rose-500" />

@@ -107,10 +107,7 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
     e.preventDefault();
     setUsernameError('');
 
-    let formattedUsername = username.trim().toLowerCase();
-    if (!formattedUsername.startsWith('@')) {
-      formattedUsername = `@${formattedUsername}`;
-    }
+    let formattedUsername = username.trim().toLowerCase().replace(/^[@#]/, '');
 
     // Strict Unique Username Enforcement Check
     if (reservedUsernames.includes(formattedUsername) && userProfile?.username !== formattedUsername) {

@@ -114,9 +114,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
             </div>
 
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 truncate font-medium">
-              <span className="group-hover/author:text-rose-500">{post.author.username || '@writer'}</span>
-              <span>•</span>
-              <span>{post.author.city}</span>
+              <span className="group-hover/author:text-rose-500">{(post.author.username || 'writer').replace(/^[@#]/, '')}</span>
               <span>•</span>
               <span>{post.createdAt}</span>
             </div>

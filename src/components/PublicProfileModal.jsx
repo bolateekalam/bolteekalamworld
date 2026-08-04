@@ -125,7 +125,7 @@ export const PublicProfileModal = ({ isOpen, onClose, author, authorPosts = [], 
             </div>
 
             <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-              <span className="text-rose-600 dark:text-rose-400 font-bold">{author.username || '@writer'}</span>
+              <span className="text-rose-600 dark:text-rose-400 font-bold">{(author.username || 'writer').replace(/^[@#]/, '')}</span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-rose-500" />
