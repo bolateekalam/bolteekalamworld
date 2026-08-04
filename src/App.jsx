@@ -225,9 +225,57 @@ function AppContent() {
 
   const handleOpenAuthorProfile = (author) => {
     if (!author) return;
+    const cleanUsername = author.username ? author.username.replace(/^@/, '') : 'author';
+    window.location.hash = `@${cleanUsername}`;
+    document.title = `${author.name || 'कवि'} (@${cleanUsername}) - बोलती कलम`;
     setSelectedAuthor(author);
     setShowPublicProfileModal(true);
   };
+
+  const handleCloseAuthorProfile = () => {
+    setShowPublicProfileModal(false);
+    if (window.location.hash.startsWith('#/@')) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+    document.title = 'बोलती कलम — हिंदी साहित्य एवं काव्य मंच';
+  };
+
+  // URL Hash Listener for SEO Deep-linking (e.g. bolteekalamvoice.in/#/@kajal or #/@sanjayrai)
+  useEffect(() => {
+    const handleHashRoute = () => {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#/@')) {
+        const usernameQuery = decodeURIComponent(hash.replace('#/@', '')).trim().toLowerCase();
+        
+        const matchedPost = posts.find(p => 
+          p.author?.username?.toLowerCase().replace(/^@/, '') === usernameQuery ||
+          p.author?.name?.toLowerCase().includes(usernameQuery)
+        );
+
+        if (matchedPost) {
+          setSelectedAuthor(matchedPost.author);
+          setShowPublicProfileModal(true);
+          document.title = `${matchedPost.author.name} (@${usernameQuery}) - बोलती कलम`;
+        } else if (usernameQuery === 'kajal' || usernameQuery.includes('काजल')) {
+          const kajalAuthor = {
+            name: 'काजल गुप्ता',
+            username: '@kajal',
+            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+            bio: 'हिंदी कवयित्री एवं साहित्य साधक। बोलती कलम मंच पर नियमित रचनाकार।',
+            city: 'लखनऊ',
+            followers: 128
+          };
+          setSelectedAuthor(kajalAuthor);
+          setShowPublicProfileModal(true);
+          document.title = `काजल गुप्ता (@kajal) की रचनाएँ - बोलती कलम`;
+        }
+      }
+    };
+
+    handleHashRoute();
+    window.addEventListener('hashchange', handleHashRoute);
+    return () => window.removeEventListener('hashchange', handleHashRoute);
+  }, [posts]);
 
   const handleOpenPoetryChallenge = (targetAuthor) => {
     setPoetryChallengeTarget(targetAuthor);
@@ -791,7 +839,7 @@ function AppContent() {
       {showPublicProfileModal && selectedAuthor && (
         <PublicProfileModal
           isOpen={true}
-          onClose={() => setShowPublicProfileModal(false)}
+          onClose={handleCloseAuthorProfile}
           author={selectedAuthor}
           authorPosts={posts.filter(p => 
             (p.author?.name && selectedAuthor?.name && p.author.name.trim().toLowerCase() === selectedAuthor.name.trim().toLowerCase()) ||
