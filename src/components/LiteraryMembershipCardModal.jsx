@@ -15,14 +15,32 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
 
   const userName = userProfile?.name || 'साहित्य साधक';
   const cleanUsername = (userProfile?.username || 'writer').replace(/^[@#]/, '');
-  const userAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
+  
+  // Custom avatar from localStorage or userProfile
+  const userEmail = userProfile?.email || 'user';
+  const savedCustomAvatar = localStorage.getItem(`custom_avatar_${userEmail}`) || localStorage.getItem('custom_avatar_global');
+  const userAvatar = savedCustomAvatar || userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
 
   // 6-Month Free Membership Validity Logic (05 अगस्त 2026 से 05 फ़रवरी 2027)
   const startDateStr = '05 अगस्त 2026';
   const endDateStr = '05 फ़रवरी 2027';
-  const membershipId = `BW-MEM-2026-${(userName.length * 43 + 819).toString()}`;
 
-  // Clean Share URL
+  // Sequential Serial Membership ID Format: BW-MEM-2026-001, BW-MEM-2026-002, etc.
+  const getSequentialMembershipId = () => {
+    const key = `bw_seq_mem_id_${userEmail}`;
+    const existing = localStorage.getItem(key);
+    if (existing) return existing;
+
+    let counter = parseInt(localStorage.getItem('bw_global_mem_counter') || '1', 10);
+    const numStr = counter.toString().padStart(3, '0');
+    const newId = `BW-MEM-2026-${numStr}`;
+    
+    localStorage.setItem(key, newId);
+    localStorage.setItem('bw_global_mem_counter', (counter + 1).toString());
+    return newId;
+  };
+
+  const membershipId = getSequentialMembershipId();
   const shareProfileUrl = `https://www.bolateeworld.in/profile/${cleanUsername}`;
 
   // Pure Canvas2D HD PNG Image Generator
@@ -35,7 +53,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       canvas.height = 760;
       const ctx = canvas.getContext('2d');
 
-      // 1. Royal Dark Burgundy Background
+      // 1. Royal Dark Crimson Background
       const bgGrad = ctx.createLinearGradient(0, 0, 1200, 760);
       bgGrad.addColorStop(0, '#70071c');  // Deep Royal Crimson
       bgGrad.addColorStop(0.5, '#450a0a'); // Dark Parchment Maroon
@@ -43,7 +61,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, 1200, 760);
 
-      // 2. Gold Border
+      // 2. Gold Filigree Border
       ctx.strokeStyle = '#fbbf24';
       ctx.lineWidth = 8;
       ctx.strokeRect(30, 30, 1140, 700);
@@ -61,7 +79,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.font = 'bold 22px sans-serif';
       ctx.fillText('राष्ट्रीय 6-माह डिजिटल साहित्यिक सदस्यता पत्र', 70, 150);
 
-      // Membership ID Badge
+      // Membership ID Badge (BW-MEM-2026-001, etc.)
       ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
       ctx.fillRect(820, 75, 310, 50);
       ctx.strokeStyle = '#fbbf24';
@@ -125,7 +143,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         ctx.font = 'bold 22px sans-serif';
         ctx.fillText('✓ 6 माह 100% नि:शुल्क सदस्य', 740, 532);
 
-        // 7. Footer Signatures (Certified ONLY by Founder Sanjay Rai)
+        // 7. Footer Signatures
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.beginPath();
         ctx.moveTo(70, 605);

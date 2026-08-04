@@ -13,6 +13,7 @@ import CertificateGenerator from './components/CertificateGenerator';
 import NotificationDrawer from './components/NotificationDrawer';
 import PublicProfileModal from './components/PublicProfileModal';
 import PoetryBattleChallengeModal from './components/PoetryBattleChallengeModal';
+import LiteraryMembershipCardModal from './components/LiteraryMembershipCardModal';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -143,9 +144,8 @@ function AppContent() {
   const [selectedAuthor, setSelectedAuthor] = useState(null);
   const [showPublicProfileModal, setShowPublicProfileModal] = useState(false);
 
-  // Poetry Battle Challenge Modal State
-  const [poetryChallengeTarget, setPoetryChallengeTarget] = useState(null);
-  const [showPoetryChallengeModal, setShowPoetryChallengeModal] = useState(false);
+  // Global 6-Month Membership Card Modal State
+  const [showGlobalMembershipModal, setShowGlobalMembershipModal] = useState(false);
 
   // Notifications List State
   const [notificationsList, setNotificationsList] = useState([
@@ -853,6 +853,8 @@ function AppContent() {
               onOpenAuthorProfile={handleOpenAuthorProfile}
               onOpenPoetryChallenge={handleOpenPoetryChallenge}
               onLikePost={handleLikePost}
+              onOpenMembershipCard={() => setShowGlobalMembershipModal(true)}
+              userProfile={userProfile}
               requireAuth={requireAuth}
             />
           )}
@@ -985,6 +987,14 @@ function AppContent() {
           onClose={() => setShowEditProfileModal(false)}
           userProfile={userProfile}
           onSaveProfile={handleSaveProfileAndSyncDB}
+        />
+      )}
+
+      {showGlobalMembershipModal && (
+        <LiteraryMembershipCardModal
+          isOpen={true}
+          onClose={() => setShowGlobalMembershipModal(false)}
+          userProfile={userProfile}
         />
       )}
 

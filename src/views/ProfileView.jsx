@@ -17,7 +17,8 @@ export const ProfileView = ({
   onOpenReferEarn,
   onEditPost,
   onDeletePost,
-  onToggleArchivePost
+  onToggleArchivePost,
+  onOpenMembershipCard
 }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('works');
@@ -25,7 +26,6 @@ export const ProfileView = ({
   const [shippingAddress, setShippingAddress] = useState('');
   const [isKitRequested, setIsKitRequested] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
-
   const [showMembershipModal, setShowMembershipModal] = useState(false);
 
   const profile = userProfile || {
@@ -102,12 +102,12 @@ export const ProfileView = ({
             {/* Quick Actions & Share Link */}
             <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={() => setShowMembershipModal(true)}
-                aria-label="मेरा 1-वर्षीय साहित्यिक सदस्यता कार्ड देखें व डाउनलोड करें"
+                onClick={onOpenMembershipCard || (() => setShowMembershipModal(true))}
+                aria-label="मेरा 6-माह का कार्ड देखें व डाउनलोड करें"
                 className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-rose-700 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition active:scale-95 border border-amber-400/40"
               >
                 <Award className="w-4 h-4 text-amber-300" />
-                <span>🪪 मेरा 6-माह सदस्यता कार्ड (नि:शुल्क)</span>
+                <span>🪪 मेरा 6-माह कार्ड (नि:शुल्क)</span>
               </button>
 
               <button
