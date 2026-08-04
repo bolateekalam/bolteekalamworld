@@ -3,19 +3,43 @@ import { X, ShieldCheck, MapPin, Calendar, UserPlus, UserCheck, Copy, Check, Hea
 import PostCard from './PostCard';
 
 export const PublicProfileModal = ({ isOpen, onClose, author, authorPosts = [], onOpenCertificate }) => {
-  const [isFollowing, setIsFollowing] = useState(author?.isFollowing || false);
-  const [followersCount, setFollowersCount] = useState(author?.followers || 14);
+  const authorKey = author?.username ? author.username.replace(/^@/, '') : 'author';
+  
+  const [isFollowing, setIsFollowing] = useState(() => {
+    try {
+      return localStorage.getItem(`is_following_${authorKey}`) === 'true';
+    } catch (e) {
+      return author?.isFollowing || false;
+    }
+  });
+
+  const baseFollowers = author?.followers !== undefined ? author.followers : 12;
+
+  const [followersCount, setFollowersCount] = useState(() => {
+    try {
+      const savedCount = localStorage.getItem(`followers_count_${authorKey}`);
+      if (savedCount !== null) return parseInt(savedCount, 10);
+    } catch (e) {}
+    return baseFollowers;
+  });
+
   const [copiedLink, setCopiedLink] = useState(false);
 
   if (!isOpen || !author) return null;
 
   const handleToggleFollow = () => {
     if (isFollowing) {
+      const newCount = Math.max(0, followersCount - 1);
       setIsFollowing(false);
-      setFollowersCount(prev => Math.max(0, prev - 1));
+      setFollowersCount(newCount);
+      localStorage.setItem(`is_following_${authorKey}`, 'false');
+      localStorage.setItem(`followers_count_${authorKey}`, newCount.toString());
     } else {
+      const newCount = followersCount + 1;
       setIsFollowing(true);
-      setFollowersCount(prev => prev + 1);
+      setFollowersCount(newCount);
+      localStorage.setItem(`is_following_${authorKey}`, 'true');
+      localStorage.setItem(`followers_count_${authorKey}`, newCount.toString());
     }
   };
 
