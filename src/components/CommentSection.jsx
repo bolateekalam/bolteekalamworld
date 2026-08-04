@@ -26,6 +26,7 @@ export const CommentSection = ({ comments = [], onAddComment, onReportComment })
     };
 
     setCommentList([added, ...commentList]);
+    if (onAddComment) onAddComment(added);
     setNewCommentText('');
   };
 

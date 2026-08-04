@@ -104,7 +104,29 @@ export const PoetryBattlesView = ({ poetryBattle, requireAuth, onRewardPoints })
   };
 
   const handleCreateChallenge = (challengeData) => {
-    alert(`पोएट्री बैटल चुनौती '${challengeData?.opponent?.name || 'लेखक'}' को भेज दी गई है!`);
+    if (!challengeData) return;
+    const newBattle = {
+      id: challengeData.id || `pb-${Date.now()}`,
+      topic: challengeData.topic || 'काव्य महासंग्राम',
+      user1: {
+        id: 'me',
+        name: 'आप (कवि)',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+        poem: challengeData.myPoem?.content || challengeData.myPoem?.title || 'काव्य रचना',
+        votes: 1
+      },
+      user2: {
+        id: 'opp',
+        name: typeof challengeData.opponent === 'string' ? challengeData.opponent : (challengeData.opponent?.name || 'संजय राय (संस्थापक)'),
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+        poem: 'प्रतिद्वंद्वी कवि की प्रतिक्रिया शीघ्र आ रही है...',
+        votes: 0
+      },
+      endsIn: '23 घंटे 59 मिनट'
+    };
+
+    setBattles(prev => [newBattle, ...prev]);
+    if (onRewardPoints) onRewardPoints(15, 'काव्य चुनौती भेजने पर');
   };
 
   return (

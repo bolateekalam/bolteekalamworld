@@ -318,18 +318,94 @@ function AppContent() {
   };
 
   const handleLikePost = (post) => {
-    const likerName = currentUser?.name || 'एक साहित्य प्रेमी';
-    const newNotif = {
+    if (!post) return;
+    const isCurrentlyLiked = !!post.isLiked;
+    const newLikesCount = isCurrentlyLiked ? Math.max(0, (post.likes || 0) - 1) : (post.likes || 0) + 1;
+    const newIsLiked = !isCurrentlyLiked;
+
+    // 1. Update posts array state dynamically & persist to localStorage
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(p => {
+        if (p.id === post.id) {
+          return {
+            ...p,
+            likes: newLikesCount,
+            isLiked: newIsLiked
+          };
+        }
+        return p;
+      });
+
+      try {
+        localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(updatedPosts));
+      } catch (e) {}
+
+      return updatedPosts;
+    });
+
+    // 2. Targeted notification for the author
+    if (!isCurrentlyLiked) {
+      handleRewardPoints(5, 'रचना लाइक करने पर');
+
+      const actorName = currentUser?.name || 'एक साहित्य प्रेमी';
+      const actorUsername = currentUser?.username || '@writer';
+
+      const newNotif = {
+        id: Date.now(),
+        type: 'like',
+        actorName,
+        actorUsername,
+        actorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+        title: `${actorName} (${actorUsername}) ने आपकी रचना '${post.title}' को लाइक किया! ❤️`,
+        desc: `आपकी पोस्ट '${post.title}' पर नई लाइक मिली है। (+5 Pts)`,
+        time: 'अभी-अभी',
+        isUnread: true
+      };
+
+      setNotificationsList(prev => [newNotif, ...prev]);
+      setUnreadNotifications(prev => prev + 1);
+    }
+  };
+
+  const handleAddCommentToPost = (postId, commentObj) => {
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(p => {
+        if (p.id === postId) {
+          const currentComments = p.comments || [];
+          return {
+            ...p,
+            comments: [commentObj, ...currentComments]
+          };
+        }
+        return p;
+      });
+
+      try {
+        localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(updatedPosts));
+      } catch (e) {}
+
+      return updatedPosts;
+    });
+
+    handleRewardPoints(5, 'टिप्पणी (Comment) करने पर');
+
+    const actorName = currentUser?.name || 'एक साहित्य प्रेमी';
+    const actorUsername = currentUser?.username || '@writer';
+
+    const commentNotif = {
       id: Date.now(),
-      type: 'like',
-      title: `${likerName} ने '${post.title}' को लाइक किया! ❤️`,
-      desc: `आपकी पोस्ट पर नई लाइक दर्ज की गई। (+5 Pts)`,
-      time: 'अभी',
+      type: 'comment',
+      actorName,
+      actorUsername,
+      actorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+      title: `${actorName} (${actorUsername}) ने आपकी रचना पर टिप्पणी की! 💬`,
+      desc: `"${commentObj.content || 'नई टिप्पणी'}"`,
+      time: 'अभी-अभी',
       isUnread: true
     };
-    setNotificationsList(prev => [newNotif, ...prev]);
+
+    setNotificationsList(prev => [commentNotif, ...prev]);
     setUnreadNotifications(prev => prev + 1);
-    handleRewardPoints(5, 'रचना लाइक करने पर');
   };
 
   // 2. Strict Auth Gatekeeper Helper
