@@ -103,8 +103,22 @@ function AppContent() {
   // User Profile State (Persisted in localStorage across refreshes)
   const [userProfile, setUserProfile] = useState(() => {
     try {
+      const savedActiveUser = localStorage.getItem('bolteekalam_active_user');
+      const activeObj = savedActiveUser ? JSON.parse(savedActiveUser) : null;
       const savedProf = localStorage.getItem('bolteekalam_user_profile');
-      if (savedProf) return JSON.parse(savedProf);
+      const profObj = savedProf ? JSON.parse(savedProf) : null;
+
+      if (profObj || activeObj) {
+        return {
+          ...profObj,
+          ...activeObj,
+          avatar: activeObj?.avatar || profObj?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+          name: activeObj?.name || profObj?.name || 'साहित्य साधक',
+          username: activeObj?.username || profObj?.username || '@writer',
+          city: activeObj?.city || profObj?.city || 'प्रयागराज',
+          bio: activeObj?.bio || profObj?.bio || 'हिंदी साहित्य एवं काव्य का नया साधक।'
+        };
+      }
     } catch (e) {}
 
     return {
@@ -566,8 +580,53 @@ function AppContent() {
   };
 
   const handleSaveProfileAndSyncDB = (updatedProfile) => {
+    // 1. Update userProfile state & localStorage
     setUserProfile(updatedProfile);
     localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updatedProfile));
+
+    // 2. CRITICAL: Update currentUser state & active user session in localStorage
+    const updatedUserObj = {
+      ...(currentUser || {}),
+      name: updatedProfile.name || currentUser?.name,
+      username: updatedProfile.username || currentUser?.username,
+      avatar: updatedProfile.avatar || currentUser?.avatar,
+      city: updatedProfile.city || currentUser?.city,
+      bio: updatedProfile.bio || currentUser?.bio,
+      email: updatedProfile.email || currentUser?.email
+    };
+    setCurrentUser(updatedUserObj);
+    localStorage.setItem('bolteekalam_active_user', JSON.stringify(updatedUserObj));
+
+    // 3. CRITICAL: Cascade new avatar & name across ALL published posts in posts state & localStorage
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(p => {
+        const isUserPost = (currentUser?.email && p.author?.email === currentUser.email) ||
+          p.author?.id === 'user-me' ||
+          (p.author?.name && updatedProfile.name && p.author.name.trim().toLowerCase() === updatedProfile.name.trim().toLowerCase()) ||
+          (p.author?.username && updatedProfile.username && p.author.username.trim().toLowerCase() === updatedProfile.username.trim().toLowerCase());
+
+        if (isUserPost) {
+          return {
+            ...p,
+            author: {
+              ...p.author,
+              name: updatedProfile.name || p.author.name,
+              username: updatedProfile.username || p.author.username,
+              avatar: updatedProfile.avatar || p.author.avatar,
+              city: updatedProfile.city || p.author.city
+            }
+          };
+        }
+        return p;
+      });
+
+      try {
+        localStorage.setItem('bolteekalam_global_shared_posts', JSON.stringify(updatedPosts));
+        localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(updatedPosts));
+      } catch (e) {}
+
+      return updatedPosts;
+    });
 
     if (currentUser?.email) {
       if (updatedProfile.phone) {
