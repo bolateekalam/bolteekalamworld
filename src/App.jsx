@@ -137,7 +137,11 @@ function AppContent() {
     const syncPosts = () => {
       fetchPostsFromDB().then(dbPosts => {
         if (dbPosts && dbPosts.length > 0) {
-          setPosts(dbPosts);
+          setPosts(prev => {
+            const dbIds = new Set(dbPosts.map(p => String(p.id)));
+            const unsyncedLocalPosts = prev.filter(p => !dbIds.has(String(p.id)));
+            return [...unsyncedLocalPosts, ...dbPosts];
+          });
         }
       });
     };
@@ -402,10 +406,14 @@ function AppContent() {
       authorEmail
     }, authorEmail);
 
-    // Refresh DB posts immediately so all clients get the synced feed
+    // Refresh DB posts immediately so all clients get the synced feed without wiping newly published post
     fetchPostsFromDB().then(dbPosts => {
       if (dbPosts && dbPosts.length > 0) {
-        setPosts(dbPosts);
+        setPosts(prev => {
+          const dbIds = new Set(dbPosts.map(p => String(p.id)));
+          const unsyncedLocalPosts = prev.filter(p => !dbIds.has(String(p.id)));
+          return [...unsyncedLocalPosts, ...dbPosts];
+        });
       }
     });
   };
