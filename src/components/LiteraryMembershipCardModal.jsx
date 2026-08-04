@@ -27,17 +27,22 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
 
   // Sequential Serial Membership ID Format: BW-MEM-2026-001, BW-MEM-2026-002, etc.
   const getSequentialMembershipId = () => {
-    const key = `bw_seq_mem_id_${userEmail}`;
-    const existing = localStorage.getItem(key);
-    if (existing) return existing;
+    try {
+      const key = `bw_seq_mem_id_${userEmail}`;
+      const existing = localStorage.getItem(key);
+      if (existing) return existing;
 
-    let counter = parseInt(localStorage.getItem('bw_global_mem_counter') || '1', 10);
-    const numStr = counter.toString().padStart(3, '0');
-    const newId = `BW-MEM-2026-${numStr}`;
-    
-    localStorage.setItem(key, newId);
-    localStorage.setItem('bw_global_mem_counter', (counter + 1).toString());
-    return newId;
+      let counter = parseInt(localStorage.getItem('bw_global_mem_counter') || '1', 10);
+      if (isNaN(counter) || counter < 1) counter = 1;
+      const numStr = counter.toString().padStart(3, '0');
+      const newId = `BW-MEM-2026-${numStr}`;
+      
+      localStorage.setItem(key, newId);
+      localStorage.setItem('bw_global_mem_counter', (counter + 1).toString());
+      return newId;
+    } catch (e) {
+      return 'BW-MEM-2026-001';
+    }
   };
 
   const membershipId = getSequentialMembershipId();

@@ -843,7 +843,7 @@ function AppContent() {
         unreadNotifications={unreadNotifications}
         setUnreadNotifications={setUnreadNotifications}
         onSearchSubmit={handleSearchSubmit}
-        userPoints={userProfile.points}
+        userPoints={userProfile?.points || 0}
       />
 
       {/* Main Layout Container */}
@@ -858,7 +858,7 @@ function AppContent() {
           onOpenCreatePost={handleOpenCreatePostProtected}
           onOpenReferEarn={() => requireAuth(() => setShowReferEarnModal(true))}
           onOpenYouTube={() => requireAuth(() => setShowYouTubeModal(true))}
-          userPoints={userProfile.points}
+          userPoints={userProfile?.points || 0}
           currentUser={currentUser}
           onOpenAuthModal={() => setShowAuthModal(true)}
         />
@@ -935,8 +935,8 @@ function AppContent() {
                 p.author?.name?.includes('आप')
               )}
               userProfile={{
-                ...userProfile,
-                points: Math.max(userProfile.points || 0, 50 + (posts.filter(p => p.author?.id === currentUser?.email || p.author?.email === currentUser?.email || p.author?.id === 'user-me' || (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase())).length * 10))
+                ...(userProfile || {}),
+                points: Math.max(userProfile?.points || 0, 50 + ((posts || []).filter(p => p && (p.author?.id === currentUser?.email || p.author?.email === currentUser?.email || p.author?.id === 'user-me' || (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase()))).length * 10))
               }}
               onOpenCertificate={openCertificateModal}
               onOpenEditProfile={() => setShowEditProfileModal(true)}
