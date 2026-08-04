@@ -5,64 +5,12 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const NotificationDrawer = ({ onClose, unreadNotifications, setUnreadNotifications }) => {
+export const NotificationDrawer = ({ onClose, notifications = [], unreadNotifications, setUnreadNotifications, onClearNotifications }) => {
   const { t } = useLanguage();
-
-  const notifications = [
-    {
-      id: 1,
-      type: 'like',
-      icon: Heart,
-      color: 'text-rose-500 bg-rose-500/10',
-      title: 'अनामिका अंबर ने आपकी कविता को लाइक किया',
-      desc: '"कोई दीवाना कहता है..." रचना पर नई लाइक मिली।',
-      time: '10 मिनट पहले',
-      isUnread: true
-    },
-    {
-      id: 2,
-      type: 'comment',
-      icon: MessageSquare,
-      color: 'text-blue-500 bg-blue-500/10',
-      title: 'नई टिप्पणी',
-      desc: 'रवि शर्मा: "अद्भुत भाव! हर पंक्ति दिल को छू गई।"',
-      time: '25 मिनट पहले',
-      isUnread: true
-    },
-    {
-      id: 3,
-      type: 'competition',
-      icon: Trophy,
-      color: 'text-amber-500 bg-amber-500/10',
-      title: 'प्रतियोगिता परिणाम घोषित',
-      desc: 'राष्ट्रीय हिंदी काव्य महोत्सव का परिणाम घोषित हुआ। डिजिटल सर्टिफिकेट डाउनलोड करें।',
-      time: '2 घंटे पहले',
-      isUnread: false
-    },
-    {
-      id: 4,
-      type: 'follow',
-      icon: UserPlus,
-      color: 'text-emerald-500 bg-emerald-500/10',
-      title: 'नया फ़ॉलोअर',
-      desc: 'डॉ. विनय पाठक ने आपको फ़ॉलो करना शुरू किया।',
-      time: '5 घंटे पहले',
-      isUnread: false
-    },
-    {
-      id: 5,
-      type: 'announcement',
-      icon: Megaphone,
-      color: 'text-purple-500 bg-purple-500/10',
-      title: 'बोलती कलम ई-मैगज़ीन प्रकाशित',
-      desc: 'अगस्त 2026 अंक अब ऑनलाइन पढ़ने के लिए उपलब्ध है।',
-      time: '1 दिन पहले',
-      isUnread: false
-    }
-  ];
 
   const handleMarkAllRead = () => {
     setUnreadNotifications(0);
+    if (onClearNotifications) onClearNotifications();
   };
 
   return (

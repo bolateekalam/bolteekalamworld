@@ -13,6 +13,8 @@ import YouTubeSubscribeModal from './components/YouTubeSubscribeModal';
 import MagazineViewerModal from './components/MagazineViewerModal';
 import CertificateGenerator from './components/CertificateGenerator';
 import NotificationDrawer from './components/NotificationDrawer';
+import PublicProfileModal from './components/PublicProfileModal';
+import PoetryBattleChallengeModal from './components/PoetryBattleChallengeModal';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -125,11 +127,33 @@ function AppContent() {
     };
   });
 
-  // Search Query State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState('all');
+  // Author Public Profile Modal State
+  const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const [showPublicProfileModal, setShowPublicProfileModal] = useState(false);
 
-  // Notifications State
+  // Poetry Battle Challenge Modal State
+  const [poetryChallengeTarget, setPoetryChallengeTarget] = useState(null);
+  const [showPoetryChallengeModal, setShowPoetryChallengeModal] = useState(false);
+
+  // Notifications List State
+  const [notificationsList, setNotificationsList] = useState([
+    {
+      id: 101,
+      type: 'like',
+      title: 'सरस्वती पाठक ने आपकी कविता को लाइक किया',
+      desc: 'आपकी रचना पर नई लाइक मिली। (+5 Pts)',
+      time: '10 मिनट पहले',
+      isUnread: true
+    },
+    {
+      id: 102,
+      type: 'comment',
+      title: 'संजय राय: "अद्भुत रचना!"',
+      desc: 'आपकी पोस्ट पर नया कमेंट प्राप्त हुआ।',
+      time: '25 मिनट पहले',
+      isUnread: true
+    }
+  ]);
   const [unreadNotifications, setUnreadNotifications] = useState(2);
 
   // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket for Instant 0-Cost Updates
@@ -198,6 +222,32 @@ function AppContent() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleOpenAuthorProfile = (author) => {
+    if (!author) return;
+    setSelectedAuthor(author);
+    setShowPublicProfileModal(true);
+  };
+
+  const handleOpenPoetryChallenge = (targetAuthor) => {
+    setPoetryChallengeTarget(targetAuthor);
+    setShowPoetryChallengeModal(true);
+  };
+
+  const handleLikePost = (post) => {
+    const likerName = currentUser?.name || 'एक साहित्य प्रेमी';
+    const newNotif = {
+      id: Date.now(),
+      type: 'like',
+      title: `${likerName} ने '${post.title}' को लाइक किया! ❤️`,
+      desc: `आपकी पोस्ट पर नई लाइक दर्ज की गई। (+5 Pts)`,
+      time: 'अभी',
+      isUnread: true
+    };
+    setNotificationsList(prev => [newNotif, ...prev]);
+    setUnreadNotifications(prev => prev + 1);
+    handleRewardPoints(5, 'रचना लाइक करने पर');
+  };
 
   // 2. Strict Auth Gatekeeper Helper
   const requireAuth = (actionCallback) => {
@@ -522,6 +572,7 @@ function AppContent() {
         onLogout={handleLogout}
         activeView={activeView}
         setActiveView={setActiveView}
+        notificationsList={notificationsList}
         unreadNotifications={unreadNotifications}
         setUnreadNotifications={setUnreadNotifications}
         onSearchSubmit={handleSearchSubmit}
@@ -556,6 +607,10 @@ function AppContent() {
               onOpenCreatePost={handleOpenCreatePostProtected}
               onOpenCertificate={openCertificateModal}
               onRewardPoints={handleRewardPoints}
+              onOpenAuthorProfile={handleOpenAuthorProfile}
+              onOpenPoetryChallenge={handleOpenPoetryChallenge}
+              onLikePost={handleLikePost}
+              requireAuth={requireAuth}
             />
           )}
 
@@ -564,6 +619,7 @@ function AppContent() {
               weeklyChallenge={weeklyChallenge}
               onOpenCreatePost={handleOpenCreatePostProtected}
               onRewardPoints={handleRewardPoints}
+              requireAuth={requireAuth}
             />
           )}
 
@@ -571,7 +627,9 @@ function AppContent() {
             <PoetryBattlesView
               onRewardPoints={handleRewardPoints}
               onOpenCreatePost={handleOpenCreatePostProtected}
+              onOpenPoetryChallenge={handleOpenPoetryChallenge}
               currentUser={currentUser}
+              requireAuth={requireAuth}
             />
           )}
 
@@ -608,7 +666,10 @@ function AppContent() {
                 (p.author?.username && userProfile?.username && p.author.username.trim().toLowerCase() === userProfile.username.trim().toLowerCase()) ||
                 p.author?.name?.includes('आप')
               )}
-              userProfile={userProfile}
+              userProfile={{
+                ...userProfile,
+                points: Math.max(userProfile.points || 0, 50 + (posts.filter(p => p.author?.id === currentUser?.email || p.author?.email === currentUser?.email || p.author?.id === 'user-me' || (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase())).length * 10))
+              }}
               onOpenCertificate={openCertificateModal}
               onOpenEditProfile={() => setShowEditProfileModal(true)}
               onOpenReferEarn={() => setShowReferEarnModal(true)}
@@ -723,6 +784,39 @@ function AppContent() {
           certificateData={certificateData}
           onOpenCreatePost={handleOpenCreatePostProtected}
           userPoints={userProfile.points}
+        />
+      )}
+
+      {/* 🔴 Author Public Profile Modal */}
+      {showPublicProfileModal && selectedAuthor && (
+        <PublicProfileModal
+          isOpen={true}
+          onClose={() => setShowPublicProfileModal(false)}
+          author={selectedAuthor}
+          authorPosts={posts.filter(p => 
+            (p.author?.name && selectedAuthor?.name && p.author.name.trim().toLowerCase() === selectedAuthor.name.trim().toLowerCase()) ||
+            (p.author?.username && selectedAuthor?.username && p.author.username.trim().toLowerCase() === selectedAuthor.username.trim().toLowerCase())
+          )}
+          onOpenCertificate={openCertificateModal}
+        />
+      )}
+
+      {/* 🔴 Poetry Battle Challenge Modal */}
+      {showPoetryChallengeModal && (
+        <PoetryBattleChallengeModal
+          isOpen={true}
+          onClose={() => setShowPoetryChallengeModal(false)}
+          targetAuthor={poetryChallengeTarget}
+          onSubmitChallenge={(challengeData) => {
+            handleRewardPoints(15, 'कवि को चुनौती भेजने पर');
+            setShowPoetryChallengeModal(false);
+            setPointsToast({ amount: 15, reason: 'कवि को चुनौती भेजी गई! 🔥' });
+          }}
+          onCreateChallenge={(challengeData) => {
+            handleRewardPoints(15, 'कवि को चुनौती भेजने पर');
+            setShowPoetryChallengeModal(false);
+            setPointsToast({ amount: 15, reason: 'कवि को चुनौती भेजी गई! 🔥' });
+          }}
         />
       )}
 

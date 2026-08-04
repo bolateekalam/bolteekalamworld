@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { X, Swords, Send, UserPlus, Share2, Sparkles, CheckCircle2, Copy } from 'lucide-react';
 
-export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge }) => {
-  const [targetOpponent, setTargetOpponent] = useState('संजय राय (@sanjayrai_founder)');
+export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge, onCreateChallenge, targetAuthor }) => {
+  const [targetOpponent, setTargetOpponent] = useState(
+    targetAuthor?.name ? `${targetAuthor.name} (${targetAuthor.username || '@writer'})` : 'संजय राय (@sanjayrai_founder)'
+  );
   const [customOpponent, setCustomOpponent] = useState('');
   const [battleTopic, setBattleTopic] = useState('80वाँ स्वतंत्रता दिवस — देशभक्ति का महासंग्राम');
   const [poemTitle, setPoemTitle] = useState('');
@@ -12,7 +14,8 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
 
   const registeredPlatformUsers = [
     { id: 'u-sanjay', name: 'संजय राय', username: '@sanjayrai_founder' },
-    { id: 'u-akash', name: 'आकाश कुमार सिंह', username: '@akash_cofounder' }
+    { id: 'u-akash', name: 'आकाश कुमार सिंह', username: '@akash_cofounder' },
+    { id: 'u-saraswati', name: 'सरस्वती पाठक', username: '@saraswati_pathak' }
   ];
 
   if (!isOpen) return null;
@@ -22,8 +25,7 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
     if (!poemTitle.trim() || !poemContent.trim()) return;
 
     const opponentName = customOpponent.trim() ? customOpponent : targetOpponent;
-
-    onSubmitChallenge({
+    const challengeData = {
       id: `battle-${Date.now()}`,
       topic: battleTopic,
       opponent: opponentName,
@@ -33,7 +35,10 @@ export const PoetryBattleChallengeModal = ({ isOpen, onClose, onSubmitChallenge 
       },
       time: 'अभी-अभी शुरू हुआ',
       status: 'LIVE'
-    });
+    };
+
+    if (onSubmitChallenge) onSubmitChallenge(challengeData);
+    if (onCreateChallenge) onCreateChallenge(challengeData);
 
     setSubmitted(true);
     setTimeout(() => {

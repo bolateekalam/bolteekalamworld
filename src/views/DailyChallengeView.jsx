@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Clock, Award, Sparkles, Send, CheckCircle2, User, Heart, Trophy, Crown, Edit3, Lock, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const DailyChallengeView = ({ dailyChallenge, onOpenCertificate, requireAuth }) => {
+export const DailyChallengeView = ({ dailyChallenge, weeklyChallenge, onOpenCertificate, requireAuth, onRewardPoints }) => {
   const { t } = useLanguage();
   const [submission, setSubmission] = useState('');
   const [submittedPoem, setSubmittedPoem] = useState('');
@@ -13,7 +13,7 @@ export const DailyChallengeView = ({ dailyChallenge, onOpenCertificate, requireA
   const [editCount, setEditCount] = useState(0);
   const maxEditsAllowed = 5;
 
-  const challenge = dailyChallenge || {
+  const challenge = dailyChallenge || weeklyChallenge || {
     id: 'wc-this-week',
     title: 'बरसात का पहला ख़त',
     prompt: 'सावन की पहली फुहार और पुराने ख़तों की यादों को समेटते हुए 4 उत्कृष्ट पंक्तियाँ लिखें।',
@@ -74,6 +74,10 @@ export const DailyChallengeView = ({ dailyChallenge, onOpenCertificate, requireA
       // Save permanently to localStorage!
       localStorage.setItem(storageKey, submission);
       localStorage.setItem(editCountKey, '0');
+
+      if (onRewardPoints) {
+        onRewardPoints(30, 'साप्ताहिक चुनौती में भाग लेने पर');
+      }
     }
   };
 

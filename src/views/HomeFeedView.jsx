@@ -16,6 +16,8 @@ export const HomeFeedView = ({
   onEditPost,
   onDeletePost,
   onOpenAuthorProfile,
+  onOpenPoetryChallenge,
+  onLikePost,
   onOpenBirthdayCard,
   userProfile,
   patrioticBanner,
@@ -121,6 +123,10 @@ export const HomeFeedView = ({
             onOpenCertificate={onOpenCertificate} 
             onEditPost={onEditPost}
             onDeletePost={onDeletePost}
+            onOpenAuthorProfile={onOpenAuthorProfile}
+            onOpenPoetryChallenge={onOpenPoetryChallenge}
+            onLikePost={onLikePost}
+            requireAuth={requireAuth}
           />
         ))}
       </div>

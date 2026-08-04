@@ -2,30 +2,34 @@ import React, { useState } from 'react';
 import { 
   Heart, Bookmark, Share2, MessageCircle, Play, Pause, 
   Eye, Clock, CheckCircle2, ShieldCheck, Flag, Copy, 
-  Send, Sparkles, UserPlus, UserCheck, Volume2, Music, Quote, Edit3, Trash2, Archive
+  Send, Sparkles, UserPlus, UserCheck, Volume2, Music, Quote, Edit3, Trash2, Archive, Swords
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
 
-export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, isAuthorView, requireAuth }) => {
+export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, isAuthorView, requireAuth }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
-  const [isFollowing, setIsFollowing] = useState(post.author.isFollowing || false);
+  const [isFollowing, setIsFollowing] = useState(post.author?.isFollowing || false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const isUserOwnPost = post.author.id === 'user-me' || post.author.name.includes('आप');
+  const isUserOwnPost = post.author?.id === 'user-me' || post.author?.name?.includes('आप');
 
   const handleLikeToggle = () => {
     if (requireAuth && !requireAuth()) return;
-    setIsLiked(!isLiked);
-    setLikesCount(prev => (isLiked ? prev - 1 : prev + 1));
+    const nextState = !isLiked;
+    setIsLiked(nextState);
+    setLikesCount(prev => (nextState ? prev + 1 : Math.max(0, prev - 1)));
+    if (nextState && onLikePost) {
+      onLikePost(post);
+    }
   };
 
   const handleFollowToggle = () => {
@@ -257,6 +261,18 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
             <Share2 className="w-4 h-4" />
             <span className="hidden sm:inline">{t('share.title')}</span>
           </button>
+
+          {/* Poetry Challenge Button */}
+          {!isUserOwnPost && (
+            <button
+              onClick={() => onOpenPoetryChallenge && onOpenPoetryChallenge(post.author)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 transition active:scale-95"
+              title="कवि को चुनौती दें"
+            >
+              <Swords className="w-4 h-4 text-amber-500" />
+              <span className="hidden sm:inline">चुनौती दें</span>
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">

@@ -15,6 +15,7 @@ export const Navbar = ({
   setSearchQuery,
   searchType,
   setSearchType,
+  notificationsList = [],
   unreadNotifications,
   setUnreadNotifications,
   userRole,
@@ -26,6 +27,7 @@ export const Navbar = ({
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -108,6 +110,31 @@ export const Navbar = ({
             <PlusCircle className="w-4 h-4" />
             <span className="hidden sm:inline">रचना लिखें</span>
           </button>
+
+          {/* Notification Bell Icon */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              aria-label="नोटिफिकेशन देखें"
+              className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition relative"
+            >
+              <Bell className="w-4.5 h-4.5 text-rose-600 dark:text-rose-400" />
+              {unreadNotifications > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-600 text-white font-bold text-[9px] flex items-center justify-center animate-pulse shadow">
+                  {unreadNotifications}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <NotificationDrawer
+                onClose={() => setShowNotifications(false)}
+                notifications={notificationsList}
+                unreadNotifications={unreadNotifications}
+                setUnreadNotifications={setUnreadNotifications}
+              />
+            )}
+          </div>
 
           {/* Theme Toggle (Dark/Light) */}
           <button
