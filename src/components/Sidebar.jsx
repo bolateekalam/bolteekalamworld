@@ -68,32 +68,6 @@ export const Sidebar = ({ activeView, setActiveView, userRole, onOpenBirthdayCar
           </nav>
         </div>
 
-        {/* 🎂 Birthday Wish Card (Adjusted in Sidebar under Main Navigation) */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-rose-900 via-purple-950 to-amber-950 text-white shadow-md space-y-2.5 border border-rose-700/40">
-          <div className="flex items-center gap-2">
-            <Cake className="w-4 h-4 text-amber-400 animate-bounce" />
-            <span className="text-[11px] font-bold text-amber-300">आज जन्मदिन की शुभकामनाएँ</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <img src={birthdayAuthor.avatar} alt={birthdayAuthor.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-amber-400 shrink-0" />
-            <div className="min-w-0">
-              <h4 className="font-bold text-xs truncate text-amber-100">{birthdayAuthor.name}</h4>
-              <p className="text-[10px] text-rose-200">{birthdayAuthor.city} • 02 अगस्त</p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => {
-              if (onOpenBirthdayCard) onOpenBirthdayCard(birthdayAuthor);
-            }}
-            className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-[11px] flex items-center justify-center gap-1 shadow active:scale-95 transition"
-          >
-            <Cake className="w-3.5 h-3.5" />
-            <span>जन्मदिन कार्ड देखें</span>
-          </button>
-        </div>
-
       </div>
     </aside>
   );

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { X, Award, ShieldCheck, Download, Share2, Copy, Check, MessageCircle, Sparkles, Calendar, User } from 'lucide-react';
+import { X, Award, ShieldCheck, Download, Share2, Copy, Check, Sparkles, Calendar, Tag, User } from 'lucide-react';
 
 const WhatsAppIcon = (props) => (
   <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -16,7 +16,6 @@ const InstagramIcon = (props) => (
 );
 
 export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) => {
-  const cardRef = useRef(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -27,85 +26,225 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
   const userAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
   const userCity = userProfile?.city || 'प्रयागराज, उत्तर प्रदेश';
 
-  // 1-Year Membership Validity Logic (From account creation date to 1 year later)
+  // 6-Month Free Membership Validity Logic (From account creation date to 6 months later)
   const startDateStr = '05 अगस्त 2026';
-  const endDateStr = '05 अगस्त 2027';
-  const membershipId = `BK-MEM-${(userName.length * 37 + 2026).toString()}-${Math.floor(Math.random() * 8999 + 1000)}`;
+  const endDateStr = '05 फ़रवरी 2027'; // Exactly 6 Months Free
+  const membershipId = `BW-MEM-2026-${(userName.length * 37 + 500).toString()}`;
+  const memberTags = ['#बोलतीवर्ल्ड', '#साहित्यसाधक', '#6माहनि:शुल्क', '#सत्यापितसदस्य'];
 
-  // Download Card as High-Resolution PNG Image
+  // Pure Canvas2D PNG Image Generator (100% Reliable across all Desktop & Mobile Browsers)
   const handleDownloadPNG = () => {
     setDownloading(true);
+
     try {
-      const cardElement = cardRef.current;
-      if (!cardElement) return;
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 760;
+      const ctx = canvas.getContext('2d');
 
-      const svgData = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="600" height="380">
-          <foreignObject width="100%" height="100%">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: sans-serif; background: linear-gradient(135deg, #881337 0%, #4c0519 50%, #0f172a 100%); color: white; padding: 24px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); width: 552px; height: 332px; border: 2px solid rgba(251,191,36,0.5); position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(251,191,36,0.3); padding-bottom: 12px;">
-                <div>
-                  <div style="font-size: 20px; font-weight: 800; color: #fbbf24;">बोलती कलम (Bolti Kalam)</div>
-                  <div style="font-size: 11px; color: #fecdd3; font-weight: 600;">राष्ट्रीय साहित्यिक 1-वर्षीय सदस्यता पत्र (नि:शुल्क)</div>
-                </div>
-                <div style="background: rgba(251,191,36,0.2); border: 1px solid #fbbf24; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; color: #fbbf24;">
-                  ID: ${membershipId}
-                </div>
-              </div>
-              <div style="display: flex; gap: 20px; margin-top: 18px; align-items: center;">
-                <img src="${userAvatar}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #fbbf24;" />
-                <div>
-                  <div style="font-size: 18px; font-weight: 800; color: #ffffff;">${userName}</div>
-                  <div style="font-size: 13px; color: #fda4af; font-weight: 600;">${userUsername}</div>
-                  <div style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">📍 ${userCity}</div>
-                </div>
-              </div>
-              <div style="margin-top: 20px; background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 14px; display: flex; justify-content: space-between; font-size: 11px;">
-                <div><strong>वैधता (Validity):</strong> ${startDateStr} - ${endDateStr} (1 वर्ष)</div>
-                <div style="color: #34d399; font-weight: 700;">✓ प्रथम वर्ष नि:शुल्क</div>
-              </div>
-              <div style="position: absolute; bottom: 16px; right: 24px; font-size: 9px; color: #94a3b8; text-align: right;">
-                प्रमाणित: संस्थापक संजय राय एवं सह-संस्थापक आकाश कुमार सिंह
-              </div>
-            </div>
-          </foreignObject>
-        </svg>
-      `;
+      // 1. Premium Linear Background
+      const bgGrad = ctx.createLinearGradient(0, 0, 1200, 760);
+      bgGrad.addColorStop(0, '#881337');  // Deep Rose
+      bgGrad.addColorStop(0.5, '#4c0519'); // Dark Crimson
+      bgGrad.addColorStop(1, '#0f172a');   // Royal Slate
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1200, 760);
 
-      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
+      // 2. Gold Border Frame
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(30, 30, 1140, 700);
 
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 600;
-        canvas.height = 380;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(42, 42, 1116, 676);
 
+      // 3. Header Branding
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 44px sans-serif';
+      ctx.fillText('बोलती वर्ल्ड (bolateeworld.in)', 70, 110);
+
+      ctx.fillStyle = '#fecdd3';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText('राष्ट्रीय साहित्यिक 6-माह सदस्यता कार्ड (नि:शुल्क)', 70, 150);
+
+      // Membership ID Badge Right
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.2)';
+      ctx.fillRect(840, 75, 290, 50);
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(840, 75, 290, 50);
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(`ID: ${membershipId}`, 860, 108);
+
+      // Divider Line
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(70, 185);
+      ctx.lineTo(1130, 185);
+      ctx.stroke();
+
+      // 4. User Avatar & Member Details
+      const avatarImg = new Image();
+      avatarImg.crossOrigin = 'anonymous';
+      avatarImg.onload = () => {
+        // Draw Circular Avatar with Gold Ring
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(160, 310, 80, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(avatarImg, 80, 230, 160, 160);
+        ctx.restore();
+
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(160, 310, 82, 0, Math.PI * 2, true);
+        ctx.stroke();
+
+        // User Text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px sans-serif';
+        ctx.fillText(userName, 280, 290);
+
+        ctx.fillStyle = '#fda4af';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(userUsername, 280, 330);
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(`📍 ${userCity}`, 280, 365);
+
+        // 5. Member Tags Section
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 18px sans-serif';
+        let tagX = 70;
+        memberTags.forEach(tag => {
+          const width = ctx.measureText(tag).width + 24;
+          ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
+          ctx.fillRect(tagX, 420, width, 36);
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+          ctx.strokeRect(tagX, 420, width, 36);
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillText(tag, tagX + 12, 444);
+          tagX += width + 14;
+        });
+
+        // 6. Validity Banner
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+        ctx.fillRect(70, 490, 1060, 75);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.3)';
+        ctx.strokeRect(70, 490, 1060, 75);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText(`📅 सदस्यता वैधता: ${startDateStr} — ${endDateStr} (6 माह)`, 100, 535);
+
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('✓ प्रथम 6 माह 100% नि:शुल्क सदस्य', 740, 535);
+
+        // 7. Footer Signatures & Authorization
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.beginPath();
+        ctx.moveTo(70, 600);
+        ctx.lineTo(1130, 600);
+        ctx.stroke();
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '18px sans-serif';
+        ctx.fillText('बोलती वर्ल्ड (bolateeworld.in) — आधिकारिक साहित्यिक पहचान पत्र', 70, 645);
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText('प्रमाणित: संस्थापक संजय राय (Sanjay Rai)', 740, 645);
+
+        // Trigger Instant HD PNG Download
         const pngUrl = canvas.toDataURL('image/png');
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pngUrl;
-        downloadLink.download = `BoltiKalam_Membership_Card_${userUsername.replace('@','')}.png`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(url);
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `BoltiWorld_6Month_Membership_Card_${userUsername.replace('@','')}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
         setDownloading(false);
       };
-      img.src = url;
-    } catch (e) {
+
+      avatarImg.onerror = () => {
+        // Fallback without avatar image
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px sans-serif';
+        ctx.fillText(userName, 100, 290);
+        ctx.fillStyle = '#fda4af';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(userUsername, 100, 330);
+
+        const pngUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `BoltiWorld_6Month_Membership_Card.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setDownloading(false);
+      };
+
+      avatarImg.src = userAvatar;
+    } catch (err) {
       setDownloading(false);
     }
   };
 
-  const handleShareWhatsApp = () => {
-    const shareText = `🚩 बोलती कलम — भारत का बहुभाषी साहित्यिक एवं काव्य मंच!\n\nयह मेरा आधिकारिक 1-वर्षीय साहित्यिक सदस्यता कार्ड है (सदस्यता ID: ${membershipId})।\n\nआप भी आज ही बोलती कलम पर नि:शुल्क सदस्य बनें:\nhttps://bolteekalamvoice.in/#/${userUsername.replace(/^@/,'')}`;
+  // WhatsApp & Native Mobile Share Handler (File / Link)
+  const handleShareWhatsApp = async () => {
+    const shareText = `🚩 बोलती वर्ल्ड (bolateeworld.in) — भारत का बहुभाषी साहित्यिक एवं काव्य मंच!\n\nयह मेरा 6-माह नि:शुल्क साहित्यिक सदस्यता कार्ड है (सदस्यता ID: ${membershipId})।\n\nआप भी आज ही बोलती वर्ल्ड पर 6-माह नि:शुल्क सदस्य बनें:\nhttps://bolateeworld.in/#/${userUsername.replace(/^@/,'')}`;
+    
+    // Check Native Web Share API for Mobile Image File Sharing
+    if (navigator.share && navigator.canShare) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 500;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#881337';
+        ctx.fillRect(0, 0, 800, 500);
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 28px sans-serif';
+        ctx.fillText('बोलती वर्ल्ड (bolateeworld.in)', 40, 60);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(`सदस्यता पत्र: ${userName} (${userUsername})`, 40, 120);
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText('✓ 6 माह 100% नि:शुल्क सदस्य', 40, 170);
+
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            const file = new File([blob], 'BoltiWorld_Membership_Card.png', { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: 'बोलती वर्ल्ड सदस्यता कार्ड',
+                text: shareText,
+                files: [file]
+              });
+              return;
+            }
+          }
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        });
+        return;
+      } catch (e) {}
+    }
+
     window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const handleCopyShareLink = () => {
-    const link = `https://bolteekalamvoice.in/#/${userUsername.replace(/^@/,'')}`;
+    const link = `https://bolateeworld.in/#/${userUsername.replace(/^@/,'')}`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -123,11 +262,11 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <span>1-वर्षीय साहित्यिक सदस्यता कार्ड</span>
+                <span>6-माह नि:शुल्क साहित्यिक सदस्यता कार्ड</span>
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
               </h3>
               <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">
-                ✓ प्रथम वर्ष 100% नि:शुल्क सदस्य (Valid 1-Year Free)
+                ✓ प्रथम 6 माह 100% नि:शुल्क (Valid 6 Months Free)
               </span>
             </div>
           </div>
@@ -142,10 +281,8 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         </div>
 
         {/* Visual Membership Card (Royal Crimson & Amber Gold Devanagari Theme) */}
-        <div
-          ref={cardRef}
-          className="relative p-6 rounded-3xl bg-gradient-to-br from-rose-900 via-rose-950 to-slate-950 border-2 border-amber-400/40 text-white shadow-2xl overflow-hidden space-y-4"
-        >
+        <div className="relative p-6 rounded-3xl bg-gradient-to-br from-rose-900 via-rose-950 to-slate-950 border-2 border-amber-400/40 text-white shadow-2xl overflow-hidden space-y-4">
+          
           {/* Watermark Logo Accent */}
           <div className="absolute -right-8 -bottom-8 opacity-10 text-amber-400 pointer-events-none">
             <Sparkles className="w-48 h-48" />
@@ -155,7 +292,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
           <div className="flex items-center justify-between border-b border-amber-400/30 pb-3">
             <div>
               <span className="text-lg font-rozha text-amber-400 block tracking-wide">
-                बोलती कलम (Bolti Kalam)
+                बोलती वर्ल्ड (bolateeworld.in)
               </span>
               <span className="text-[10px] text-rose-200 font-medium block">
                 राष्ट्रीय साहित्यिक एवं सांस्कृतिक डिजिटल मंच
@@ -183,21 +320,30 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
             </div>
           </div>
 
-          {/* Validity & Free First Year Badge */}
+          {/* Member Tags */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {memberTags.map((tag, idx) => (
+              <span key={idx} className="px-2 py-0.5 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-300 text-[10px] font-bold">
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Validity & Free 6-Month Badge */}
           <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs gap-2">
             <div className="flex items-center gap-2 text-slate-300">
               <Calendar className="w-4 h-4 text-amber-400 shrink-0" />
-              <span><strong>वैधता:</strong> {startDateStr} — {endDateStr}</span>
+              <span><strong>वैधता:</strong> {startDateStr} — {endDateStr} (6 माह)</span>
             </div>
             <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold shrink-0">
-              ✓ प्रथम वर्ष नि:शुल्क
+              ✓ 6 माह नि:शुल्क
             </span>
           </div>
 
           {/* Signatures Footer */}
           <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800/80">
-            <span>बोलती कलम डिजिटल साहित्यिक पहचान</span>
-            <span>प्रमाणित: संस्थापक संजय राय व सह-संस्थापक आकाश कुमार सिंह</span>
+            <span>बोलती वर्ल्ड डिजिटल साहित्यिक पहचान</span>
+            <span>प्रमाणित: संस्थापक संजय राय (Sanjay Rai)</span>
           </div>
         </div>
 
@@ -209,7 +355,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
             className="py-2.5 px-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
-            <span>{downloading ? 'डाउनलोड हो रहा है...' : 'PNG कार्ड डाउनलोड करें'}</span>
+            <span>{downloading ? 'PNG डाउनलोड हो रहा...' : 'PNG इमेज़ डाउनलोड करें'}</span>
           </button>
 
           <button

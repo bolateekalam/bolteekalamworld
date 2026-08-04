@@ -58,14 +58,14 @@ export const Navbar = ({
           <div className="hidden sm:block">
             <div className="flex items-center gap-1.5">
               <h1 className="font-rozha text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-none">
-                बोलती कलम
+                बोलती वर्ल्ड
               </h1>
-              <span className="px-1.5 py-0.2 text-[10px] font-extrabold bg-rose-600 text-white rounded-md">
-                v2.0
+              <span className="px-1.5 py-0.2 text-[9px] font-extrabold bg-gradient-to-r from-amber-500 to-rose-600 text-white rounded-md uppercase tracking-wider">
+                bolateeworld.in
               </span>
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-tiro">
-              बहुभाषी साहित्यिक मंच
+              राष्ट्रीय साहित्यिक डिजिटल मंच
             </p>
           </div>
         </div>

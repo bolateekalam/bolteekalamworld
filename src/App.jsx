@@ -7,8 +7,6 @@ import FirstTimeUserModal from './components/FirstTimeUserModal';
 import CreatePostModal from './components/CreatePostModal';
 import EditPostModal from './components/EditPostModal';
 import EditProfileModal from './components/EditProfileModal';
-import ReferEarnModal from './components/ReferEarnModal';
-import BirthdayCardModal from './components/BirthdayCardModal';
 import YouTubeSubscribeModal from './components/YouTubeSubscribeModal';
 import MagazineViewerModal from './components/MagazineViewerModal';
 import CertificateGenerator from './components/CertificateGenerator';

@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { X, Download, Share2, Copy, Check, Sparkles, Quote, Heart } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Download, Share2, Copy, Check, Sparkles } from 'lucide-react';
 
 const WhatsAppIcon = (props) => (
   <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -8,7 +8,6 @@ const WhatsAppIcon = (props) => (
 );
 
 export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
-  const cardRef = useRef(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -17,79 +16,197 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
   const authorName = post.author?.name || 'साहित्य साधक';
   const authorUsername = post.author?.username || '@writer';
   const authorAvatar = post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
+  const poemTitle = post.title || 'बिना शीर्षक';
+  const poemContent = post.content || '';
+  const poemTags = post.tags || ['#हिंदीसाहित्य', '#बोलतीवर्ल्ड', '#कविता'];
 
-  // Download Poem Card as High-Resolution PNG Image
+  // Pure Canvas2D PNG Image Download Handler
   const handleDownloadPNG = () => {
     setDownloading(true);
+
     try {
-      const cardElement = cardRef.current;
-      if (!cardElement) return;
+      const canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      canvas.height = 1000;
+      const ctx = canvas.getContext('2d');
 
-      const safeContent = (post.content || '').substring(0, 300).replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const safeTitle = (post.title || 'बिना शीर्षक').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      // Parchment Royal Background
+      ctx.fillStyle = '#fffcf7';
+      ctx.fillRect(0, 0, 1000, 1000);
 
-      const svgData = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">
-          <foreignObject width="100%" height="100%">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: sans-serif; background: #fffcf7; color: #1e293b; padding: 32px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); width: 536px; height: 536px; border: 2px solid #e2e8f0; position: relative; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f43f5e; padding-bottom: 12px; margin-bottom: 20px;">
-                  <div style="font-size: 20px; font-weight: 800; color: #e11d48;">बोलती कलम (Bolti Kalam)</div>
-                  <div style="background: #ffe4e6; color: #e11d48; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 700;">${post.category || 'कविता'}</div>
-                </div>
-                <div style="font-size: 22px; font-weight: 800; color: #881337; margin-bottom: 16px;">${safeTitle}</div>
-                <div style="font-size: 15px; line-height: 1.7; color: #334155; white-space: pre-wrap; font-style: italic;">"${safeContent}"</div>
-              </div>
-              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <img src="${authorAvatar}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #e11d48;" />
-                  <div>
-                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${authorName}</div>
-                    <div style="font-size: 11px; color: #64748b;">${authorUsername}</div>
-                  </div>
-                </div>
-                <div style="font-size: 11px; font-weight: 700; color: #e11d48;">www.bolteekalamvoice.in</div>
-              </div>
-            </div>
-          </foreignObject>
-        </svg>
-      `;
+      // Crimson Double Frame
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(30, 30, 940, 940);
 
-      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
+      ctx.strokeStyle = 'rgba(225, 29, 72, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(42, 42, 916, 916);
 
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 600;
-        canvas.height = 600;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+      // Header Branding
+      ctx.fillStyle = '#881337';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.fillText('बोलती वर्ल्ड (bolateeworld.in)', 70, 110);
 
+      ctx.fillStyle = '#e11d48';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText(`श्रेणी: ${post.category || 'कविता'}`, 760, 110);
+
+      // Divider Line
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(70, 140);
+      ctx.lineTo(930, 140);
+      ctx.stroke();
+
+      // Poem Title
+      ctx.fillStyle = '#881337';
+      ctx.font = 'bold 38px sans-serif';
+      ctx.fillText(poemTitle, 70, 210);
+
+      // Poem Content Lines
+      ctx.fillStyle = '#1e293b';
+      ctx.font = 'italic 24px serif';
+      const lines = poemContent.split('\n');
+      let currentY = 280;
+
+      lines.forEach((lineText, idx) => {
+        if (idx < 14 && currentY < 720) {
+          ctx.fillText(`"${lineText.trim()}"`, 80, currentY);
+          currentY += 42;
+        }
+      });
+
+      // Tags Chips
+      let tagX = 70;
+      ctx.font = 'bold 18px sans-serif';
+      poemTags.forEach(tag => {
+        const width = ctx.measureText(tag).width + 24;
+        ctx.fillStyle = '#ffe4e6';
+        ctx.fillRect(tagX, 770, width, 36);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.strokeRect(tagX, 770, width, 36);
+        ctx.fillStyle = '#e11d48';
+        ctx.fillText(tag, tagX + 12, 794);
+        tagX += width + 14;
+      });
+
+      // Author Footer
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(70, 840);
+      ctx.lineTo(930, 840);
+      ctx.stroke();
+
+      const avatarImg = new Image();
+      avatarImg.crossOrigin = 'anonymous';
+      avatarImg.onload = () => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(110, 900, 36, 0, Math.PI * 2, true);
+        ctx.clip();
+        ctx.drawImage(avatarImg, 74, 864, 72, 72);
+        ctx.restore();
+
+        ctx.strokeStyle = '#e11d48';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(110, 900, 37, 0, Math.PI * 2, true);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 26px sans-serif';
+        ctx.fillText(authorName, 170, 895);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '20px sans-serif';
+        ctx.fillText(authorUsername, 170, 925);
+
+        ctx.fillStyle = '#e11d48';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('www.bolateeworld.in', 700, 910);
+
+        // Download PNG File
         const pngUrl = canvas.toDataURL('image/png');
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pngUrl;
-        downloadLink.download = `BoltiKalam_Poem_${safeTitle.replace(/\s+/g, '_')}.png`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(url);
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `BoltiWorld_Poem_${poemTitle.replace(/\s+/g, '_')}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
         setDownloading(false);
       };
-      img.src = url;
+
+      avatarImg.onerror = () => {
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 26px sans-serif';
+        ctx.fillText(authorName, 70, 900);
+        ctx.fillStyle = '#e11d48';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('www.bolateeworld.in', 700, 900);
+
+        const pngUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `BoltiWorld_Poem_${poemTitle.replace(/\s+/g, '_')}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setDownloading(false);
+      };
+
+      avatarImg.src = authorAvatar;
     } catch (e) {
       setDownloading(false);
     }
   };
 
-  const handleShareWhatsApp = () => {
-    const poemSnippet = (post.content || '').substring(0, 180);
-    const shareText = `📜 '${post.title}' — ${authorName}\n\n"${poemSnippet}..."\n\nबोलती कलम पर पूरी कविता पढ़ने हेतु क्लिक करें:\nhttps://bolteekalamvoice.in/#/${authorUsername.replace(/^@/,'')}`;
+  const handleShareWhatsApp = async () => {
+    const poemSnippet = (poemContent || '').substring(0, 180);
+    const shareText = `📜 '${poemTitle}' — ${authorName}\n\n"${poemSnippet}..."\n\nबोलती वर्ल्ड पर पूरी कविता पढ़ें:\nhttps://bolateeworld.in/#/${authorUsername.replace(/^@/,'')}`;
+
+    if (navigator.share && navigator.canShare) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fffcf7';
+        ctx.fillRect(0, 0, 600, 600);
+        ctx.fillStyle = '#e11d48';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(poemTitle, 40, 60);
+        ctx.fillStyle = '#334155';
+        ctx.font = '16px serif';
+        ctx.fillText(`"${poemSnippet}..."`, 40, 120);
+
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            const file = new File([blob], 'BoltiWorld_Poem.png', { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: poemTitle,
+                text: shareText,
+                files: [file]
+              });
+              return;
+            }
+          }
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        });
+        return;
+      } catch (e) {}
+    }
+
     window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const handleCopyLink = () => {
-    const link = `https://bolteekalamvoice.in/#/${authorUsername.replace(/^@/,'')}`;
+    const link = `https://bolateeworld.in/#/${authorUsername.replace(/^@/,'')}`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -104,7 +221,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              रचना साझा करें (Share Poem Card)
+              रचना साझ करें (Share Poem PNG Card)
             </h3>
           </div>
 
@@ -118,20 +235,26 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
         </div>
 
         {/* Printable Parchment Preview Card */}
-        <div
-          ref={cardRef}
-          className="p-6 rounded-3xl bg-amber-50/90 dark:bg-slate-800 border-2 border-rose-500/30 text-slate-900 dark:text-slate-100 shadow-xl space-y-4 relative overflow-hidden"
-        >
+        <div className="p-6 rounded-3xl bg-amber-50/90 dark:bg-slate-800 border-2 border-rose-500/30 text-slate-900 dark:text-slate-100 shadow-xl space-y-4 relative overflow-hidden">
           <div className="flex justify-between items-center border-b border-rose-500/20 pb-2">
-            <span className="text-sm font-rozha text-rose-700 dark:text-rose-400">बोलती कलम (Bolti Kalam)</span>
+            <span className="text-sm font-rozha text-rose-700 dark:text-rose-400">बोलती वर्ल्ड (bolateeworld.in)</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 font-bold uppercase">{post.category || 'कविता'}</span>
           </div>
 
           <div>
-            <h4 className="text-lg font-bold text-rose-950 dark:text-rose-100 font-rozha mb-2">{post.title}</h4>
+            <h4 className="text-lg font-bold text-rose-950 dark:text-rose-100 font-rozha mb-2">{poemTitle}</h4>
             <p className="text-xs text-slate-700 dark:text-slate-300 font-tiro leading-relaxed italic line-clamp-6">
-              "{post.content}"
+              "{poemContent}"
             </p>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {poemTags.map((tag, idx) => (
+              <span key={idx} className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-300 text-[10px] font-bold">
+                {tag}
+              </span>
+            ))}
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t border-rose-500/20 text-xs">
@@ -142,7 +265,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
                 <span className="text-[10px] text-slate-500">{authorUsername}</span>
               </div>
             </div>
-            <span className="text-[10px] font-bold text-rose-600">bolteekalamvoice.in</span>
+            <span className="text-[10px] font-bold text-rose-600">bolateeworld.in</span>
           </div>
         </div>
 
@@ -154,7 +277,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
             className="py-2.5 px-3 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
-            <span>{downloading ? 'PNG डाउनलोड हो रहा...' : 'PNG डाउनलोड करें'}</span>
+            <span>{downloading ? 'PNG डाउनलोड हो रहा...' : 'PNG इमेज़ डाउनलोड करें'}</span>
           </button>
 
           <button
