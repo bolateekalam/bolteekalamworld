@@ -61,7 +61,7 @@ export const Navbar = ({
                 बोलती कलम
               </h1>
               <span className="px-1.5 py-0.2 text-[9px] font-extrabold bg-gradient-to-r from-rose-600 to-amber-600 text-white rounded-md uppercase tracking-wider shadow-sm">
-                bolteekalamvoice.in
+                bolateeworld.in
               </span>
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-tiro">

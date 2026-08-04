@@ -167,7 +167,8 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
 
   const handleShareWhatsApp = async () => {
     const poemSnippet = (poemContent || '').substring(0, 180);
-    const shareText = `📜 '${poemTitle}' — ${authorName}\n\n"${poemSnippet}..."\n\nबोलती वर्ल्ड पर पूरी कविता पढ़ें:\nhttps://bolateeworld.in/#/${authorUsername.replace(/^@/,'')}`;
+    const cleanUser = authorUsername.replace(/^[@#]/,'');
+    const shareText = `📜 '${poemTitle}' — ${authorName}\n\n"${poemSnippet}..."\n\nबोलती कलम (bolateeworld.in) पर पूरी कविता पढ़ें:\nhttps://www.bolateeworld.in/profile/${cleanUser}`;
 
     if (navigator.share && navigator.canShare) {
       try {
@@ -186,7 +187,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
 
         canvas.toBlob(async (blob) => {
           if (blob) {
-            const file = new File([blob], 'BoltiWorld_Poem.png', { type: 'image/png' });
+            const file = new File([blob], 'BoltiKalam_Poem.png', { type: 'image/png' });
             if (navigator.canShare({ files: [file] })) {
               await navigator.share({
                 title: poemTitle,
@@ -206,7 +207,8 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
   };
 
   const handleCopyLink = () => {
-    const link = `https://bolateeworld.in/#/${authorUsername.replace(/^@/,'')}`;
+    const cleanUser = authorUsername.replace(/^[@#]/,'');
+    const link = `https://www.bolateeworld.in/profile/${cleanUser}`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);

@@ -65,7 +65,7 @@ export const HomeFeedView = ({
         <div className="space-y-2 max-w-xl z-10">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold text-[10px] border border-amber-400/40 uppercase tracking-wider">
-              bolteekalamvoice.in • 6-माह नि:शुल्क सदस्यता
+              bolateeworld.in • 6-माह नि:शुल्क सदस्यता
             </span>
           </div>
 
@@ -74,7 +74,7 @@ export const HomeFeedView = ({
           </h2>
 
           <p className="text-xs sm:text-sm text-rose-200 font-tiro leading-relaxed">
-            बोलती कलम (bolteekalamvoice.in) पर आज ही अपना 6-माह नि:शुल्क राष्ट्रीय साहित्यिक सदस्यता पत्र जनरेट करें, HD PNG इमेज डाउनलोड करें और WhatsApp स्टेटस पर शेयर करें!
+            बोलती कलम (bolateeworld.in) पर आज ही अपना 6-माह नि:शुल्क राष्ट्रीय साहित्यिक सदस्यता पत्र जनरेट करें, HD PNG इमेज डाउनलोड करें और WhatsApp स्टेटस पर शेयर करें!
           </p>
 
           <div className="flex items-center gap-4 text-xs font-bold text-emerald-400 pt-1">

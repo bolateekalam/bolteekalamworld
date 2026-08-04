@@ -14,16 +14,16 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
   if (!isOpen) return null;
 
   const userName = userProfile?.name || 'साहित्य साधक';
-  const cleanUsername = (userProfile?.username || '@writer').replace(/^@/, '');
+  const cleanUsername = (userProfile?.username || 'writer').replace(/^[@#]/, '');
   const userAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
 
   // 6-Month Free Membership Validity Logic (05 अगस्त 2026 से 05 फ़रवरी 2027)
   const startDateStr = '05 अगस्त 2026';
   const endDateStr = '05 फ़रवरी 2027';
-  const membershipId = `BK-MEM-2026-${(userName.length * 43 + 819).toString()}`;
+  const membershipId = `BW-MEM-2026-${(userName.length * 43 + 819).toString()}`;
 
-  // Clean Share URL without '#' hash!
-  const shareProfileUrl = `https://bolteekalamvoice.in/${cleanUsername}`;
+  // Clean Share URL
+  const shareProfileUrl = `https://www.bolateeworld.in/profile/${cleanUsername}`;
 
   // Pure Canvas2D HD PNG Image Generator
   const handleDownloadPNG = () => {
@@ -35,7 +35,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       canvas.height = 760;
       const ctx = canvas.getContext('2d');
 
-      // 1. Royal Dark Burgundy & Amber Linear Background
+      // 1. Royal Dark Burgundy Background
       const bgGrad = ctx.createLinearGradient(0, 0, 1200, 760);
       bgGrad.addColorStop(0, '#70071c');  // Deep Royal Crimson
       bgGrad.addColorStop(0.5, '#450a0a'); // Dark Parchment Maroon
@@ -43,7 +43,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, 1200, 760);
 
-      // 2. Gold Filigree Border
+      // 2. Gold Border
       ctx.strokeStyle = '#fbbf24';
       ctx.lineWidth = 8;
       ctx.strokeRect(30, 30, 1140, 700);
@@ -55,7 +55,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       // 3. Header Branding
       ctx.fillStyle = '#fbbf24';
       ctx.font = 'bold 44px sans-serif';
-      ctx.fillText('बोलती कलम (bolteekalamvoice.in)', 70, 110);
+      ctx.fillText('बोलती कलम (bolateeworld.in)', 70, 110);
 
       ctx.fillStyle = '#fecdd3';
       ctx.font = 'bold 22px sans-serif';
@@ -79,7 +79,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.lineTo(1130, 185);
       ctx.stroke();
 
-      // 4. Avatar Image & Member Name
+      // 4. Avatar Image & Member Details
       const avatarImg = new Image();
       avatarImg.crossOrigin = 'anonymous';
       avatarImg.onload = () => {
@@ -97,16 +97,16 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         ctx.arc(160, 310, 82, 0, Math.PI * 2, true);
         ctx.stroke();
 
-        // User Details (NO City/Place, NO hashtags)
+        // User Details
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 38px sans-serif';
         ctx.fillText(userName, 280, 290);
 
         ctx.fillStyle = '#fda4af';
         ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(`@${cleanUsername}`, 280, 335);
+        ctx.fillText(`${cleanUsername}`, 280, 335);
 
-        // 5. Formal Literary Pledge / Motto
+        // 5. Formal Literary Motto
         ctx.fillStyle = '#fef08a';
         ctx.font = 'italic 22px sans-serif';
         ctx.fillText('"साहित्य, भाषा एवं सर्व-समावेशी अभिव्यक्ति को समर्पित निष्ठावान सदस्य।"', 70, 435);
@@ -134,7 +134,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
 
         ctx.fillStyle = '#cbd5e1';
         ctx.font = '18px sans-serif';
-        ctx.fillText('बोलती कलम (bolteekalamvoice.in) — आधिकारिक डिजिटल पहचान पत्र', 70, 650);
+        ctx.fillText('बोलती कलम (bolateeworld.in) — आधिकारिक डिजिटल पहचान पत्र', 70, 650);
 
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 20px sans-serif';
@@ -158,7 +158,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         ctx.fillText(userName, 100, 290);
         ctx.fillStyle = '#fda4af';
         ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(`@${cleanUsername}`, 100, 335);
+        ctx.fillText(`${cleanUsername}`, 100, 335);
 
         const pngUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -177,9 +177,9 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
     }
   };
 
-  // WhatsApp & Native Mobile Share (NO HASHTAGS, NO HASH SYMBOL IN LINK)
+  // WhatsApp & Native Mobile Share
   const handleShareWhatsApp = async () => {
-    const shareText = `🚩 बोलती कलम (bolteekalamvoice.in) — राष्ट्रीय साहित्यिक मंच\n\nयह मेरा 6-माह नि:शुल्क डिजिटल साहित्यिक सदस्यता पत्र है (क्रमांक: ${membershipId})।\n\nआप भी आज ही बोलती कलम पर 6-माह नि:शुल्क सदस्य बनें:\n${shareProfileUrl}`;
+    const shareText = `🚩 बोलती कलम (bolateeworld.in) — राष्ट्रीय साहित्यिक मंच\n\nयह मेरा 6-माह नि:शुल्क डिजिटल साहित्यिक सदस्यता पत्र है (क्रमांक: ${membershipId})।\n\nआप भी आज ही बोलती कलम पर 6-माह नि:शुल्क सदस्य बनें:\n${shareProfileUrl}`;
 
     if (navigator.share && navigator.canShare) {
       try {
@@ -199,11 +199,11 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
 
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 32px sans-serif';
-        ctx.fillText('बोलती कलम (bolteekalamvoice.in)', 50, 70);
+        ctx.fillText('बोलती कलम (bolateeworld.in)', 50, 70);
 
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 30px sans-serif';
-        ctx.fillText(`सदस्यता पत्र: ${userName} (@${cleanUsername})`, 50, 140);
+        ctx.fillText(`सदस्यता पत्र: ${userName} (${cleanUsername})`, 50, 140);
 
         ctx.fillStyle = '#fef08a';
         ctx.font = 'italic 20px sans-serif';
@@ -256,7 +256,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
               </h3>
               <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">
-                ✓ प्रथम 6 माह 100% नि:शुल्क सदस्य (bolteekalamvoice.in)
+                ✓ प्रथम 6 माह 100% नि:शुल्क सदस्य (bolateeworld.in)
               </span>
             </div>
           </div>
@@ -270,7 +270,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
           </button>
         </div>
 
-        {/* Visual Membership Card (Formal Royal Burgundy & Gold Theme) */}
+        {/* Visual Membership Card */}
         <div className="relative p-6 rounded-3xl bg-gradient-to-br from-rose-950 via-rose-900 to-slate-950 border-2 border-amber-400/40 text-white shadow-2xl overflow-hidden space-y-4">
           
           <div className="absolute -right-8 -bottom-8 opacity-10 text-amber-400 pointer-events-none">
@@ -281,7 +281,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
           <div className="flex items-center justify-between border-b border-amber-400/30 pb-3">
             <div>
               <span className="text-lg font-rozha text-amber-400 block tracking-wide">
-                बोलती कलम (bolteekalamvoice.in)
+                बोलती कलम (bolateeworld.in)
               </span>
               <span className="text-[10px] text-rose-200 font-medium block">
                 राष्ट्रीय डिजिटल साहित्यिक मंच
@@ -292,7 +292,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
             </div>
           </div>
 
-          {/* User Details (No hashtags, No place/city) */}
+          {/* User Details */}
           <div className="flex items-center gap-4">
             <img
               src={userAvatar}
@@ -304,7 +304,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
                 <span>{userName}</span>
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               </h4>
-              <p className="text-xs text-rose-300 font-semibold truncate">@{cleanUsername}</p>
+              <p className="text-xs text-rose-300 font-semibold truncate">{cleanUsername}</p>
             </div>
           </div>
 
