@@ -323,6 +323,13 @@ function AppContent() {
     const newLikesCount = isCurrentlyLiked ? Math.max(0, (post.likes || 0) - 1) : (post.likes || 0) + 1;
     const newIsLiked = !isCurrentlyLiked;
 
+    // Check if liking own post
+    const isSelfLike = currentUser && (
+      (currentUser.email && post.author?.email === currentUser.email) ||
+      (currentUser.username && post.author?.username === currentUser.username) ||
+      (currentUser.name && post.author?.name === currentUser.name)
+    );
+
     // 1. Update posts array state dynamically & persist to localStorage
     setPosts(prevPosts => {
       const updatedPosts = prevPosts.map(p => {
@@ -343,27 +350,32 @@ function AppContent() {
       return updatedPosts;
     });
 
-    // 2. Targeted notification for the author
+    // 2. Points & Targeted notification
     if (!isCurrentlyLiked) {
-      handleRewardPoints(5, 'रचना लाइक करने पर');
+      if (isSelfLike) {
+        // Self-like gives 0 points
+      } else {
+        // Award 1 Pt per like on other authors' posts
+        handleRewardPoints(1, 'अन्य रचनाकार की पोस्ट लाइक करने पर');
 
-      const actorName = currentUser?.name || 'एक साहित्य प्रेमी';
-      const actorUsername = currentUser?.username || '@writer';
+        const actorName = currentUser?.name || 'आप';
+        const actorUsername = currentUser?.username || '@writer';
 
-      const newNotif = {
-        id: Date.now(),
-        type: 'like',
-        actorName,
-        actorUsername,
-        actorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-        title: `${actorName} (${actorUsername}) ने आपकी रचना '${post.title}' को लाइक किया! ❤️`,
-        desc: `आपकी पोस्ट '${post.title}' पर नई लाइक मिली है। (+5 Pts)`,
-        time: 'अभी-अभी',
-        isUnread: true
-      };
+        const newNotif = {
+          id: Date.now(),
+          type: 'like',
+          actorName,
+          actorUsername,
+          actorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+          title: `आपने ${post.author?.name || 'लेखक'} की रचना '${post.title}' को लाइक किया! ❤️`,
+          desc: `रचना पर नई लाइक दर्ज की गई। (+1 Pt)`,
+          time: 'अभी-अभी',
+          isUnread: true
+        };
 
-      setNotificationsList(prev => [newNotif, ...prev]);
-      setUnreadNotifications(prev => prev + 1);
+        setNotificationsList(prev => [newNotif, ...prev]);
+        setUnreadNotifications(prev => prev + 1);
+      }
     }
   };
 
@@ -387,9 +399,9 @@ function AppContent() {
       return updatedPosts;
     });
 
-    handleRewardPoints(5, 'टिप्पणी (Comment) करने पर');
+    handleRewardPoints(1, 'टिप्पणी (Comment) करने पर');
 
-    const actorName = currentUser?.name || 'एक साहित्य प्रेमी';
+    const actorName = currentUser?.name || 'आप';
     const actorUsername = currentUser?.username || '@writer';
 
     const commentNotif = {
@@ -398,8 +410,8 @@ function AppContent() {
       actorName,
       actorUsername,
       actorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-      title: `${actorName} (${actorUsername}) ने आपकी रचना पर टिप्पणी की! 💬`,
-      desc: `"${commentObj.content || 'नई टिप्पणी'}"`,
+      title: `आपने रचना पर टिप्पणी की! 💬`,
+      desc: `"${commentObj.content || 'नई टिप्पणी'}" (+1 Pt)`,
       time: 'अभी-अभी',
       isUnread: true
     };

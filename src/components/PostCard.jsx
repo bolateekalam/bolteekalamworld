@@ -7,6 +7,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
+import PoemCardShareModal from './PoemCardShareModal';
 
 export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, isAuthorView, requireAuth }) => {
   const { t } = useLanguage();
@@ -370,6 +371,13 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           </div>
         </div>
       )}
+
+      {/* Poem PNG & Link Share Modal */}
+      <PoemCardShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        post={post}
+      />
 
       {/* Inline Comments */}
       {showComments && (

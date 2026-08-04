@@ -7,6 +7,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import PostCard from '../components/PostCard';
 import PointsExplanationModal from '../components/PointsExplanationModal';
+import LiteraryMembershipCardModal from '../components/LiteraryMembershipCardModal';
 
 export const ProfileView = ({ 
   posts = [], 
@@ -24,6 +25,8 @@ export const ProfileView = ({
   const [shippingAddress, setShippingAddress] = useState('');
   const [isKitRequested, setIsKitRequested] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
+
+  const [showMembershipModal, setShowMembershipModal] = useState(false);
 
   const profile = userProfile || {
     name: 'साहित्य साधक',
@@ -98,6 +101,15 @@ export const ProfileView = ({
 
             {/* Quick Actions & Share Link */}
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setShowMembershipModal(true)}
+                aria-label="मेरा 1-वर्षीय साहित्यिक सदस्यता कार्ड देखें व डाउनलोड करें"
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-rose-700 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition active:scale-95 border border-amber-400/40"
+              >
+                <Award className="w-4 h-4 text-amber-300" />
+                <span>🪪 मेरा 1-वर्षीय सदस्यता कार्ड (नि:शुल्क)</span>
+              </button>
+
               <button
                 onClick={handleCopyPortfolioLink}
                 aria-label="पोर्टफ़ोलियो लिंक कॉपी करें"
@@ -284,6 +296,13 @@ export const ProfileView = ({
         isOpen={showPointsModal}
         onClose={() => setShowPointsModal(false)}
         points={profile.points || 0}
+      />
+
+      {/* 1-Year Literary Membership Card Modal */}
+      <LiteraryMembershipCardModal
+        isOpen={showMembershipModal}
+        onClose={() => setShowMembershipModal(false)}
+        userProfile={profile}
       />
 
     </div>
