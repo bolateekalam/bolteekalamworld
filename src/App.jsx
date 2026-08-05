@@ -19,7 +19,7 @@ import ReferEarnModal from './components/ReferEarnModal';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
-import { fetchPostsFromDB, createPostInDB, deletePostFromDB, archivePostInDB, updateUserProfileInDB, fetchWeeklyChallengeFromDB } from './lib/dataService';
+import { fetchPostsFromDB, createPostInDB, deletePostFromDB, archivePostInDB, updateUserProfileInDB, fetchWeeklyChallengeFromDB, toggleLikeInDB } from './lib/dataService';
 
 import HomeFeedView from './views/HomeFeedView';
 import DailyChallengeView from './views/DailyChallengeView';
@@ -151,36 +151,71 @@ function AppContent() {
   // Global 6-Month Membership Card Modal State
   const [showGlobalMembershipModal, setShowGlobalMembershipModal] = useState(false);
 
-  // Notifications List State
-  const [notificationsList, setNotificationsList] = useState([
-    {
-      id: 101,
-      type: 'like',
-      title: 'सरस्वती पाठक ने आपकी कविता को लाइक किया',
-      desc: 'आपकी रचना पर नई लाइक मिली। (+5 Pts)',
-      time: '10 मिनट पहले',
-      isUnread: true
-    },
-    {
-      id: 102,
-      type: 'comment',
-      title: 'संजय राय: "अद्भुत रचना!"',
-      desc: 'आपकी पोस्ट पर नया कमेंट प्राप्त हुआ।',
-      time: '25 मिनट पहले',
-      isUnread: true
-    }
-  ]);
-  const [unreadNotifications, setUnreadNotifications] = useState(2);
+  // Notifications List State (Persisted in localStorage)
+  const [notificationsList, setNotificationsList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_notifications_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [
+      {
+        id: 101,
+        type: 'like',
+        title: 'सरस्वती पाठक ने आपकी कविता को लाइक किया',
+        desc: 'आपकी रचना पर नई लाइक मिली। (+5 Pts)',
+        time: '10 मिनट पहले',
+        isUnread: true
+      },
+      {
+        id: 102,
+        type: 'comment',
+        title: 'संजय राय: "अद्भुत रचना!"',
+        desc: 'आपकी पोस्ट पर नया कमेंट प्राप्त हुआ।',
+        time: '25 मिनट पहले',
+        isUnread: true
+      }
+    ];
+  });
+  const [unreadNotifications, setUnreadNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_unread_notifications_v1');
+      if (saved !== null) return parseInt(saved, 10);
+    } catch (e) {}
+    return 2;
+  });
 
-  // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket for Instant 0-Cost Updates
+  // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket
   useEffect(() => {
     const syncPosts = () => {
       fetchPostsFromDB().then(dbPosts => {
         if (dbPosts && dbPosts.length > 0) {
+          let likedIds = new Set();
+          try {
+            const storedLikes = localStorage.getItem('bolteekalam_user_liked_posts');
+            if (storedLikes) likedIds = new Set(JSON.parse(storedLikes));
+          } catch (e) {}
+
           setPosts(prev => {
+            const prevMap = new Map();
+            prev.forEach(p => prevMap.set(String(p.id), p));
+
             const dbIds = new Set(dbPosts.map(p => String(p.id)));
             const unsyncedLocalPosts = prev.filter(p => !dbIds.has(String(p.id)));
-            return [...unsyncedLocalPosts, ...dbPosts];
+
+            const mergedDbPosts = dbPosts.map(p => {
+              const pId = String(p.id);
+              const prevPost = prevMap.get(pId);
+              const isLiked = likedIds.has(pId) || (prevPost && prevPost.isLiked);
+              const comments = (p.comments && p.comments.length > 0) ? p.comments : (prevPost?.comments || []);
+              return {
+                ...p,
+                isLiked: !!isLiked,
+                likes: Math.max(p.likes || 0, prevPost?.likes || 0),
+                comments
+              };
+            });
+
+            return [...unsyncedLocalPosts, ...mergedDbPosts];
           });
         }
       });
@@ -188,7 +223,7 @@ function AppContent() {
 
     syncPosts();
 
-    // Supabase Realtime Channel Listener (Instant 50ms Push Updates, 100% Free!)
+    // Supabase Realtime Channel Listener
     const postsChannel = supabase
       .channel('public:posts')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => {
@@ -204,32 +239,35 @@ function AppContent() {
     };
   }, []);
 
-  // 1. Supabase OAuth Session Listener for Instant Google Login Restore
+  // 1. Supabase OAuth Session Listener for Instant Google Login Restore & Profile Preservation
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         const userEmail = session.user.email || '';
-        const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
-        
-        let existingPoints = 100;
+
+        let savedProf = null;
         try {
-          const savedProf = localStorage.getItem('bolteekalam_user_profile');
-          if (savedProf) {
-            const parsed = JSON.parse(savedProf);
-            if (parsed.points !== undefined) existingPoints = parsed.points;
-          }
+          const stored = localStorage.getItem('bolteekalam_user_profile');
+          if (stored) savedProf = JSON.parse(stored);
         } catch (e) {}
 
+        const existingPoints = savedProf?.points !== undefined ? savedProf.points : 100;
+        const preservedAvatar = savedProf?.avatar || session.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
+        const preservedName = savedProf?.name || session.user.user_metadata?.full_name || 'गूगल यूज़र';
+        const preservedUsername = savedProf?.username || `@${(session.user.user_metadata?.full_name || 'writer').toLowerCase().replace(/\s+/g, '_')}`;
+
         const googleProfile = {
-          name: session.user.user_metadata?.full_name || 'गूगल यूज़र',
-          username: `@${(session.user.user_metadata?.full_name || 'writer').toLowerCase().replace(/\s+/g, '_')}`,
+          name: preservedName,
+          username: preservedUsername,
           email: userEmail,
-          avatar: session.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-          role: 'user',
-          city: 'प्रयागराज',
+          avatar: preservedAvatar,
+          role: savedProf?.role || 'user',
+          city: savedProf?.city || 'प्रयागराज',
+          bio: savedProf?.bio || '',
           isVerified: true,
           points: existingPoints,
-          phone: localStorage.getItem(`user_phone_${userEmail}`) || ''
+          phone: savedProf?.phone || localStorage.getItem(`user_phone_${userEmail}`) || '',
+          birthday: savedProf?.birthday || localStorage.getItem(`user_dob_${userEmail}`) || ''
         };
 
         handleLoginSuccess(googleProfile, true);
@@ -238,6 +276,38 @@ function AppContent() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // View Navigation Handler with Clean URL PushState
+  const handleNavigateView = (viewId) => {
+    setActiveView(viewId);
+    try {
+      if (viewId === 'profile') {
+        history.pushState(null, '', '/profile');
+        document.title = 'मेरी साहित्य प्रोफ़ाइल — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'feed') {
+        history.pushState(null, '', '/');
+        document.title = 'बोलती कलम (bolateeworld.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
+      } else if (viewId === 'battles') {
+        history.pushState(null, '', '/poetry-battle');
+        document.title = 'काव्य संग्राम — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'daily') {
+        history.pushState(null, '', '/sahityik-chunautiyan');
+        document.title = 'साहित्यिक चुनौतियाँ — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'competitions') {
+        history.pushState(null, '', '/sahityik-darpan');
+        document.title = 'साहित्यिक दर्पण — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'events') {
+        history.pushState(null, '', '/events');
+        document.title = 'साहित्यिक कार्यक्रम — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'leaderboard') {
+        history.pushState(null, '', '/leaderboard');
+        document.title = 'लीडरबोर्ड — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'magazine') {
+        history.pushState(null, '', '/magazine');
+        document.title = 'साहित्यिक पत्रिका — बोलती कलम | bolateeworld.in';
+      }
+    } catch (e) {}
+  };
 
   const handleOpenAuthorProfile = (author) => {
     if (!author) return;
@@ -261,7 +331,7 @@ function AppContent() {
     } catch (e) {
       if (window.location.hash) history.replaceState(null, '', window.location.pathname);
     }
-    document.title = 'बोलती कलम (bolteekalamvoice.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
+    document.title = 'बोलती कलम (bolateeworld.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
   };
 
   // URL Pathname & Hash Listener for Resilient SPA Navigation & Deep-linking
@@ -298,6 +368,7 @@ function AppContent() {
         }
         if (rawPath === '/profile' || rawHash === '#/profile') {
           setActiveView('profile');
+          document.title = 'मेरी साहित्य प्रोफ़ाइल — बोलती कलम | bolateeworld.in';
           return;
         }
 
@@ -373,23 +444,27 @@ function AppContent() {
     setShowPoetryChallengeModal(true);
   };
 
-  const handleLikePost = (post) => {
+  const handleLikePost = (post, isLikedState, likesCountState) => {
     if (!post) return;
-    const isCurrentlyLiked = !!post.isLiked;
-    const newLikesCount = isCurrentlyLiked ? Math.max(0, (post.likes || 0) - 1) : (post.likes || 0) + 1;
-    const newIsLiked = !isCurrentlyLiked;
+    const newIsLiked = isLikedState !== undefined ? isLikedState : !post.isLiked;
+    const newLikesCount = likesCountState !== undefined ? likesCountState : (newIsLiked ? (post.likes || 0) + 1 : Math.max(0, (post.likes || 0) - 1));
 
-    // Check if liking own post
-    const isSelfLike = currentUser && (
-      (currentUser.email && post.author?.email === currentUser.email) ||
-      (currentUser.username && post.author?.username === currentUser.username) ||
-      (currentUser.name && post.author?.name === currentUser.name)
-    );
+    // Save liked post IDs in localStorage for user session persistence
+    try {
+      const storedLikes = localStorage.getItem('bolteekalam_user_liked_posts');
+      let likedIds = storedLikes ? JSON.parse(storedLikes) : [];
+      if (newIsLiked) {
+        if (!likedIds.includes(String(post.id))) likedIds.push(String(post.id));
+      } else {
+        likedIds = likedIds.filter(id => id !== String(post.id));
+      }
+      localStorage.setItem('bolteekalam_user_liked_posts', JSON.stringify(likedIds));
+    } catch (e) {}
 
     // 1. Update posts array state dynamically & persist to localStorage
     setPosts(prevPosts => {
       const updatedPosts = prevPosts.map(p => {
-        if (p.id === post.id) {
+        if (p.id === post.id || String(p.id) === String(post.id)) {
           return {
             ...p,
             likes: newLikesCount,
@@ -406,39 +481,53 @@ function AppContent() {
       return updatedPosts;
     });
 
-    // 2. Points & Targeted notification
-    if (!isCurrentlyLiked) {
-      if (isSelfLike) {
-        // Self-like gives 0 points
-      } else {
-        // Award 1 Pt per like on other authors' posts
+    // 2. Sync like count with Supabase DB
+    toggleLikeInDB(post.id, newLikesCount);
+
+    // 3. Points & Targeted notification
+    if (newIsLiked) {
+      const isSelfLike = currentUser && (
+        (currentUser.email && post.author?.email === currentUser.email) ||
+        (currentUser.username && post.author?.username === currentUser.username) ||
+        (currentUser.name && post.author?.name === currentUser.name)
+      );
+
+      if (!isSelfLike) {
         handleRewardPoints(1, 'अन्य रचनाकार की पोस्ट लाइक करने पर');
-
-        const actorName = currentUser?.name || 'आप';
-        const actorUsername = currentUser?.username || '@writer';
-
-        const newNotif = {
-          id: Date.now(),
-          type: 'like',
-          actorName,
-          actorUsername,
-          actorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-          title: `आपने ${post.author?.name || 'लेखक'} की रचना '${post.title}' को लाइक किया! ❤️`,
-          desc: `रचना पर नई लाइक दर्ज की गई। (+1 Pt)`,
-          time: 'अभी-अभी',
-          isUnread: true
-        };
-
-        setNotificationsList(prev => [newNotif, ...prev]);
-        setUnreadNotifications(prev => prev + 1);
       }
+
+      const actorName = currentUser?.name || 'आप';
+      const actorUsername = currentUser?.username || '@writer';
+
+      const newNotif = {
+        id: Date.now(),
+        type: 'like',
+        actorName,
+        actorUsername,
+        actorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+        title: `आपने ${post.author?.name || 'लेखक'} की रचना '${post.title}' को लाइक किया! ❤️`,
+        desc: `रचना पर नई लाइक दर्ज की गई। (+1 Pt)`,
+        time: 'अभी-अभी',
+        isUnread: true
+      };
+
+      setNotificationsList(prev => {
+        const updated = [newNotif, ...prev];
+        try { localStorage.setItem('bolteekalam_notifications_v1', JSON.stringify(updated)); } catch(e){}
+        return updated;
+      });
+      setUnreadNotifications(prev => {
+        const updated = prev + 1;
+        try { localStorage.setItem('bolteekalam_unread_notifications_v1', String(updated)); } catch(e){}
+        return updated;
+      });
     }
   };
 
   const handleAddCommentToPost = (postId, commentObj) => {
     setPosts(prevPosts => {
       const updatedPosts = prevPosts.map(p => {
-        if (p.id === postId) {
+        if (p.id === postId || String(p.id) === String(postId)) {
           const currentComments = p.comments || [];
           return {
             ...p,
@@ -472,8 +561,16 @@ function AppContent() {
       isUnread: true
     };
 
-    setNotificationsList(prev => [commentNotif, ...prev]);
-    setUnreadNotifications(prev => prev + 1);
+    setNotificationsList(prev => {
+      const updated = [commentNotif, ...prev];
+      try { localStorage.setItem('bolteekalam_notifications_v1', JSON.stringify(updated)); } catch(e){}
+      return updated;
+    });
+    setUnreadNotifications(prev => {
+      const updated = prev + 1;
+      try { localStorage.setItem('bolteekalam_unread_notifications_v1', String(updated)); } catch(e){}
+      return updated;
+    });
   };
 
   // 2. Strict Auth Gatekeeper Helper
@@ -546,7 +643,7 @@ function AppContent() {
       localStorage.setItem(`onboarding_completed_${userEmail}`, 'true');
       setShowFirstTimeModal(false);
       setShowAuthModal(false);
-      setActiveView('profile');
+      handleNavigateView('profile');
       return;
     }
 
@@ -557,7 +654,7 @@ function AppContent() {
       setShowFirstTimeModal(true);
     } else {
       setShowFirstTimeModal(false);
-      setActiveView('profile');
+      handleNavigateView('profile');
     }
   };
 
@@ -618,7 +715,7 @@ function AppContent() {
 
     setShowFirstTimeModal(false);
     setPendingFirstTimeUser(null);
-    setActiveView('profile');
+    handleNavigateView('profile');
 
     handleRewardPoints(50, 'प्रथम प्रोफ़ाइल पूर्ण करने पर (Welcome Bonus)');
   };
@@ -687,66 +784,64 @@ function AppContent() {
     setShowCreateModal(true);
   };
 
-  // 🔴 100% Bulletproof Post Creation: Save to localStorage AND Supabase DB
+  // Single Unified Post Creation Pipeline
   const handlePostCreated = async (newPost) => {
     const authorEmail = currentUser?.email || 'user-anon';
     const authorName = userProfile?.name || 'साहित्य साधक';
     const authorUsername = userProfile?.username || `@${authorName.toLowerCase().replace(/\s+/g, '_')}`;
-
-    const postWithAuthor = {
-      ...newPost,
-      author: {
-        id: authorEmail,
-        email: authorEmail,
-        name: authorName,
-        username: authorUsername,
-        avatar: userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-        badge: 'verifiedAuthor',
-        city: userProfile.city || 'प्रयागराज'
-      }
-    };
-
-    setPosts(prev => [postWithAuthor, ...prev]);
-
-    // Save to global shared posts array so post is visible to ALL users on this machine/browser!
-    try {
-      const savedGlobal = localStorage.getItem('bolteekalam_global_shared_posts');
-      const existingGlobal = savedGlobal ? JSON.parse(savedGlobal) : [];
-      const updatedGlobal = [postWithAuthor, ...existingGlobal];
-      localStorage.setItem('bolteekalam_global_shared_posts', JSON.stringify(updatedGlobal));
-    } catch (e) {}
-
-    // Save to user's created posts array
-    try {
-      const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
-      const existingUserPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
-      const updatedUserPosts = [postWithAuthor, ...existingUserPosts];
-      localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserPosts));
-    } catch (e) {}
+    const authorAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
+    const authorCity = userProfile?.city || 'प्रयागराज';
 
     handleRewardPoints(10, 'नई साहित्य रचना पोस्ट करने पर');
 
-    const created = await createPostInDB({
+    const createdDBPost = await createPostInDB({
+      id: newPost.id,
       title: newPost.title,
       category: newPost.category,
       content: newPost.content,
       tags: newPost.tags,
       authorName,
       authorUsername,
-      authorAvatar: userProfile.avatar || '',
+      authorAvatar,
       authorEmail
     }, authorEmail);
 
-    // Refresh DB posts immediately so all clients get the synced feed without wiping newly published post
-    fetchPostsFromDB().then(dbPosts => {
-      if (dbPosts && dbPosts.length > 0) {
-        setPosts(prev => {
-          const dbIds = new Set(dbPosts.map(p => String(p.id)));
-          const unsyncedLocalPosts = prev.filter(p => !dbIds.has(String(p.id)));
-          return [...unsyncedLocalPosts, ...dbPosts];
-        });
+    const postToSave = {
+      ...newPost,
+      ...(createdDBPost || {}),
+      author: {
+        id: authorEmail,
+        email: authorEmail,
+        name: authorName,
+        username: authorUsername,
+        avatar: authorAvatar,
+        badge: 'verifiedAuthor',
+        city: authorCity
       }
+    };
+
+    setPosts(prev => {
+      const filtered = prev.filter(p => 
+        String(p.id) !== String(postToSave.id) && 
+        String(p.id) !== String(newPost.id) &&
+        !(p.title === postToSave.title && p.content === postToSave.content)
+      );
+      return [postToSave, ...filtered];
     });
+
+    try {
+      const savedGlobal = localStorage.getItem('bolteekalam_global_shared_posts');
+      const existingGlobal = savedGlobal ? JSON.parse(savedGlobal) : [];
+      const filteredGlobal = existingGlobal.filter(p => String(p.id) !== String(postToSave.id) && !(p.title === postToSave.title && p.content === postToSave.content));
+      localStorage.setItem('bolteekalam_global_shared_posts', JSON.stringify([postToSave, ...filteredGlobal]));
+    } catch (e) {}
+
+    try {
+      const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
+      const existingUserPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
+      const filteredUser = existingUserPosts.filter(p => String(p.id) !== String(postToSave.id) && !(p.title === postToSave.title && p.content === postToSave.content));
+      localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify([postToSave, ...filteredUser]));
+    } catch (e) {}
   };
 
   const handleSavePost = (updatedPost) => {
@@ -791,7 +886,7 @@ function AppContent() {
     setCurrentUser(null);
     setUserRole('user');
     localStorage.removeItem('bolteekalam_active_user');
-    setActiveView('feed');
+    handleNavigateView('feed');
   };
 
   const openCertificateModal = (type, titleStr = 'काव्य शिरोमणि सम्मान 2026') => {
@@ -843,7 +938,7 @@ function AppContent() {
         onOpenAuthModal={() => setShowAuthModal(true)}
         onLogout={handleLogout}
         activeView={activeView}
-        setActiveView={setActiveView}
+        setActiveView={handleNavigateView}
         notificationsList={notificationsList}
         unreadNotifications={unreadNotifications}
         setUnreadNotifications={setUnreadNotifications}
@@ -857,7 +952,7 @@ function AppContent() {
         {/* Left Sidebar Navigation (Desktop) */}
         <Sidebar
           activeView={activeView}
-          setActiveView={setActiveView}
+          setActiveView={handleNavigateView}
           userRole={userRole}
           setUserRole={setUserRole}
           onOpenCreatePost={handleOpenCreatePostProtected}
@@ -881,6 +976,7 @@ function AppContent() {
               onOpenAuthorProfile={handleOpenAuthorProfile}
               onOpenPoetryChallenge={handleOpenPoetryChallenge}
               onLikePost={handleLikePost}
+              onAddComment={handleAddCommentToPost}
               onOpenMembershipCard={() => setShowGlobalMembershipModal(true)}
               userProfile={userProfile}
               requireAuth={requireAuth}
@@ -949,6 +1045,9 @@ function AppContent() {
               onEditPost={(p) => setEditingPost(p)}
               onDeletePost={handleDeletePost}
               onToggleArchivePost={handleToggleArchivePost}
+              onLikePost={handleLikePost}
+              onAddComment={handleAddCommentToPost}
+              requireAuth={requireAuth}
             />
           )}
 
@@ -974,7 +1073,7 @@ function AppContent() {
       {/* Mobile Bottom Navigation Bar */}
       <MobileBottomNav
         activeView={activeView}
-        setActiveView={setActiveView}
+        setActiveView={handleNavigateView}
         onOpenCreatePost={handleOpenCreatePostProtected}
       />
 

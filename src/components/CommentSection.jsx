@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Heart, Reply, Pin, Flag, Trash2, Send } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const CommentSection = ({ comments = [], onAddComment, onReportComment }) => {
+export const CommentSection = ({ comments = [], userProfile, onAddComment, onReportComment }) => {
   const { t } = useLanguage();
   const [commentList, setCommentList] = useState(comments);
   const [newCommentText, setNewCommentText] = useState('');
@@ -15,10 +15,10 @@ export const CommentSection = ({ comments = [], onAddComment, onReportComment })
 
     const added = {
       id: `c-${Date.now()}`,
-      author: 'आप (User)',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-      content: newCommentText,
-      createdAt: 'अभी',
+      author: userProfile?.name || 'साहित्य साधक',
+      avatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+      content: newCommentText.trim(),
+      createdAt: 'अभी-अभी',
       likes: 0,
       isLiked: false,
       isPinned: false,

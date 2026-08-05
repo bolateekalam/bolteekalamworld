@@ -90,6 +90,7 @@ export const fetchPostsFromDB = async () => {
           tags: p.tags || ['हिंदीसाहित्य'],
           likes: p.likes_count || 0,
           isLiked: false,
+          comments: p.comments || [],
           bookmarks: p.bookmarks_count || 0,
           isBookmarked: false,
           views: p.views_count || 1,
@@ -112,29 +113,42 @@ export const fetchPostsFromDB = async () => {
     }
   } catch (e) {}
 
-  // Combine DB posts + Global Shared posts + Mock posts without duplicates (Newest Top)
-  const allPostsMap = new Map();
+  // Helper fingerprint for deduplication
+  const getPostFingerprint = (p) => {
+    if (!p) return '';
+    const title = (p.title || '').trim().toLowerCase();
+    const snippet = (p.content || '').trim().slice(0, 60).toLowerCase();
+    const author = (p.author?.name || p.authorName || '').trim().toLowerCase();
+    return `${title}::${snippet}::${author}`;
+  };
 
-  // Add DB posts first
-  dbPosts.forEach(p => {
-    if (p && p.id) allPostsMap.set(String(p.id), p);
-  });
+  // Combine DB posts + Global Shared posts + Mock posts without duplicates (DB takes precedence)
+  const finalPosts = [];
+  const seenIds = new Set();
+  const seenFingerprints = new Set();
 
-  // Add Global Shared posts
-  globalSharedPosts.forEach(gp => {
-    if (gp && gp.id && !allPostsMap.has(String(gp.id))) {
-      allPostsMap.set(String(gp.id), gp);
+  const addPostIfUnique = (p) => {
+    if (!p) return;
+    const pId = String(p.id);
+    const fp = getPostFingerprint(p);
+    if (seenIds.has(pId) || (fp && seenFingerprints.has(fp))) {
+      return;
     }
-  });
+    seenIds.add(pId);
+    if (fp) seenFingerprints.add(fp);
+    finalPosts.push(p);
+  };
 
-  // Add Mock posts
-  mockPosts.forEach(mp => {
-    if (mp && mp.id && !allPostsMap.has(String(mp.id))) {
-      allPostsMap.set(String(mp.id), mp);
-    }
-  });
+  // 1. Add DB posts first
+  dbPosts.forEach(addPostIfUnique);
 
-  return Array.from(allPostsMap.values());
+  // 2. Add Global Shared posts
+  globalSharedPosts.forEach(addPostIfUnique);
+
+  // 3. Add Mock posts
+  mockPosts.forEach(addPostIfUnique);
+
+  return finalPosts;
 };
 
 // 2. Create New Post in Supabase DB & Global Shared Public Storage
@@ -148,8 +162,10 @@ export const createPostInDB = async (postData, userId) => {
 
   const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo, false);
 
+  const postId = postData.id || `post_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
   const newCreatedPostObj = {
-    id: `post_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    id: postId,
     author: authorInfo,
     title: postData.title || 'बिना शीर्षक',
     category: postData.category || 'कविता',
@@ -158,6 +174,7 @@ export const createPostInDB = async (postData, userId) => {
     tags: postData.tags || ['हिंदीसाहित्य'],
     likes: 0,
     isLiked: false,
+    comments: [],
     bookmarks: 0,
     isBookmarked: false,
     views: 1,
@@ -166,15 +183,7 @@ export const createPostInDB = async (postData, userId) => {
     createdAt: new Date().toLocaleDateString('hi-IN')
   };
 
-  // A. Save into Global Shared Public Memory
-  try {
-    const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
-    const existing = stored ? JSON.parse(stored) : [];
-    const updated = [newCreatedPostObj, ...existing];
-    localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
-  } catch (e) {}
-
-  // B. Try Supabase Insert with session or fallback payload
+  // A. Try Supabase Insert with session or fallback payload
   try {
     const payload = {
       title: postData.title || 'बिना शीर्षक',
@@ -193,13 +202,46 @@ export const createPostInDB = async (postData, userId) => {
       .select();
 
     if (!error && data && data[0]) {
-      return data[0];
+      const dbPost = {
+        ...newCreatedPostObj,
+        id: String(data[0].id)
+      };
+
+      // Save into Global Shared Public Memory with real DB ID
+      try {
+        const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
+        const existing = stored ? JSON.parse(stored) : [];
+        const updated = [dbPost, ...existing.filter(p => p.id !== postId)];
+        localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
+      } catch (e) {}
+
+      return dbPost;
     }
   } catch (err) {
     console.warn('Supabase DB insert warning:', err);
   }
 
+  // Fallback: Save into Global Shared Public Memory with temporary ID
+  try {
+    const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
+    const existing = stored ? JSON.parse(stored) : [];
+    const updated = [newCreatedPostObj, ...existing];
+    localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
+  } catch (e) {}
+
   return newCreatedPostObj;
+};
+
+// Toggle Like Count in DB
+export const toggleLikeInDB = async (postId, newLikesCount) => {
+  try {
+    await supabase
+      .from('posts')
+      .update({ likes_count: newLikesCount })
+      .eq('id', postId);
+  } catch (err) {
+    console.warn('Supabase DB like update notice:', err);
+  }
 };
 
 // 3. Toggle Archive Status of Post

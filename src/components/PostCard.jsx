@@ -9,7 +9,7 @@ import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
 import PoemCardShareModal from './PoemCardShareModal';
 
-export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, isAuthorView, requireAuth }) => {
+export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, onAddComment, isAuthorView, requireAuth, userProfile }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
@@ -26,10 +26,11 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
   const handleLikeToggle = () => {
     if (requireAuth && !requireAuth()) return;
     const nextState = !isLiked;
+    const nextCount = nextState ? likesCount + 1 : Math.max(0, likesCount - 1);
     setIsLiked(nextState);
-    setLikesCount(prev => (nextState ? prev + 1 : Math.max(0, prev - 1)));
-    if (nextState && onLikePost) {
-      onLikePost(post);
+    setLikesCount(nextCount);
+    if (onLikePost) {
+      onLikePost({ ...post, isLiked: nextState, likes: nextCount });
     }
   };
 
@@ -381,6 +382,8 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
       {showComments && (
         <CommentSection 
           comments={post.comments}
+          userProfile={userProfile}
+          onAddComment={(commentObj) => onAddComment && onAddComment(post.id, commentObj)}
           onReportComment={() => setShowReportModal(true)}
         />
       )}

@@ -18,6 +18,9 @@ export const ProfileView = ({
   onEditPost,
   onDeletePost,
   onToggleArchivePost,
+  onLikePost,
+  onAddComment,
+  requireAuth,
   onOpenMembershipCard
 }) => {
   const { t } = useLanguage();
@@ -285,6 +288,10 @@ export const ProfileView = ({
               onEditPost={onEditPost}
               onDeletePost={onDeletePost}
               onToggleArchivePost={onToggleArchivePost}
+              onLikePost={onLikePost}
+              onAddComment={onAddComment}
+              userProfile={userProfile}
+              requireAuth={requireAuth}
               isAuthorView={true}
             />
           ));
