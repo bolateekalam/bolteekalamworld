@@ -132,6 +132,43 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.lineTo(1005, 100);
       ctx.stroke();
 
+      // Helper for pixel-accurate text wrapping on Canvas (Words + Long String Char Wrap)
+      const wrapCanvasText = (ctx, text, maxW) => {
+        if (!text) return [''];
+        const words = text.split(' ');
+        const wrappedLines = [];
+        let currentLine = '';
+
+        for (let i = 0; i < words.length; i++) {
+          const word = words[i];
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const testWidth = ctx.measureText(testLine).width;
+
+          if (testWidth <= maxW) {
+            currentLine = testLine;
+          } else {
+            if (currentLine) {
+              wrappedLines.push(currentLine);
+              currentLine = word;
+            } else {
+              // Single word itself is longer than maxW (e.g. continuous unbroken string)
+              let subWord = '';
+              for (let char of word) {
+                if (ctx.measureText(subWord + char).width <= maxW) {
+                  subWord += char;
+                } else {
+                  wrappedLines.push(subWord);
+                  subWord = char;
+                }
+              }
+              currentLine = subWord;
+            }
+          }
+        }
+        if (currentLine) wrappedLines.push(currentLine);
+        return wrappedLines;
+      };
+
       // Function to Draw Poem Lines & Author Footer
       const renderTextAndFooter = (startY = 255, maxTextW = 930, maxLinesY = 1140) => {
         let fontSize = 34;
@@ -139,34 +176,43 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         let fontWeight = 'bold';
 
         if (validLinesCount <= 6) {
-          fontSize = selectedLayoutId === 'side' ? 34 : 40;
-          lineHeight = selectedLayoutId === 'side' ? 56 : 64;
+          fontSize = selectedLayoutId === 'side' ? 32 : 40;
+          lineHeight = selectedLayoutId === 'side' ? 52 : 64;
           fontWeight = 'bold';
         } else if (validLinesCount <= 10) {
-          fontSize = selectedLayoutId === 'side' ? 28 : 32;
-          lineHeight = selectedLayoutId === 'side' ? 46 : 52;
+          fontSize = selectedLayoutId === 'side' ? 26 : 32;
+          lineHeight = selectedLayoutId === 'side' ? 44 : 52;
           fontWeight = 'bold';
         } else {
-          fontSize = selectedLayoutId === 'side' ? 24 : 26;
-          lineHeight = selectedLayoutId === 'side' ? 38 : 40;
+          fontSize = selectedLayoutId === 'side' ? 22 : 26;
+          lineHeight = selectedLayoutId === 'side' ? 36 : 40;
           fontWeight = 'normal';
         }
 
-        // Title
+        // Title Wrapping & Drawing
         ctx.fillStyle = titleColor;
-        ctx.font = selectedLayoutId === 'topCenter' ? 'bold 40px serif' : 'bold 44px serif';
+        ctx.font = selectedLayoutId === 'topCenter' ? 'bold 38px serif' : 'bold 42px serif';
         const displayTitle = title.trim() ? title : '★ शीर्षक (Title)';
-        const truncatedTitle = displayTitle.length > 24 ? displayTitle.slice(0, 24) + '...' : displayTitle;
         
+        // Wrap title to maxTextW so title never overlaps photo either
+        const wrappedTitleLines = wrapCanvasText(ctx, displayTitle, maxTextW);
+
         if (selectedLayoutId === 'topCenter') {
-          const tWidth = ctx.measureText(truncatedTitle).width;
-          ctx.fillText(truncatedTitle, (1080 - tWidth) / 2, startY);
-          startY += 65;
+          for (let tLine of wrappedTitleLines) {
+            const tWidth = ctx.measureText(tLine).width;
+            ctx.fillText(tLine, (1080 - tWidth) / 2, startY);
+            startY += 55;
+          }
+          startY += 10;
         } else {
-          ctx.fillText(truncatedTitle, 75, 175);
+          let titleY = 170;
+          for (let tLine of wrappedTitleLines.slice(0, 2)) {
+            ctx.fillText(tLine, 75, titleY);
+            titleY += 50;
+          }
         }
 
-        // Poem Lines
+        // Poem Lines Wrapping & Drawing
         ctx.fillStyle = textColor;
         ctx.font = `${fontWeight} ${fontSize}px serif`;
 
@@ -174,19 +220,26 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         const renderLinesList = validLinesCount > 0 ? lines : ['★ यहाँ अपनी कविता की पंक्तियाँ लिखें...'];
 
         for (let i = 0; i < renderLinesList.length; i++) {
-          const line = renderLinesList[i];
+          const rawLine = renderLinesList[i];
           if (currentY > maxLinesY) break;
 
-          if (line === '') {
+          if (rawLine === '') {
             currentY += Math.round(lineHeight * 0.5);
           } else {
-            if (selectedLayoutId === 'topCenter') {
-              const lWidth = ctx.measureText(line).width;
-              ctx.fillText(line, (1080 - lWidth) / 2, currentY);
-            } else {
-              ctx.fillText(line, 75, currentY);
+            // Precision Canvas Wrapping per line (Guarantees zero overlap with photo!)
+            const wrappedSubLines = wrapCanvasText(ctx, rawLine, maxTextW);
+
+            for (let subLine of wrappedSubLines) {
+              if (currentY > maxLinesY) break;
+
+              if (selectedLayoutId === 'topCenter') {
+                const lWidth = ctx.measureText(subLine).width;
+                ctx.fillText(subLine, (1080 - lWidth) / 2, currentY);
+              } else {
+                ctx.fillText(subLine, 75, currentY);
+              }
+              currentY += lineHeight;
             }
-            currentY += lineHeight;
           }
         }
 
@@ -257,7 +310,8 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             }
             ctx.stroke();
 
-            renderTextAndFooter(255, 510, 1140);
+            // maxTextW = 520px (75 + 520 = 595px, leaves 40px safe margin before photo at 635px!)
+            renderTextAndFooter(255, 520, 1140);
 
           } else if (selectedLayoutId === 'topRight') {
             const photoX = 650;
