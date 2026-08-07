@@ -481,13 +481,14 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
     setPosting(true);
     try {
       const canvas = await drawPosterCanvas();
-      const pngUrl = canvas.toDataURL('image/png');
+      // Compress to lightweight HD JPEG (0.88 quality ~80KB) so localStorage NEVER exceeds quota limits!
+      const compressedUrl = canvas.toDataURL('image/jpeg', 0.88);
 
       if (onPublishPosterPost) {
         onPublishPosterPost({
           title: title.trim() || 'कवि इमेज़ पोस्टर',
           content: content.trim(),
-          imageUrl: pngUrl
+          imageUrl: compressedUrl
         });
       }
     } catch (e) {
