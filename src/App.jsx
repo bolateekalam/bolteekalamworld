@@ -678,10 +678,11 @@ function AppContent() {
     }, 4000);
   };
 
-  // Buy Points Recharge Store Handler
-  const handleRechargePoints = (rupees, points) => {
-    handleRewardPoints(points, `₹${rupees} रीचार्ज पैक (${points} Points Credit)`);
-    alert(`🎉 बधाई हो! ₹${rupees} का रीचार्ज सफल हुआ। आपके वॉलेट में ${points} रिवॉर्ड पॉइंट्स जोड़ दिए गए हैं!`);
+  // Buy Points Recharge Store Handler with Razorpay Payment Verification
+  const handleRechargePoints = (rupees, points, paymentId) => {
+    const payRef = paymentId ? ` (Razorpay: ${paymentId})` : '';
+    handleRewardPoints(points, `₹${rupees} रीचार्ज पैक - ${points} Points Credit${payRef}`);
+    alert(`🎉 भुगतान सफल! ₹${rupees} का पेमेंट रेजरपे द्वारा सत्यापित हुआ। आपके वॉलेट में ${points} रिवॉर्ड पॉइंट्स क्रेडिट कर दिए गए हैं!`);
   };
 
   // 4. Handle Successful Login & Store Session Permanently

@@ -8,6 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 import PostCard from '../components/PostCard';
 import PointsExplanationModal from '../components/PointsExplanationModal';
 import LiteraryMembershipCardModal from '../components/LiteraryMembershipCardModal';
+import { initiateRazorpayCheckout } from '../lib/razorpayService';
 
 export const ProfileView = ({ 
   posts = [], 
@@ -368,7 +369,21 @@ export const ProfileView = ({
                         </div>
 
                         <button
-                          onClick={() => onRechargePoints && onRechargePoints(pack.rupees, pack.points)}
+                          onClick={() => {
+                            initiateRazorpayCheckout({
+                              rupees: pack.rupees,
+                              points: pack.points,
+                              userProfile: profile,
+                              onSuccess: (res) => {
+                                if (onRechargePoints) {
+                                  onRechargePoints(pack.rupees, pack.points, res.paymentId);
+                                }
+                              },
+                              onFailure: (reason) => {
+                                console.log('Razorpay payment cancelled/failed:', reason);
+                              }
+                            });
+                          }}
                           className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition active:scale-95 shadow-sm ${
                             pack.popular
                               ? 'bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-extrabold'
