@@ -53,7 +53,17 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       canvas.height = 1350;
       const ctx = canvas.getContext('2d');
 
-      // 1. Bright Warm Parchment Royal Background
+      // 1. Clip Canvas with 24px Rounded Outer Corners
+      ctx.save();
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(12, 12, 1056, 1326, 24);
+      } else {
+        ctx.rect(12, 12, 1056, 1326);
+      }
+      ctx.clip();
+
+      // Bright Warm Parchment Royal Background
       const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
       bgGrad.addColorStop(0, '#fffdf9');   // Warm Cream
       bgGrad.addColorStop(0.5, '#fef3c7'); // Soft Gold Parchment
@@ -61,26 +71,13 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, 1080, 1350);
 
-      // 2. Double Crimson & Gold Imperial Frame
-      ctx.strokeStyle = '#be123c'; // Royal Crimson
+      // Sleek 24px Rounded Crimson Outer Border
+      ctx.strokeStyle = '#be123c';
       ctx.lineWidth = 10;
-      ctx.strokeRect(36, 36, 1008, 1278);
+      ctx.stroke();
+      ctx.restore();
 
-      ctx.strokeStyle = '#d97706'; // Gold Accent
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(50, 50, 980, 1250);
-
-      // Crimson Corner Squares
-      const drawCornerSquare = (x, y) => {
-        ctx.fillStyle = '#be123c';
-        ctx.fillRect(x, y, 16, 16);
-      };
-      drawCornerSquare(33, 33);
-      drawCornerSquare(1031, 33);
-      drawCornerSquare(33, 1301);
-      drawCornerSquare(1031, 1301);
-
-      // 3. Top Header Branding (GUARANTEED NO OVERLAPPING!)
+      // 2. Top Header Branding (GUARANTEED NO OVERLAPPING!)
       ctx.fillStyle = '#881337';
       ctx.font = 'bold 44px serif';
       ctx.fillText('बोलती कलम (bolateeworld.in)', 75, 115);
@@ -108,7 +105,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.lineTo(1005, 180);
       ctx.stroke();
 
-      // 4. Large Centered Member Avatar (Y = 330)
+      // 3. Large Centered Member Avatar (Y = 330)
       const avatarImg = new Image();
       avatarImg.crossOrigin = 'anonymous';
 
@@ -141,7 +138,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         ctx.fillStyle = '#15803d';
         ctx.fillText(badgeText, badgeX + 18, 596);
 
-        // 5. Literary Motto Box (Centered Y = 685, H = 95)
+        // 4. Literary Motto Box (Centered Y = 685, H = 95)
         ctx.fillStyle = '#fff1f2';
         ctx.fillRect(90, 640, 900, 95);
         ctx.strokeStyle = '#f43f5e';
@@ -154,24 +151,30 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         const mottoWidth = ctx.measureText(mottoText).width;
         ctx.fillText(mottoText, (1080 - mottoWidth) / 2, 698);
 
-        // 6. Validity & Perks Box (Centered Y = 850, H = 130)
+        // 5. 6-Month Perks & Official YouTube Feature Box (Centered Y = 860, H = 150)
         ctx.fillStyle = '#881337'; // Royal Deep Crimson
-        ctx.fillRect(90, 775, 900, 130);
+        ctx.fillRect(90, 765, 900, 155);
         ctx.strokeStyle = '#d97706';
         ctx.lineWidth = 2.5;
-        ctx.strokeRect(90, 775, 900, 130);
+        ctx.strokeRect(90, 765, 900, 155);
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 25px sans-serif';
-        const validText = `📅 सदस्यता अवधि: ${startDateStr} — ${endDateStr}`;
+        ctx.font = 'bold 24px sans-serif';
+        const validText = `📅 सदस्यता अवधि: ${startDateStr} — ${endDateStr} (6 माह)`;
         const validWidth = ctx.measureText(validText).width;
-        ctx.fillText(validText, (1080 - validWidth) / 2, 828);
+        ctx.fillText(validText, (1080 - validWidth) / 2, 810);
 
         ctx.fillStyle = '#fbbf24';
-        ctx.font = 'bold 23px sans-serif';
-        const perkText = '✓ बोलती कलम राष्ट्रीय साहित्यिक मंच (bolateeworld.in)';
+        ctx.font = 'bold 22px sans-serif';
+        const perkText = '✓ असीमित रचना प्रकाशन • डिजिटल सम्मान पत्र • काव्य गोष्ठी';
         const perkWidth = ctx.measureText(perkText).width;
-        ctx.fillText(perkText, (1080 - perkWidth) / 2, 875);
+        ctx.fillText(perkText, (1080 - perkWidth) / 2, 855);
+
+        ctx.fillStyle = '#fef08a';
+        ctx.font = 'bold 21px sans-serif';
+        const ytText = '▶ Boltee Kalam Official YouTube Feature & Podcasts';
+        const ytWidth = ctx.measureText(ytText).width;
+        ctx.fillText(ytText, (1080 - ytWidth) / 2, 895);
 
         // 7. Official Certification & Signatures Footer (ZERO OVERLAPPING GUARANTEED!)
         ctx.strokeStyle = '#cbd5e1';

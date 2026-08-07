@@ -35,18 +35,25 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       canvas.height = 1350;
       const ctx = canvas.getContext('2d');
 
-      // 1. Parchment Royal Background
+      // 1. Clip Canvas with 24px Rounded Outer Corners
+      ctx.save();
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(12, 12, 1056, 1326, 24);
+      } else {
+        ctx.rect(12, 12, 1056, 1326);
+      }
+      ctx.clip();
+
+      // Parchment Royal Background
       ctx.fillStyle = '#fffdf9';
       ctx.fillRect(0, 0, 1080, 1350);
 
-      // 2. Double Crimson Frame
-      ctx.strokeStyle = '#be123c';
-      ctx.lineWidth = 8;
-      ctx.strokeRect(36, 36, 1008, 1278);
-
-      ctx.strokeStyle = 'rgba(190, 18, 60, 0.25)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(50, 50, 980, 1250);
+      // Sleek 24px Rounded Crimson Outer Border
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 10;
+      ctx.stroke();
+      ctx.restore();
 
       // 3. Top Header Bar: Post Title at Top Left (ONLY ONCE!), Category at Top Right
       ctx.fillStyle = '#881337';
