@@ -77,6 +77,32 @@ export const HomeFeedView = ({
         </button>
       </div>
 
+      {/* 📸 New Feature: Poet Image Poster Studio Banner */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950 via-purple-900 to-slate-900 border-2 border-purple-500/40 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 relative overflow-hidden">
+        <div className="space-y-1.5 z-10 max-w-xl">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-rose-950 font-extrabold text-[10px] uppercase">
+              ✨ नया ख़ास फ़ीचर
+            </span>
+            <span className="text-xs text-amber-300 font-bold">1080 × 1350 (Instagram 4:5 Poster)</span>
+          </div>
+          <h3 className="text-lg sm:text-xl font-bold font-rozha text-purple-200">
+            कवि इमेज़ पोस्टर Studio — अपनी कविता + स्केच से सुंदर पोस्ट बनाएँ!
+          </h3>
+          <p className="text-xs text-purple-200 font-tiro">
+            अपनी कविता को अपनी फोटो या स्केच के साथ 4:5 इमेज़ पोस्टर में बदलें और सीधे Instagram / WhatsApp पर शेयर करें! (लागत: 25 Pts)
+          </p>
+        </div>
+
+        <button
+          onClick={() => setActiveView && setActiveView('posterStudio')}
+          className="z-10 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-2 shadow-lg active:scale-95 transition"
+        >
+          <Sparkles className="w-4 h-4 text-rose-950" />
+          <span>🎨 पोस्टर Studio खोलें (25 Pts)</span>
+        </button>
+      </div>
+
       {/* Weekly Literature Challenge Banner */}
       {dailyChallenge && (
         <DailyChallenge 

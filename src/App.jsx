@@ -31,6 +31,7 @@ import MagazineView from './views/MagazineView';
 import ProfileView from './views/ProfileView';
 import AdminDashboardView from './views/AdminDashboardView';
 import SearchResultsView from './views/SearchResultsView';
+import PosterStudioView from './views/PosterStudioView';
 
 import { mockPosts, mockDailyChallenge, mockPoetryBattle } from './data/mockPosts';
 import { mockCompetitions } from './data/mockCompetitions';
@@ -1095,6 +1096,15 @@ function AppContent() {
 
           {activeView === 'leaderboard' && (
             <LeaderboardView />
+          )}
+
+          {activeView === 'posterStudio' && (
+            <PosterStudioView
+              userProfile={userProfile}
+              onRewardPoints={handleRewardPoints}
+              requireAuth={requireAuth}
+              setActiveView={handleNavigateView}
+            />
           )}
 
           {activeView === 'magazine' && (

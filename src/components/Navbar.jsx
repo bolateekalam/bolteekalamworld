@@ -169,7 +169,22 @@ export const Navbar = ({
                     <span>मेरा प्रोफ़ाइल</span>
                   </button>
 
-                  {/* Option 2: हिंदी / English Toggle */}
+                  {/* Option 2: कवि इमेज़ पोस्टर Studio (25 Pts) */}
+                  <button
+                    onClick={() => { setActiveView('posterStudio'); setShowUserDropdown(false); }}
+                    aria-label="कवि इमेज़ पोस्टर Studio खोलें"
+                    className="w-full text-left px-3 py-2 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-between text-slate-900 dark:text-slate-100 font-bold"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      <span>कवि इमेज़ पोस्टर Studio</span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-amber-400 text-rose-950 font-extrabold shadow-sm">
+                      25 Pts
+                    </span>
+                  </button>
+
+                  {/* Option 3: हिंदी / English Toggle */}
                   <button
                     onClick={() => setLanguage(language === 'hi' ? 'en' : 'hi')}
                     aria-label="भाषा बदलें (Hindi/English)"
