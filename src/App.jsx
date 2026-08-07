@@ -825,6 +825,8 @@ function AppContent() {
     const postToSave = {
       ...newPost,
       ...(createdDBPost || {}),
+      imageUrl: newPost.imageUrl || newPost.image || createdDBPost?.imageUrl || createdDBPost?.image || null,
+      image: newPost.imageUrl || newPost.image || createdDBPost?.imageUrl || createdDBPost?.image || null,
       author: {
         id: authorEmail,
         email: authorEmail,

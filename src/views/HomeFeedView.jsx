@@ -78,14 +78,17 @@ export const HomeFeedView = ({
       </div>
 
       {/* 📸 New Feature: Poet Image Poster Studio Banner */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950 via-purple-900 to-slate-900 border-2 border-purple-500/40 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 relative overflow-hidden">
+      <div 
+        onClick={() => setActiveView && setActiveView('posterStudio')}
+        className="p-5 rounded-3xl bg-gradient-to-r from-purple-950 via-purple-900 to-slate-900 border-2 border-purple-500/40 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 relative overflow-hidden cursor-pointer hover:border-amber-400/60 hover:shadow-2xl transition group"
+      >
         <div className="space-y-1.5 z-10 max-w-xl">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-rose-950 font-extrabold text-[10px] uppercase">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-rose-950 font-extrabold text-[10px] uppercase shadow">
               ✨ नया ख़ास फ़ीचर
             </span>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold font-rozha text-purple-200">
+          <h3 className="text-lg sm:text-xl font-bold font-rozha text-purple-200 group-hover:text-amber-300 transition">
             कवि इमेज़ पोस्टर Studio — अपनी कविता + इमेज़ से सुंदर पोस्टर बनाएँ!
           </h3>
           <p className="text-xs text-purple-200 font-tiro">
@@ -94,7 +97,10 @@ export const HomeFeedView = ({
         </div>
 
         <button
-          onClick={() => setActiveView && setActiveView('posterStudio')}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (setActiveView) setActiveView('posterStudio');
+          }}
           className="z-10 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-2 shadow-lg active:scale-95 transition"
         >
           <Sparkles className="w-4 h-4 text-rose-950" />

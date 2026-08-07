@@ -40,7 +40,29 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
   const canvasRef = useRef(null);
 
-  const lines = content.split('\n').map(l => l.replace(/^["'“”«»-]+|["'“”«»-]+$/g, '').trim());
+  const processLinesWithWordLimit = (rawText, maxWordsPerLine = 8) => {
+    const rawLines = rawText.split('\n').map(l => l.replace(/^["'“”«»-]+|["'“”«»-]+$/g, '').trim());
+    const finalLines = [];
+
+    for (let l of rawLines) {
+      if (l === '') {
+        finalLines.push('');
+        continue;
+      }
+
+      const words = l.split(/\s+/);
+      if (words.length <= maxWordsPerLine) {
+        finalLines.push(l);
+      } else {
+        for (let i = 0; i < words.length; i += maxWordsPerLine) {
+          finalLines.push(words.slice(i, i + maxWordsPerLine).join(' '));
+        }
+      }
+    }
+    return finalLines;
+  };
+
+  const lines = processLinesWithWordLimit(content, 8);
   const validLinesCount = lines.filter(l => l.length > 0).length;
   const isTextTooLong = validLinesCount > 14 || content.length > 380;
   const isFormInvalid = !title.trim() || !content.trim();

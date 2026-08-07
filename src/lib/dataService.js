@@ -190,6 +190,8 @@ export const createPostInDB = async (postData, userId) => {
     title: postData.title || 'बिना शीर्षक',
     category: postData.category || 'कविता',
     content: postData.content || '',
+    imageUrl: postData.imageUrl || postData.image || null,
+    image: postData.imageUrl || postData.image || null,
     isArchived: false,
     tags: postData.tags || ['हिंदीसाहित्य'],
     likes: 0,
