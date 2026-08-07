@@ -1086,6 +1086,7 @@ function AppContent() {
               onOpenMembershipCard={() => setShowGlobalMembershipModal(true)}
               userProfile={userProfile}
               requireAuth={requireAuth}
+              setActiveView={handleNavigateView}
             />
           )}
 

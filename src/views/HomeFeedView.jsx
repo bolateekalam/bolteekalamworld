@@ -79,7 +79,13 @@ export const HomeFeedView = ({
 
       {/* 📸 New Feature: Poet Image Poster Studio Banner */}
       <div 
-        onClick={() => setActiveView && setActiveView('posterStudio')}
+        onClick={() => {
+          if (setActiveView) {
+            setActiveView('posterStudio');
+          } else {
+            window.location.href = '/studio';
+          }
+        }}
         className="p-5 rounded-3xl bg-gradient-to-r from-purple-950 via-purple-900 to-slate-900 border-2 border-purple-500/40 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 relative overflow-hidden cursor-pointer hover:border-amber-400/60 hover:shadow-2xl transition group"
       >
         <div className="space-y-1.5 z-10 max-w-xl">
@@ -99,7 +105,11 @@ export const HomeFeedView = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (setActiveView) setActiveView('posterStudio');
+            if (setActiveView) {
+              setActiveView('posterStudio');
+            } else {
+              window.location.href = '/studio';
+            }
           }}
           className="z-10 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-2 shadow-lg active:scale-95 transition"
         >
