@@ -23,8 +23,8 @@ export const initiateRazorpayCheckout = async ({ rupees, points, userProfile, on
     return;
   }
 
-  // Get Razorpay Key from environment or window fallback
-  const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID || 'rzp_test_demo12345';
+  // Get Razorpay Key from environment or fallback user key
+  const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID || 'rzp_test_TN20k4uJOp5Sfj';
 
   const options = {
     key: razorpayKey,
