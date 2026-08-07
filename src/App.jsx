@@ -95,6 +95,107 @@ function AppContent() {
     return mockPosts;
   });
 
+  // Weekly Challenge Global State
+  const [weeklyChallenge, setWeeklyChallenge] = useState({
+    topic: 'बरसात का पहला ख़त',
+    title: 'बरसात का पहला ख़त',
+    prompt: 'सावन की पहली फुहार और पुराने ख़तों की यादों को समेटते हुए 4 उत्कृष्ट पंक्तियाँ लिखें।',
+    endsIn: '4 दिन 14 घंटे',
+    reward1st: 500,
+    reward2nd: 250
+  });
+
+  // Dynamic Festive Banner Global State
+  const [patrioticBanner, setPatrioticBanner] = useState({
+    tag: '80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳',
+    title: 'समस्त देशवासियों को 80वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!',
+    description: '80वें स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें।',
+    bgImage: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800'
+  });
+
+  // User Profile State (Persisted in localStorage across refreshes)
+  const [userProfile, setUserProfile] = useState(() => {
+    try {
+      const savedActiveUser = localStorage.getItem('bolteekalam_active_user');
+      const activeObj = savedActiveUser ? JSON.parse(savedActiveUser) : null;
+      const savedProf = localStorage.getItem('bolteekalam_user_profile');
+      const profObj = savedProf ? JSON.parse(savedProf) : null;
+
+      if (profObj || activeObj) {
+        return {
+          ...profObj,
+          ...activeObj,
+          avatar: activeObj?.avatar || profObj?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+          name: activeObj?.name || profObj?.name || 'साहित्य साधक',
+          username: activeObj?.username || profObj?.username || '@writer',
+          city: activeObj?.city || profObj?.city || 'प्रयागराज',
+          bio: activeObj?.bio || profObj?.bio || 'हिंदी साहित्य एवं काव्य का नया साधक।'
+        };
+      }
+    } catch (e) {}
+
+    return {
+      name: 'नया साहित्य साधक',
+      email: 'newuser@bolteekalam.com',
+      phone: '',
+      username: '@new_writer',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+      cover: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200',
+      badge: 'verifiedAuthor',
+      bio: 'हिंदी साहित्य एवं काव्य का नया साधक। अभी अपनी पहली कविता पोस्ट करने जा रहा हूँ।',
+      city: 'प्रयागराज',
+      joined: 'अगस्त 2026',
+      points: 100,
+      followers: 12,
+      following: 5,
+      streak: 3
+    };
+  });
+
+  // Author Public Profile Modal State
+  const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const [showPublicProfileModal, setShowPublicProfileModal] = useState(false);
+
+  // Poetry Battle Challenge Modal State
+  const [poetryChallengeTarget, setPoetryChallengeTarget] = useState(null);
+  const [showPoetryChallengeModal, setShowPoetryChallengeModal] = useState(false);
+
+  // Global 6-Month Membership Card Modal State
+  const [showGlobalMembershipModal, setShowGlobalMembershipModal] = useState(false);
+
+  // Notifications List State (Persisted in localStorage)
+  const [notificationsList, setNotificationsList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_notifications_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [
+      {
+        id: 101,
+        type: 'like',
+        title: 'सरस्वती पाठक ने आपकी कविता को लाइक किया',
+        desc: 'आपकी रचना पर नई लाइक मिली। (+5 Pts)',
+        time: '10 मिनट पहले',
+        isUnread: true
+      },
+      {
+        id: 102,
+        type: 'comment',
+        title: 'संजय राय: "अद्भुत रचना!"',
+        desc: 'आपकी पोस्ट पर नया कमेंट प्राप्त हुआ।',
+        time: '25 मिनट पहले',
+        isUnread: true
+      }
+    ];
+  });
+  const [unreadNotifications, setUnreadNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_unread_notifications_v1');
+      if (saved !== null) return parseInt(saved, 10);
+    } catch (e) {}
+    return 2;
+  });
+
   // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket
   useEffect(() => {
     const syncPosts = () => {
