@@ -214,6 +214,29 @@ export const fetchPostsFromDB = async () => {
     return `${title}::${snippet}::${author}`;
   };
 
+  // Build a lookup map of images from globalSharedPosts to guarantee zero image loss
+  const localImageMap = new Map();
+  globalSharedPosts.forEach(p => {
+    if (p && (p.imageUrl || p.image)) {
+      const img = p.imageUrl || p.image;
+      if (p.id) localImageMap.set(String(p.id), img);
+      const fp = getPostFingerprint(p);
+      if (fp) localImageMap.set(fp, img);
+    }
+  });
+
+  // Ensure dbPosts retain local images if present in local memory
+  dbPosts = dbPosts.map(p => {
+    const pId = String(p.id);
+    const fp = getPostFingerprint(p);
+    const attachedImg = p.imageUrl || p.image || localImageMap.get(pId) || localImageMap.get(fp) || null;
+    return {
+      ...p,
+      imageUrl: attachedImg,
+      image: attachedImg
+    };
+  });
+
   // Combine DB posts + Global Shared posts + Mock posts without duplicates (DB takes precedence)
   const finalPosts = [];
   const seenIds = new Set();
@@ -230,8 +253,12 @@ export const fetchPostsFromDB = async () => {
     if (fp) seenFingerprints.add(fp);
 
     const isUserLiked = likedIds.has(pId);
+    const posterImg = p.imageUrl || p.image || localImageMap.get(pId) || localImageMap.get(fp) || null;
+
     finalPosts.push({
       ...p,
+      imageUrl: posterImg,
+      image: posterImg,
       isLiked: isUserLiked || p.isLiked,
       likes: isUserLiked ? Math.max(p.likes || 0, 1) : (p.likes || 0)
     });
