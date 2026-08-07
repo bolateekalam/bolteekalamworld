@@ -34,10 +34,15 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
     ? (userProfile?.avatar || currentUser?.avatar) 
     : (post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
 
-  const handleDeleteConfirm = () => {
-    if (window.confirm('क्या आप निश्चित ही इस रचना को डिलीट करना चाहते हैं? यह हमेशा के लिए हट जाएगी।')) {
-      if (onDeletePost) onDeletePost(post.id);
-    }
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDeleteAction = () => {
+    setShowDeleteModal(false);
+    if (onDeletePost) onDeletePost(post.id);
   };
 
   const handleLikeToggle = () => {
@@ -171,7 +176,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
               </button>
 
               <button
-                onClick={handleDeleteConfirm}
+                onClick={handleDeleteClick}
                 aria-label="रचना हमेशा के लिए डिलीट करें"
                 className="p-1.5 rounded-full bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition"
                 title="डिलीट करें"
@@ -375,6 +380,42 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           onClose={() => setShowReportModal(false)}
           postId={post.id}
         />
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-rose-500/30 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+            <div className="w-14 h-14 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto ring-4 ring-rose-500/20">
+              <Trash2 className="w-7 h-7" />
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                रचना डिलीट करें?
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                क्या आप निश्चित ही इस रचना को डिलीट करना चाहते हैं? यह हमेशा के लिए हट जाएगी।
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 pt-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-xs transition"
+              >
+                रद्द करें (Cancel)
+              </button>
+
+              <button
+                onClick={handleConfirmDeleteAction}
+                className="py-2.5 px-4 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-extrabold rounded-2xl text-xs shadow-md transition active:scale-95"
+              >
+                हाँ, डिलीट करें
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </article>
