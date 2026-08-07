@@ -9,7 +9,7 @@ import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
 import PoemCardShareModal from './PoemCardShareModal';
 
-export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, onAddComment, onFollowAuthor, isAuthorView, requireAuth, userProfile }) => {
+export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, onAddComment, onFollowAuthor, isAuthorView, requireAuth, userProfile, currentUser }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
@@ -29,6 +29,10 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
     (userProfile?.username && post.author?.username === userProfile.username) ||
     (userProfile?.name && post.author?.name && post.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase())
   );
+
+  const displayAuthorAvatar = (isUserOwnPost && (userProfile?.avatar || currentUser?.avatar)) 
+    ? (userProfile?.avatar || currentUser?.avatar) 
+    : (post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
 
   const handleDeleteConfirm = () => {
     if (window.confirm('क्या आप निश्चित ही इस रचना को डिलीट करना चाहते हैं? यह हमेशा के लिए हट जाएगी।')) {
@@ -110,11 +114,11 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
         >
           <div className="relative shrink-0">
             <img 
-              src={post.author.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'} 
-              alt={post.author.name} 
+              src={displayAuthorAvatar} 
+              alt={post.author?.name || 'लेखक'} 
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-2 ring-rose-500/30 group-hover/author:ring-rose-500 transition"
             />
-            {post.author.badge && (
+            {post.author?.badge && (
               <span className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 rounded-full p-0.5 shadow" title={getBadgeLabel(post.author.badge)}>
                 <ShieldCheck className="w-3.5 h-3.5 fill-amber-400" />
               </span>
@@ -124,9 +128,9 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 group-hover/author:text-rose-600 cursor-pointer truncate transition">
-                {post.author.name || 'साहित्य साधक'}
+                {isUserOwnPost && userProfile?.name ? userProfile.name : (post.author?.name || 'साहित्य साधक')}
               </h3>
-              {post.author.badge && (
+              {post.author?.badge && (
                 <span className="text-[9px] sm:text-[10px] px-2 py-0.2 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold shrink-0">
                   {getBadgeLabel(post.author.badge)}
                 </span>
@@ -134,25 +138,47 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
             </div>
 
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 truncate font-medium">
-              <span className="group-hover/author:text-rose-500">{(post.author.username || 'writer').replace(/^[@#]/, '')}</span>
+              <span className="group-hover/author:text-rose-500">
+                @{(isUserOwnPost && userProfile?.username ? userProfile.username : (post.author?.username || 'writer')).replace(/^[@#]/, '')}
+              </span>
               <span>•</span>
               <span>{post.createdAt}</span>
             </div>
           </div>
         </div>
 
-        {/* Right Actions: Author Edit or Follow Button */}
+        {/* Right Actions: Author Edit/Delete or Follow Button */}
         <div className="flex items-center gap-1.5 shrink-0">
           {isUserOwnPost ? (
-            <button
-              onClick={() => onEditPost && onEditPost(post)}
-              aria-label="रचना संपादित करें"
-              className="px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 text-xs font-bold flex items-center gap-1 transition"
-              title="रचना संपादित करें"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>संपादित करें</span>
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => onEditPost && onEditPost(post)}
+                aria-label="रचना संपादित करें"
+                className="px-2.5 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 text-xs font-bold flex items-center gap-1 transition"
+                title="रचना संपादित करें"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">संपादित करें</span>
+              </button>
+
+              <button
+                onClick={() => onToggleArchivePost && onToggleArchivePost(post.id)}
+                aria-label="आर्काइव करें"
+                className="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 transition"
+                title="आर्काइव करें"
+              >
+                <Archive className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={handleDeleteConfirm}
+                aria-label="रचना हमेशा के लिए डिलीट करें"
+                className="p-1.5 rounded-full bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition"
+                title="डिलीट करें"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           ) : (
             <button
               onClick={handleFollowToggle}
@@ -195,7 +221,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
         </span>
         <span className="flex items-center gap-1">
           <Eye className="w-3.5 h-3.5 text-amber-500" />
-          <span>{post.views.toLocaleString()} व्यूज़</span>
+          <span>{(post.views || 0).toLocaleString()} व्यूज़</span>
         </span>
 
         {/* Audio Recite Player Button */}
@@ -226,22 +252,37 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
         </div>
       )}
 
-      {/* Composition Body (Royal Parchment Styling) */}
-      <div className="relative p-4 sm:p-5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/40 border border-amber-200/50 dark:border-slate-800 mb-4 select-text">
-        <Quote className="w-6 h-6 text-amber-500/30 absolute top-2 right-2 rotate-180 pointer-events-none" />
-        <div className="font-tiro text-sm sm:text-base md:text-lg text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">
-          {post.content}
+      {/* Attached Full Poster Canvas Image (e.g. Generated from Poster Studio) */}
+      {(post.imageUrl || post.image) && (
+        <div className="mb-4 rounded-3xl overflow-hidden shadow-xl border-2 border-rose-500/30 max-w-lg mx-auto bg-slate-950">
+          <img 
+            src={post.imageUrl || post.image} 
+            alt={post.title}
+            className="w-full h-auto object-contain max-h-[650px] rounded-3xl" 
+          />
         </div>
-      </div>
+      )}
+
+      {/* Composition Body (Royal Parchment Styling) */}
+      {post.content && (
+        <div className="relative p-4 sm:p-5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/40 border border-amber-200/50 dark:border-slate-800 mb-4 select-text">
+          <Quote className="w-6 h-6 text-amber-500/30 absolute top-2 right-2 rotate-180 pointer-events-none" />
+          <div className="font-tiro text-sm sm:text-base md:text-lg text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">
+            {post.content}
+          </div>
+        </div>
+      )}
 
       {/* Hashtags */}
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {post.tags.map((tag, idx) => (
-          <span key={idx} className="text-xs text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-medium">
-            #{tag}
-          </span>
-        ))}
-      </div>
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {post.tags.map((tag, idx) => (
+            <span key={idx} className="text-xs text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-medium">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Action Toolbar */}
       <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
@@ -264,172 +305,77 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           {/* Comment Button */}
           <button
             onClick={handleCommentToggle}
-            aria-label={`टिप्पणियाँ देखें (${post.comments ? post.comments.length : 0} कमेंट्स)`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            aria-label={`टिप्पणियाँ देखें (${post.comments?.length || 0})`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95"
           >
-            <MessageCircle className="w-4 h-4" />
-            <span>{post.comments ? post.comments.length : 0}</span>
+            <MessageCircle className="w-4 h-4 text-emerald-500" />
+            <span>{post.comments?.length || 0}</span>
           </button>
 
           {/* Share Button */}
           <button
             onClick={handleShareToggle}
             aria-label="रचना शेयर करें"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95"
           >
-            <Share2 className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('share.title')}</span>
+            <Share2 className="w-4 h-4 text-sky-500" />
+            <span className="hidden sm:inline">शेयर</span>
           </button>
 
-          {/* Poetry Challenge Button */}
-          {!isUserOwnPost && (
-            <button
-              onClick={() => onOpenPoetryChallenge && onOpenPoetryChallenge(post.author)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 transition active:scale-95"
-              title="कवि को चुनौती दें"
-            >
-              <Swords className="w-4 h-4 text-amber-500" />
-              <span className="hidden sm:inline">चुनौती दें</span>
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1 sm:gap-2">
           {/* Bookmark Button */}
           <button
             onClick={handleBookmarkToggle}
-            aria-label="रचना सहेजें (Bookmark)"
-            className={`p-2 rounded-full transition ${
-              isBookmarked 
-                ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/50' 
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'
+            aria-label={isBookmarked ? "सेव की गई लिस्ट से हटाएँ" : "रचना सेव करें"}
+            className={`p-1.5 rounded-full transition active:scale-95 ${
+              isBookmarked ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100'
             }`}
-            title={t('bookmark.save')}
           >
             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-amber-500' : ''}`} />
           </button>
 
-          {/* Report Button (Hidden on own post) */}
-          {!isUserOwnPost && (
-            <button
-              onClick={() => setShowReportModal(true)}
-              aria-label="रचना रिपोर्ट करें"
-              className="p-2 rounded-full text-slate-500 hover:text-rose-500 transition"
-              title={t('report.title')}
-            >
-              <Flag className="w-4 h-4" />
-            </button>
-          )}
-
-          {/* Author Actions: Edit, Archive, Delete */}
-          {isUserOwnPost && (
-            <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-800 pl-2">
-              {onEditPost && (
-                <button
-                  onClick={() => onEditPost(post)}
-                  aria-label="रचना एडिट करें"
-                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 flex items-center gap-1 transition"
-                  title="रचना एडिट करें"
-                >
-                  <Edit3 className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="hidden sm:inline">एडिट</span>
-                </button>
-              )}
-
-              {onToggleArchivePost && (
-                <button
-                  onClick={() => onToggleArchivePost(post.id)}
-                  aria-label={post.isArchived ? "अन-आर्काइव करें" : "आर्काइव करें"}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-                    post.isArchived 
-                      ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/30' 
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
-                  }`}
-                  title={post.isArchived ? "अन-आर्काइव करें" : "आर्काइव करें"}
-                >
-                  <Archive className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="hidden sm:inline">{post.isArchived ? 'अन-आर्काइव' : 'आर्काइव'}</span>
-                </button>
-              )}
-
-              <button
-                onClick={handleDeleteConfirm}
-                aria-label="रचना डिलीट करें"
-                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 flex items-center gap-1 transition shadow-sm"
-                title="रचना पूरी तरह डिलीट करें"
-              >
-                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                <span>डिलीट</span>
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Flag/Report Option for non-authors */}
+        {!isUserOwnPost && (
+          <button
+            onClick={() => setShowReportModal(true)}
+            aria-label="रचना की रिपोर्ट करें"
+            className="p-1.5 rounded-full text-slate-400 hover:text-rose-500 transition"
+            title="रिपोर्ट करें"
+          >
+            <Flag className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
-      {/* Share Modal Drawer */}
-      {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 text-center">
-              {t('share.title')}
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button 
-                onClick={handleCopyLink} 
-                aria-label="लिंक कॉपी करें"
-                className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold flex items-center gap-2 justify-center text-slate-800 dark:text-slate-200 hover:bg-slate-200"
-              >
-                <Copy className="w-4 h-4 text-rose-500" />
-                <span>{copiedLink ? t('share.copiedMsg') : t('share.copyLink')}</span>
-              </button>
-
-              <a 
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title)}`} 
-                target="_blank" 
-                rel="noreferrer"
-                aria-label="व्हाट्सएप पर शेयर करें"
-                className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 font-bold flex items-center gap-2 justify-center hover:bg-emerald-500/20"
-              >
-                <Send className="w-4 h-4" />
-                <span>{t('share.whatsapp')}</span>
-              </a>
-            </div>
-
-            <button
-              onClick={() => setShowShareModal(false)}
-              aria-label="शेयर मॉडल बंद करें"
-              className="w-full py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold"
-            >
-              बंद करें
-            </button>
-          </div>
-        </div>
+      {/* Expandable Comment Section */}
+      {showComments && (
+        <CommentSection
+          postId={post.id}
+          comments={post.comments || []}
+          onAddComment={onAddComment}
+          requireAuth={requireAuth}
+          currentUser={currentUser}
+        />
       )}
 
-      {/* Poem PNG & Link Share Modal */}
-      <PoemCardShareModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        post={post}
-      />
-
-      {/* Inline Comments */}
-      {showComments && (
-        <CommentSection 
-          comments={post.comments}
-          userProfile={userProfile}
-          onAddComment={(commentObj) => onAddComment && onAddComment(post.id, commentObj)}
-          onReportComment={() => setShowReportModal(true)}
+      {/* Share Card Modal */}
+      {showShareModal && (
+        <PoemCardShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          post={post}
         />
       )}
 
       {/* Report Modal */}
-      <ReportModal
-        isOpen={showReportModal}
-        onClose={() => setShowReportModal(false)}
-        targetItem={post}
-      />
+      {showReportModal && (
+        <ReportModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          postId={post.id}
+        />
+      )}
 
     </article>
   );
