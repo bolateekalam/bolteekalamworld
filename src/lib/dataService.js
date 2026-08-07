@@ -84,22 +84,23 @@ export const uploadImageToSupabaseStorage = async (base64DataUrl, fileName) => {
   return base64DataUrl;
 };
 
-// Encode author metadata and archived status into content text for 100% schema safety
-const encodeContentWithAuthor = (content, authorInfo, isArchived = false) => {
+// Encode author metadata, archived status, and poster imageUrl into content text for 100% schema safety
+const encodeContentWithAuthor = (content, authorInfo, isArchived = false, imageUrl = null) => {
   const metaHeader = `<!--BK_AUTHOR: ${JSON.stringify({
     name: authorInfo.name || 'साहित्य साधक',
     username: authorInfo.username || '@writer',
     avatar: authorInfo.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
     email: authorInfo.email || '',
-    isArchived: !!isArchived
+    isArchived: !!isArchived,
+    imageUrl: imageUrl || authorInfo.imageUrl || null
   })}-->\n`;
   return metaHeader + content;
 };
 
-// Decode author metadata and archived status from content text
+// Decode author metadata, archived status, and poster imageUrl from content text
 const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
   if (!rawContent || typeof rawContent !== 'string') {
-    return { content: '', author: defaultAuthor, isArchived: false };
+    return { content: '', author: defaultAuthor, isArchived: false, imageUrl: null };
   }
 
   const match = rawContent.match(/^<!--BK_AUTHOR:\s*({.*?})-->\n?/s);
@@ -110,6 +111,7 @@ const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
       return {
         content: cleanContent,
         isArchived: !!parsedMeta.isArchived,
+        imageUrl: parsedMeta.imageUrl || null,
         author: {
           id: parsedMeta.email || parsedMeta.username || defaultAuthor.id,
           email: parsedMeta.email || '',
@@ -124,7 +126,7 @@ const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
     } catch (e) {}
   }
 
-  return { content: rawContent, author: defaultAuthor, isArchived: false };
+  return { content: rawContent, author: defaultAuthor, isArchived: false, imageUrl: null };
 };
 
 // 1. Fetch All Shared Posts from Supabase DB + Global Shared Cloud Feed
@@ -166,6 +168,7 @@ export const fetchPostsFromDB = async () => {
         const decoded = decodeContentAndAuthor(p.content, defaultAuthor);
         const pId = String(p.id);
         const isUserLiked = likedIds.has(pId);
+        const posterImg = decoded.imageUrl || p.image_url || p.imageUrl || p.image || null;
 
         return {
           id: pId,
@@ -173,6 +176,8 @@ export const fetchPostsFromDB = async () => {
           title: p.title || 'बिना शीर्षक',
           category: p.category || 'कविता',
           content: decoded.content,
+          imageUrl: posterImg,
+          image: posterImg,
           isArchived: decoded.isArchived,
           tags: p.tags || ['हिंदीसाहित्य'],
           likes: isUserLiked ? Math.max(p.likes_count || 0, 1) : (p.likes_count || 0),
@@ -253,7 +258,8 @@ export const createPostInDB = async (postData, userId) => {
     email: postData.authorEmail || userId || ''
   };
 
-  const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo, false);
+  const posterImg = postData.imageUrl || postData.image || null;
+  const encodedBody = encodeContentWithAuthor(postData.content || '', authorInfo, false, posterImg);
 
   const postId = postData.id || `post_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
