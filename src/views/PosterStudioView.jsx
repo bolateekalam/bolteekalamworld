@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Download, Image as ImageIcon, Upload, Check, 
-  AlertCircle, Lock, Award, RefreshCw, Palette, Type, Feather, Trash2
+  AlertCircle, Lock, Award, RefreshCw, Palette, Type, Feather, Trash2, Send
 } from 'lucide-react';
 
 const THEMES = [
@@ -14,16 +14,18 @@ const THEMES = [
 
 const LAYOUTS = [
   { id: 'side', name: '📐 दाएँ तरफ फोटो (Side Photo Layout)' },
-  { id: 'bottomCircle', name: '⭕ नीचे दाएँ गोल पोर्ट्रेट (Bottom Circle Sketch)' },
-  { id: 'stacked', name: '🖼️ स्प्लिट लेआउट (Split Stacked Layout)' },
+  { id: 'topRight', name: '🖼️ ऊपर दाएँ फोटो (Top Right Photo Stack)' },
+  { id: 'bottomRight', name: '🖼️ नीचे दाएँ फोटो (Bottom Right Photo Stack)' },
+  { id: 'topCenter', name: '✨ ऊपर सेंटर फोटो + नीचे कविता (Top Center Photo + Poem)' },
   { id: 'fullText', name: '📜 केवल कविता टेक्स्ट (Full Text Poster)' }
 ];
 
-export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, setActiveView }) => {
+export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterPost, requireAuth, setActiveView }) => {
   const userPoints = userProfile?.points || 0;
-  const HAS_ENOUGH_POINTS = userPoints >= 25;
+  const HAS_25_POINTS = userPoints >= 25;
+  const HAS_15_POINTS = userPoints >= 15;
 
-  // Fixed Non-editable Author Details
+  // Fixed Non-editable Author Details from Profile
   const fixedAuthorName = userProfile?.name || 'साहित्य साधक';
   const fixedAuthorUsername = (userProfile?.username || '@writer').replace(/^[@#]/, '');
 
@@ -36,6 +38,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
   const [selectedLayoutId, setSelectedLayoutId] = useState('side');
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
   const [downloading, setDownloading] = useState(false);
+  const [posting, setPosting] = useState(false);
 
   const canvasRef = useRef(null);
 
@@ -61,7 +64,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
     setUploadedPhotoUrl(null);
   };
 
-  // Render 4:5 Poster Canvas (1080x1350)
+  // Render 4:5 Poster Canvas (1080x1350) with ZERO OVERLAPPING GUARANTEE
   const drawPosterCanvas = () => {
     return new Promise((resolve) => {
       const canvas = canvasRef.current || document.createElement('canvas');
@@ -71,7 +74,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
 
       const { bg1, bg2, border: borderColor, title: titleColor, text: textColor, brand: brandColor } = currentTheme;
 
-      // 1. TRUE 24px Rounded Outer Corner Clipping Mask
+      // 1. TRUE 24px Rounded Outer Corner Mask
       ctx.save();
       ctx.beginPath();
       const r = 24;
@@ -108,46 +111,59 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
       ctx.lineTo(1005, 100);
       ctx.stroke();
 
-      // 3. Main Poem Title
-      ctx.fillStyle = titleColor;
-      ctx.font = 'bold 44px serif';
-      const truncatedTitle = title.length > 22 ? title.slice(0, 22) + '...' : title;
-      ctx.fillText(truncatedTitle, 75, 175);
-
       // Function to Draw Poem Lines & Author Footer
-      const renderPoemAndFooter = (maxWidth = 930) => {
+      const renderTextAndFooter = (startY = 255, maxTextW = 930, maxLinesY = 1140) => {
+        // Dynamic Font Scaling based on poem length
         let fontSize = 34;
         let lineHeight = 54;
         let fontWeight = 'bold';
 
         if (validLinesCount <= 6) {
-          fontSize = 42;
-          lineHeight = 66;
+          fontSize = selectedLayoutId === 'side' ? 34 : 40;
+          lineHeight = selectedLayoutId === 'side' ? 56 : 64;
           fontWeight = 'bold';
         } else if (validLinesCount <= 10) {
-          fontSize = 32;
-          lineHeight = 52;
+          fontSize = selectedLayoutId === 'side' ? 28 : 32;
+          lineHeight = selectedLayoutId === 'side' ? 46 : 52;
           fontWeight = 'bold';
         } else {
-          fontSize = 26;
-          lineHeight = 40;
+          fontSize = selectedLayoutId === 'side' ? 24 : 26;
+          lineHeight = selectedLayoutId === 'side' ? 38 : 40;
           fontWeight = 'normal';
         }
 
+        // Title
+        ctx.fillStyle = titleColor;
+        ctx.font = selectedLayoutId === 'topCenter' ? 'bold 40px serif' : 'bold 44px serif';
+        const truncatedTitle = title.length > 22 ? title.slice(0, 22) + '...' : title;
+        
+        if (selectedLayoutId === 'topCenter') {
+          const tWidth = ctx.measureText(truncatedTitle).width;
+          ctx.fillText(truncatedTitle, (1080 - tWidth) / 2, startY);
+          startY += 60;
+        } else {
+          ctx.fillText(truncatedTitle, 75, 175);
+        }
+
+        // Poem Lines
         ctx.fillStyle = textColor;
         ctx.font = `${fontWeight} ${fontSize}px serif`;
 
-        let currentY = 255;
-        const maxLinesY = (selectedLayoutId === 'bottomCircle' && uploadedPhotoUrl) ? 820 : 1130;
+        let currentY = startY;
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
           if (currentY > maxLinesY) break;
 
           if (line === '') {
-            currentY += Math.round(lineHeight * 0.6);
+            currentY += Math.round(lineHeight * 0.5);
           } else {
-            ctx.fillText(line, 75, currentY);
+            if (selectedLayoutId === 'topCenter') {
+              const lWidth = ctx.measureText(line).width;
+              ctx.fillText(line, (1080 - lWidth) / 2, currentY);
+            } else {
+              ctx.fillText(line, 75, currentY);
+            }
             currentY += lineHeight;
           }
         }
@@ -177,7 +193,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
         resolve(canvas);
       };
 
-      // Handle Image Rendering based on selected layout
+      // Photo Layout Modes Logic
       if (uploadedPhotoUrl && selectedLayoutId !== 'fullText') {
         const img = new Image();
         img.crossOrigin = 'anonymous';
@@ -186,10 +202,10 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
           ctx.save();
 
           if (selectedLayoutId === 'side') {
-            // Side Photo (Right 380px)
-            const photoX = 625;
+            // Side Photo (Right 370px, X = 635 to 1005) -> ZERO OVERLAP! Text max width 510px.
+            const photoX = 635;
             const photoY = 220;
-            const photoW = 380;
+            const photoW = 370;
             const photoH = 880;
 
             ctx.beginPath();
@@ -220,40 +236,14 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
             }
             ctx.stroke();
 
-            renderPoemAndFooter(510);
-          } else if (selectedLayoutId === 'bottomCircle') {
-            // Bottom Right Circle Portrait (Radius 130px)
-            const centerX = 840;
-            const centerY = 950;
-            const radius = 130;
+            renderTextAndFooter(255, 510, 1140);
 
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
-            ctx.clip();
-
-            const aspect = img.width / img.height;
-            let drawW = radius * 2;
-            let drawH = (radius * 2) / aspect;
-            if (drawH < radius * 2) {
-              drawH = radius * 2;
-              drawW = (radius * 2) * aspect;
-            }
-            ctx.drawImage(img, centerX - drawW / 2, centerY - drawH / 2, drawW, drawH);
-            ctx.restore();
-
-            ctx.strokeStyle = borderColor;
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius + 2, 0, Math.PI * 2, true);
-            ctx.stroke();
-
-            renderPoemAndFooter(930);
-          } else if (selectedLayoutId === 'stacked') {
-            // Stacked Bottom Right Photo
-            const photoX = 640;
-            const photoY = 740;
-            const photoW = 365;
-            const photoH = 410;
+          } else if (selectedLayoutId === 'topRight') {
+            // Top Right Photo Stack (Photo X = 650, Y = 175, W = 355, H = 420)
+            const photoX = 650;
+            const photoY = 175;
+            const photoW = 355;
+            const photoH = 420;
 
             ctx.beginPath();
             if (ctx.roundRect) {
@@ -283,18 +273,92 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
             }
             ctx.stroke();
 
-            renderPoemAndFooter(930);
+            renderTextAndFooter(255, 520, 1140);
+
+          } else if (selectedLayoutId === 'bottomRight') {
+            // Bottom Right Photo Stack (Photo X = 650, Y = 730, W = 355, H = 420)
+            const photoX = 650;
+            const photoY = 730;
+            const photoW = 355;
+            const photoH = 420;
+
+            ctx.beginPath();
+            if (ctx.roundRect) {
+              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
+            } else {
+              ctx.rect(photoX, photoY, photoW, photoH);
+            }
+            ctx.clip();
+
+            const aspect = img.width / img.height;
+            let drawW = photoW;
+            let drawH = photoW / aspect;
+            if (drawH < photoH) {
+              drawH = photoH;
+              drawW = photoH * aspect;
+            }
+            ctx.drawImage(img, photoX - (drawW - photoW) / 2, photoY - (drawH - photoH) / 2, drawW, drawH);
+            ctx.restore();
+
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            if (ctx.roundRect) {
+              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
+            } else {
+              ctx.rect(photoX, photoY, photoW, photoH);
+            }
+            ctx.stroke();
+
+            renderTextAndFooter(255, 520, 1140);
+
+          } else if (selectedLayoutId === 'topCenter') {
+            // Top Center Photo (X = 390, Y = 140, W = 300, H = 340) -> Centered Poem Below!
+            const photoX = 390;
+            const photoY = 140;
+            const photoW = 300;
+            const photoH = 340;
+
+            ctx.beginPath();
+            if (ctx.roundRect) {
+              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
+            } else {
+              ctx.rect(photoX, photoY, photoW, photoH);
+            }
+            ctx.clip();
+
+            const aspect = img.width / img.height;
+            let drawW = photoW;
+            let drawH = photoW / aspect;
+            if (drawH < photoH) {
+              drawH = photoH;
+              drawW = photoH * aspect;
+            }
+            ctx.drawImage(img, photoX - (drawW - photoW) / 2, photoY - (drawH - photoH) / 2, drawW, drawH);
+            ctx.restore();
+
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            if (ctx.roundRect) {
+              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
+            } else {
+              ctx.rect(photoX, photoY, photoW, photoH);
+            }
+            ctx.stroke();
+
+            renderTextAndFooter(530, 930, 1140);
           }
         };
 
         img.onerror = () => {
-          renderPoemAndFooter(930);
+          renderTextAndFooter(255, 930, 1140);
         };
 
         img.src = uploadedPhotoUrl;
       } else {
         // Full Text Poem Mode without photo
-        renderPoemAndFooter(930);
+        renderTextAndFooter(255, 930, 1140);
       }
     });
   };
@@ -303,12 +367,12 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
     drawPosterCanvas();
   }, [title, content, selectedThemeId, selectedLayoutId, uploadedPhotoUrl]);
 
-  // Generate & Download PNG + Deduct 25 Points
+  // Option 1: Download PNG (-25 Points)
   const handleGenerateAndDownload = async () => {
     if (requireAuth && !requireAuth()) return;
 
-    if (!HAS_ENOUGH_POINTS) {
-      alert(`आपके पास केवल ${userPoints} रिवॉर्ड पॉइंट्स हैं। 4:5 कवि पोस्टर जनरेट करने के लिए 25 पॉइंट्स की आवश्यकता है।`);
+    if (!HAS_25_POINTS) {
+      alert(`आपके पास केवल ${userPoints} रिवॉर्ड पॉइंट्स हैं। इमेज़ डाउनलोड करने के लिए 25 पॉइंट्स आवश्यक हैं।`);
       return;
     }
 
@@ -325,13 +389,41 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
 
       // Deduct 25 Points
       if (onRewardPoints) {
-        onRewardPoints(-25, 'कवि इमेज़ पोस्टर जनरेट करने पर');
+        onRewardPoints(-25, 'कवि इमेज़ पोस्टर डाउनलोड करने पर');
       }
 
     } catch (e) {
-      console.error('Poster generation error:', e);
+      console.error('Poster download error:', e);
     } finally {
       setDownloading(false);
+    }
+  };
+
+  // Option 2: Post Directly to Feed (-15 Points)
+  const handlePublishDirectly = async () => {
+    if (requireAuth && !requireAuth()) return;
+
+    if (!HAS_15_POINTS) {
+      alert(`आपके पास केवल ${userPoints} रिवॉर्ड पॉइंट्स हैं। मंच पर पोस्ट करने के लिए 15 पॉइंट्स आवश्यक हैं।`);
+      return;
+    }
+
+    setPosting(true);
+    try {
+      const canvas = await drawPosterCanvas();
+      const pngUrl = canvas.toDataURL('image/png');
+
+      if (onPublishPosterPost) {
+        onPublishPosterPost({
+          title,
+          content,
+          imageUrl: pngUrl
+        });
+      }
+    } catch (e) {
+      console.error('Poster publish error:', e);
+    } finally {
+      setPosting(false);
     }
   };
 
@@ -344,7 +436,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-amber-400 text-rose-950 font-extrabold text-xs uppercase flex items-center gap-1 shadow">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>प्रीमियम फीचर</span>
+              <span>प्रीमियम पोस्टर फीचर</span>
             </span>
             <span className="text-xs text-rose-200 font-bold">
               1080 × 1350 (Instagram 4:5 Aspect Ratio)
@@ -354,7 +446,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
             कवि इमेज़ पोस्टर Studio
           </h2>
           <p className="text-xs sm:text-sm text-rose-100 max-w-xl font-tiro">
-            अपनी कविता और तस्वीर को एक सुंदर 4:5 HD इमेज़ पोस्टर में बदलें। (लागत: 25 रिवॉर्ड पॉइंट्स)
+            अपनी कविता और तस्वीर को एक सुंदर 4:5 HD इमेज़ पोस्टर में बदलें। (डाउनलोड: 25 Pts | सीधी पोस्ट: 15 Pts)
           </p>
         </div>
 
@@ -363,7 +455,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
           <span className="text-[10px] text-slate-400 uppercase font-bold block">आपके कुल पॉइंट्स</span>
           <span className="text-2xl font-extrabold text-amber-400">{userPoints} Pts</span>
           <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">
-            {HAS_ENOUGH_POINTS ? '✓ 25 Pts उपलब्ध हैं' : '⚠️ 25 Pts की आवश्यकता है'}
+            {HAS_25_POINTS ? '✓ 25 Pts उपलब्ध हैं' : `⚠️ 25 Pts आवश्यक (आपके पास ${userPoints})`}
           </span>
         </div>
       </div>
@@ -376,7 +468,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
           
           <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
             <Palette className="w-5 h-5 text-rose-600" />
-            <span>पोस्टर टेक्स्ट व कस्टमाइज़ेशन</span>
+            <span>पोस्टर कस्टमाइज़ेशन</span>
           </h3>
 
           {/* Title Input */}
@@ -429,7 +521,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
             </div>
           </div>
 
-          {/* Theme Dropdown (5 Options) */}
+          {/* Theme Dropdown (5 Themes) */}
           <div className="space-y-1">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
               थीम व बैकग्राउंड स्टाइल चुनें (5 Themes)
@@ -445,10 +537,10 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
             </select>
           </div>
 
-          {/* Layout Dropdown (4 Layouts) */}
+          {/* Layout Dropdown (5 Layouts) */}
           <div className="space-y-1">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              इमेज़ व टेक्स्ट लेआउट स्टाइल चुनें (4 Styles)
+              इमेज़ व टेक्स्ट लेआउट स्टाइल चुनें (5 Styles)
             </label>
             <select
               value={selectedLayoutId}
@@ -486,7 +578,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
 
             {!uploadedPhotoUrl && (
               <p className="text-[10px] text-slate-500 italic">
-                * फोटो न अपलोड करने पर पोस्ट केवल कविता (Full Text) मोड में बिना फोटो के डाउनलोड होगी।
+                * फोटो न अपलोड करने पर पोस्ट केवल कविता (Full Text) मोड में बिना फोटो के डाउनलोड/पोस्ट होगी।
               </p>
             )}
           </div>
@@ -500,7 +592,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
           <div className="flex items-center justify-between w-full border-b border-slate-200 dark:border-slate-800 pb-2 text-xs font-bold text-slate-700 dark:text-slate-300">
             <span className="flex items-center gap-1.5">
               <ImageIcon className="w-4 h-4 text-rose-600" />
-              <span>तुरंत 4:5 लाइव पोस्टर प्रिव्यू (Live Preview First)</span>
+              <span>तुरंत 4:5 लाइव पोस्टर प्रिव्यू (Live Preview)</span>
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 font-extrabold uppercase">
               24px Rounded PNG
@@ -515,28 +607,51 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, requireAuth, set
             />
           </div>
 
-          {/* Action Download Button Directly Below Live Preview */}
-          <div className="w-full max-w-[420px] space-y-2 pt-1">
-            <button
-              onClick={handleGenerateAndDownload}
-              disabled={downloading || !HAS_ENOUGH_POINTS || isTextTooLong}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-rose-600 via-rose-700 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white font-extrabold rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {HAS_ENOUGH_POINTS ? (
-                <>
-                  <Download className="w-4.5 h-4.5" />
-                  <span>{downloading ? 'पोस्टर जनरेट हो रहा...' : '4:5 HD इमेज़ डाउनलोड करें (-25 Pts)'}</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4 text-amber-300" />
-                  <span>25 रिवॉर्ड पॉइंट्स आवश्यक (आपके पास {userPoints} Pts)</span>
-                </>
-              )}
-            </button>
+          {/* Action Download & Direct Post Buttons Directly Below Live Preview */}
+          <div className="w-full max-w-[420px] space-y-2.5 pt-1">
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* Download Option */}
+              <button
+                onClick={handleGenerateAndDownload}
+                disabled={downloading || !HAS_25_POINTS || isTextTooLong}
+                className="py-3 px-3 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-extrabold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {HAS_25_POINTS ? (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>{downloading ? 'डाउनलोडिंग...' : 'इमेज़ डाउनलोड (-25 Pts)'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4 text-amber-300" />
+                    <span>25 Pts आवश्यक</span>
+                  </>
+                )}
+              </button>
+
+              {/* Direct Post Option */}
+              <button
+                onClick={handlePublishDirectly}
+                disabled={posting || !HAS_15_POINTS || isTextTooLong}
+                className="py-3 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {HAS_15_POINTS ? (
+                  <>
+                    <Send className="w-4 h-4 text-slate-950" />
+                    <span>{posting ? 'पोस्ट हो रहा...' : 'मंच पर पोस्ट करें (-15 Pts)'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4 text-rose-950" />
+                    <span>15 Pts आवश्यक</span>
+                  </>
+                )}
+              </button>
+            </div>
 
             <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center">
-              डाउनलोड होने वाली PNG इमेज़ 1080×1350 px में 24px राउंडेड कॉर्नर्स के साथ बिना किसी ओवरलैपिंग के सेव होगी।
+              * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
             </p>
           </div>
 

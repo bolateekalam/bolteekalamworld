@@ -306,6 +306,9 @@ function AppContent() {
       } else if (viewId === 'magazine') {
         history.pushState(null, '', '/magazine');
         document.title = 'साहित्यिक पत्रिका — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'posterStudio') {
+        history.pushState(null, '', '/studio');
+        document.title = 'कवि इमेज़ पोस्टर Studio — बोलती कलम | bolateeworld.in';
       }
     } catch (e) {}
   };
@@ -365,6 +368,11 @@ function AppContent() {
         }
         if (rawPath.includes('/magazine') || rawHash.includes('magazine')) {
           setActiveView('magazine');
+          return;
+        }
+        if (rawPath.includes('/studio') || rawHash.includes('studio')) {
+          setActiveView('posterStudio');
+          document.title = 'कवि इमेज़ पोस्टर Studio — बोलती कलम | bolateeworld.in';
           return;
         }
         if (rawPath === '/profile' || rawHash === '#/profile') {
@@ -985,6 +993,24 @@ function AppContent() {
     window.open('https://www.youtube me', '_blank');
   };
 
+  const handlePublishPosterPost = (posterData) => {
+    handleRewardPoints(-15, 'मंच पर इमेज़ पोस्टर पोस्ट करने पर');
+
+    const postPayload = {
+      title: posterData.title || 'कवि इमेज़ पोस्टर',
+      category: 'कविता',
+      content: posterData.content || '',
+      authorName: userProfile?.name || 'साहित्य साधक',
+      authorUsername: userProfile?.username || '@writer',
+      authorAvatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+      authorEmail: currentUser?.email || userProfile?.email || ''
+    };
+
+    handlePostCreated(postPayload);
+    handleNavigateView('feed');
+    alert('🎉 आपकी इमेज़ पोस्टर पोस्ट सफलतापूर्वक मंच पर लाइव हो गई है! (-15 Points)');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-inter">
       
@@ -1102,6 +1128,7 @@ function AppContent() {
             <PosterStudioView
               userProfile={userProfile}
               onRewardPoints={handleRewardPoints}
+              onPublishPosterPost={handlePublishPosterPost}
               requireAuth={requireAuth}
               setActiveView={handleNavigateView}
             />
