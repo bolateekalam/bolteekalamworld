@@ -263,8 +263,8 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
         </div>
       )}
 
-      {/* Composition Body (Royal Parchment Styling) */}
-      {post.content && (
+      {/* Composition Body (Royal Parchment Styling) - Rendered ONLY if NOT a poster image post */}
+      {post.content && !(post.imageUrl || post.image) && (
         <div className="relative p-4 sm:p-5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/40 border border-amber-200/50 dark:border-slate-800 mb-4 select-text">
           <Quote className="w-6 h-6 text-amber-500/30 absolute top-2 right-2 rotate-180 pointer-events-none" />
           <div className="font-tiro text-sm sm:text-base md:text-lg text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">

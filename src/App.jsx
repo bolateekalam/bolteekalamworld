@@ -848,18 +848,25 @@ function AppContent() {
     });
 
     try {
-      const savedGlobal = localStorage.getItem('bolteekalam_global_shared_posts');
+      const savedGlobal = localStorage.getItem('bolteekalam_global_shared_public_posts_v2') || localStorage.getItem('bolteekalam_global_shared_posts');
       const existingGlobal = savedGlobal ? JSON.parse(savedGlobal) : [];
       const filteredGlobal = existingGlobal.filter(p => String(p.id) !== String(postToSave.id) && !(p.title === postToSave.title && p.content === postToSave.content));
-      localStorage.setItem('bolteekalam_global_shared_posts', JSON.stringify([postToSave, ...filteredGlobal]));
-    } catch (e) {}
+      const updatedGlobalList = [postToSave, ...filteredGlobal];
+      localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(updatedGlobalList));
+      localStorage.setItem('bolteekalam_global_shared_posts', JSON.stringify(updatedGlobalList));
+    } catch (e) {
+      console.error("Global storage save error:", e);
+    }
 
     try {
       const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
       const existingUserPosts = savedUserPosts ? JSON.parse(savedUserPosts) : [];
       const filteredUser = existingUserPosts.filter(p => String(p.id) !== String(postToSave.id) && !(p.title === postToSave.title && p.content === postToSave.content));
-      localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify([postToSave, ...filteredUser]));
-    } catch (e) {}
+      const updatedUserList = [postToSave, ...filteredUser];
+      localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserList));
+    } catch (e) {
+      console.error("User storage save error:", e);
+    }
   };
 
   const handleSavePost = (updatedPost) => {
