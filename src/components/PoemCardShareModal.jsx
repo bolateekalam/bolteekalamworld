@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, Share2, Copy, Check, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { X, Download, Share2, Copy, Check, Sparkles } from 'lucide-react';
 
 const WhatsAppIcon = (props) => (
   <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -25,6 +25,8 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
     return line.replace(/^["'“”«»-]+|["'“”«»-]+$/g, '').trim();
   });
 
+  const validLinesCount = poemLines.filter(l => l.length > 0).length;
+
   // Generate 4:5 Aspect Ratio (1080x1350) Canvas PNG
   const generateCanvasPNG = () => {
     return new Promise((resolve) => {
@@ -33,7 +35,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       canvas.height = 1350;
       const ctx = canvas.getContext('2d');
 
-      // 1. Parchment Background
+      // 1. Parchment Royal Background
       ctx.fillStyle = '#fffdf9';
       ctx.fillRect(0, 0, 1080, 1350);
 
@@ -46,14 +48,14 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       ctx.lineWidth = 2;
       ctx.strokeRect(50, 50, 980, 1250);
 
-      // 3. Top Header Bar: Post Title at Top Left, Category at Top Right
+      // 3. Top Header Bar: Post Title at Top Left (ONLY ONCE!), Category at Top Right
       ctx.fillStyle = '#881337';
-      ctx.font = 'bold 36px serif';
-      const truncatedTopTitle = poemTitle.length > 25 ? poemTitle.slice(0, 25) + '...' : poemTitle;
+      ctx.font = 'bold 42px serif';
+      const truncatedTopTitle = poemTitle.length > 22 ? poemTitle.slice(0, 22) + '...' : poemTitle;
       ctx.fillText(truncatedTopTitle, 75, 115);
 
       ctx.fillStyle = '#e11d48';
-      ctx.font = 'bold 22px sans-serif';
+      ctx.font = 'bold 24px sans-serif';
       const categoryText = `श्रेणी: ${post.category || 'कविता'}`;
       const catWidth = ctx.measureText(categoryText).width;
       ctx.fillText(categoryText, 1005 - catWidth, 115);
@@ -62,20 +64,37 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       ctx.strokeStyle = '#e11d48';
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(75, 145);
-      ctx.lineTo(1005, 145);
+      ctx.moveTo(75, 150);
+      ctx.lineTo(1005, 150);
       ctx.stroke();
 
-      // 5. Main Poem Title
-      ctx.fillStyle = '#881337';
-      ctx.font = 'bold 44px serif';
-      ctx.fillText(poemTitle, 75, 225);
+      // 5. Dynamic Large Font Scaling Based on Poem Length for High Readability
+      let fontSize = 38;
+      let lineHeight = 64;
+      let fontWeight = 'bold';
 
-      // 6. Render Poem Lines (No quotes, no dashes, clean stanza gaps)
-      ctx.fillStyle = '#1e293b';
-      ctx.font = '26px serif';
+      if (validLinesCount <= 6) {
+        fontSize = 42;
+        lineHeight = 68;
+        fontWeight = 'bold';
+      } else if (validLinesCount <= 10) {
+        fontSize = 34;
+        lineHeight = 54;
+        fontWeight = 'bold';
+      } else if (validLinesCount <= 16) {
+        fontSize = 28;
+        lineHeight = 44;
+        fontWeight = 'normal';
+      } else {
+        fontSize = 24;
+        lineHeight = 38;
+        fontWeight = 'normal';
+      }
 
-      let currentY = 295;
+      ctx.fillStyle = '#0f172a';
+      ctx.font = `${fontWeight} ${fontSize}px serif`;
+
+      let currentY = 220 + fontSize;
       const maxLinesY = 1140;
 
       for (let i = 0; i < poemLines.length; i++) {
@@ -83,15 +102,15 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
         if (currentY > maxLinesY) break;
 
         if (line === '') {
-          // Empty line / stanza gap: advance Y space without drawing quotes or dashes
-          currentY += 28;
+          // Stanza gap: advance Y space cleanly without quotes or dashes
+          currentY += Math.round(lineHeight * 0.6);
         } else {
           ctx.fillText(line, 80, currentY);
-          currentY += 46;
+          currentY += lineHeight;
         }
       }
 
-      // 7. Footer Divider Line
+      // 6. Footer Divider Line
       ctx.strokeStyle = '#cbd5e1';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -99,22 +118,22 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       ctx.lineTo(1005, 1180);
       ctx.stroke();
 
-      // 8. Footer Author Info & Website Brand URL
+      // 7. Footer Author Info & Website Brand URL
       const avatarImg = new Image();
       avatarImg.crossOrigin = 'anonymous';
 
       const drawFooterDetails = () => {
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 28px sans-serif';
-        ctx.fillText(authorName, 175, 1240);
+        ctx.font = 'bold 30px sans-serif';
+        ctx.fillText(authorName, 180, 1240);
 
         ctx.fillStyle = '#64748b';
-        ctx.font = '20px sans-serif';
-        ctx.fillText(authorUsername, 175, 1272);
+        ctx.font = '22px sans-serif';
+        ctx.fillText(authorUsername, 180, 1275);
 
         ctx.fillStyle = '#e11d48';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.fillText('www.bolateeworld.in', 740, 1255);
+        ctx.font = 'bold 26px sans-serif';
+        ctx.fillText('www.bolateeworld.in', 720, 1255);
 
         resolve(canvas);
       };
@@ -122,15 +141,15 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       avatarImg.onload = () => {
         ctx.save();
         ctx.beginPath();
-        ctx.arc(115, 1250, 42, 0, Math.PI * 2, true);
+        ctx.arc(115, 1250, 44, 0, Math.PI * 2, true);
         ctx.clip();
-        ctx.drawImage(avatarImg, 73, 1208, 84, 84);
+        ctx.drawImage(avatarImg, 71, 1206, 88, 88);
         ctx.restore();
 
         ctx.strokeStyle = '#e11d48';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(115, 1250, 43, 0, Math.PI * 2, true);
+        ctx.arc(115, 1250, 45, 0, Math.PI * 2, true);
         ctx.stroke();
 
         drawFooterDetails();
@@ -144,7 +163,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
     });
   };
 
-  // Pure PNG Download Handler (4:5 Ratio)
+  // Pure PNG Download Handler
   const handleDownloadPNG = async () => {
     setDownloading(true);
     try {
@@ -152,7 +171,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       const pngUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = pngUrl;
-      link.download = `Bolateeworld_${poemTitle.replace(/\s+/g, '_')}_4x5.png`;
+      link.download = `Bolateeworld_${poemTitle.replace(/\s+/g, '_')}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -163,32 +182,27 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
     }
   };
 
-  // WhatsApp Native File & Text Share Handler
+  // WhatsApp Share Handler - ONLY PNG Image Shared, NO Extra Text Below Image!
   const handleShareWhatsApp = async () => {
     setSharingWhatsApp(true);
-    const cleanUser = authorUsername.replace(/^[@#]/, '');
-    const poemSnippet = poemLines.filter(l => l.length > 0).slice(0, 6).join('\n');
-    
-    const shareText = `📜 *${poemTitle}*\n✍️ *रचनाकार:* ${authorName} (${authorUsername})\n\n${poemSnippet}\n\n📖 पूरी रचना बोलती कलम पर पढ़ें:\nhttps://www.bolateeworld.in/profile/${cleanUser}`;
 
     try {
       const canvas = await generateCanvasPNG();
       
-      // Try Web Share API with 4:5 PNG Image File for direct WhatsApp Image/Status Sharing
       canvas.toBlob(async (blob) => {
         if (blob && navigator.share && navigator.canShare) {
-          const file = new File([blob], `${poemTitle.replace(/\s+/g, '_')}_4x5.png`, { type: 'image/png' });
+          const file = new File([blob], `${poemTitle.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
           if (navigator.canShare({ files: [file] })) {
             try {
+              // EMPTY text property so WhatsApp ONLY shares the PNG image without extra text below!
               await navigator.share({
                 title: poemTitle,
-                text: shareText,
+                text: '',
                 files: [file]
               });
               setSharingWhatsApp(false);
               return;
             } catch (err) {
-              // User cancelled share modal
               if (err.name !== 'AbortError') {
                 console.warn('File share fallback:', err);
               }
@@ -196,20 +210,21 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
           }
         }
 
-        // Web Fallback: Automatically download 4:5 image and open WhatsApp with clean multi-line poem text
+        // Web Fallback: Direct Download of PNG Image + Option to Share
         const pngUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = pngUrl;
-        link.download = `Bolateeworld_${poemTitle.replace(/\s+/g, '_')}_4x5.png`;
+        link.download = `Bolateeworld_${poemTitle.replace(/\s+/g, '_')}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
 
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+        const cleanUser = authorUsername.replace(/^[@#]/, '');
+        const shareLinkText = `📜 *${poemTitle}* — ${authorName}\nhttps://www.bolateeworld.in/profile/${cleanUser}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareLinkText)}`, '_blank');
         setSharingWhatsApp(false);
       }, 'image/png');
     } catch (e) {
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
       setSharingWhatsApp(false);
     }
   };
@@ -231,7 +246,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              रचना कार्ड साझ करें (4:5 HD Image)
+              रचना कार्ड साझा करें (HD PNG Image)
             </h3>
           </div>
 
@@ -250,9 +265,9 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
           {/* Inner Accent Line */}
           <div className="absolute inset-2 border border-rose-600/20 rounded-2xl pointer-events-none" />
 
-          {/* Top Bar: Poem Title on Left, Category on Right */}
+          {/* Top Bar: Poem Title ONCE on Left, Category on Right */}
           <div className="flex justify-between items-center border-b border-rose-600/30 pb-2 z-10">
-            <h4 className="text-base font-bold font-rozha text-rose-900 dark:text-rose-300 truncate max-w-[220px]">
+            <h4 className="text-base sm:text-lg font-bold font-rozha text-rose-900 dark:text-rose-300 truncate max-w-[240px]">
               {poemTitle}
             </h4>
             <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 font-extrabold uppercase shrink-0">
@@ -260,16 +275,14 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
             </span>
           </div>
 
-          {/* Center Body: Title & Clean Poem Lines (No quotes, no dashes) */}
-          <div className="my-auto py-2 z-10 overflow-hidden space-y-2">
-            <h3 className="text-lg font-bold font-rozha text-rose-950 dark:text-rose-100">
-              {poemTitle}
-            </h3>
-            
-            <div className="font-tiro text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed max-h-[220px] overflow-y-auto pr-1">
+          {/* Center Body: Poem Lines Directly Start Here (No Second Title, Dynamic Font Sizing) */}
+          <div className="my-auto py-2 z-10 overflow-hidden space-y-1">
+            <div className={`font-tiro text-slate-900 dark:text-slate-100 max-h-[250px] overflow-y-auto pr-1 ${
+              validLinesCount <= 6 ? 'text-sm sm:text-base font-bold leading-relaxed' : validLinesCount <= 10 ? 'text-xs sm:text-sm font-semibold leading-relaxed' : 'text-xs leading-normal'
+            }`}>
               {poemLines.map((line, idx) => (
                 line === '' ? (
-                  <div key={idx} className="h-3" />
+                  <div key={idx} className="h-2.5" />
                 ) : (
                   <p key={idx} className="py-0.5">
                     {line}
@@ -303,7 +316,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
 
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons with Clean Labels */}
         <div className="space-y-2 pt-1">
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -312,7 +325,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
               className="py-2.5 px-3 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
-              <span>{downloading ? '4:5 PNG डाउनलोड...' : '4:5 HD इमेज़ (PNG)'}</span>
+              <span>{downloading ? 'डाउनलोड हो रहा...' : 'PNG इमेज़ डाउनलोड करें'}</span>
             </button>
 
             <button
@@ -321,7 +334,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
               className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 disabled:opacity-50"
             >
               <WhatsAppIcon />
-              <span>{sharingWhatsApp ? 'शेयर हो रहा...' : 'WhatsApp शेयर'}</span>
+              <span>{sharingWhatsApp ? 'शेयर हो रहा...' : 'WhatsApp पर शेयर'}</span>
             </button>
           </div>
 
