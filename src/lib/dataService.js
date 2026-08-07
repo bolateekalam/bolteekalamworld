@@ -11,6 +11,79 @@ const isValidUUID = (str) => {
   return uuidRegex.test(str);
 };
 
+// IndexedDB Helper for Unlimited Local Browser Storage (Solves 5MB localStorage limit)
+const openDB = () => {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      reject('IndexedDB not supported');
+      return;
+    }
+    const request = window.indexedDB.open('BolteeKalamDB', 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('posts')) {
+        db.createObjectStore('posts', { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+};
+
+export const savePostToIndexedDB = async (post) => {
+  try {
+    const db = await openDB();
+    const tx = db.transaction('posts', 'readwrite');
+    const store = tx.objectStore('posts');
+    store.put(post);
+  } catch (e) {
+    console.warn('IndexedDB save fallback:', e);
+  }
+};
+
+export const getAllPostsFromIndexedDB = async () => {
+  try {
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction('posts', 'readonly');
+      const store = tx.objectStore('posts');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
+  } catch (e) {
+    return [];
+  }
+};
+
+// Cloud Storage CDN Helper: Uploads Image to Supabase Storage Bucket 'posters'
+export const uploadImageToSupabaseStorage = async (base64DataUrl, fileName) => {
+  try {
+    if (!base64DataUrl || !base64DataUrl.startsWith('data:image')) return base64DataUrl;
+
+    const res = await fetch(base64DataUrl);
+    const blob = await res.blob();
+    const filePath = `posters/${fileName || `poster_${Date.now()}`}.jpg`;
+
+    const { data, error } = await supabase.storage
+      .from('posters')
+      .upload(filePath, blob, { contentType: 'image/jpeg', upsert: true });
+
+    if (!error && data) {
+      const { data: publicUrlData } = supabase.storage
+        .from('posters')
+        .getPublicUrl(filePath);
+
+      if (publicUrlData && publicUrlData.publicUrl) {
+        return publicUrlData.publicUrl;
+      }
+    }
+  } catch (e) {
+    console.warn('Supabase storage upload fallback:', e);
+  }
+  return base64DataUrl;
+};
+
 // Encode author metadata and archived status into content text for 100% schema safety
 const encodeContentWithAuthor = (content, authorInfo, isArchived = false) => {
   const metaHeader = `<!--BK_AUTHOR: ${JSON.stringify({

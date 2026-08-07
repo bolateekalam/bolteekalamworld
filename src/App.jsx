@@ -19,7 +19,7 @@ import ReferEarnModal from './components/ReferEarnModal';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
-import { fetchPostsFromDB, createPostInDB, deletePostFromDB, archivePostInDB, updateUserProfileInDB, fetchWeeklyChallengeFromDB, toggleLikeInDB } from './lib/dataService';
+import { fetchPostsFromDB, createPostInDB, deletePostFromDB, archivePostInDB, updateUserProfileInDB, fetchWeeklyChallengeFromDB, toggleLikeInDB, savePostToIndexedDB, uploadImageToSupabaseStorage } from './lib/dataService';
 
 import HomeFeedView from './views/HomeFeedView';
 import DailyChallengeView from './views/DailyChallengeView';
@@ -822,11 +822,17 @@ function AppContent() {
       authorEmail
     }, authorEmail);
 
+    // Upload Image to Supabase Cloud Storage Bucket CDN if possible
+    let cdnImageUrl = newPost.imageUrl || newPost.image || null;
+    if (cdnImageUrl && cdnImageUrl.startsWith('data:image')) {
+      cdnImageUrl = await uploadImageToSupabaseStorage(cdnImageUrl, `poster_${Date.now()}`);
+    }
+
     const postToSave = {
       ...newPost,
       ...(createdDBPost || {}),
-      imageUrl: newPost.imageUrl || newPost.image || createdDBPost?.imageUrl || createdDBPost?.image || null,
-      image: newPost.imageUrl || newPost.image || createdDBPost?.imageUrl || createdDBPost?.image || null,
+      imageUrl: cdnImageUrl || newPost.imageUrl || newPost.image || createdDBPost?.imageUrl || createdDBPost?.image || null,
+      image: cdnImageUrl || newPost.imageUrl || newPost.image || createdDBPost?.imageUrl || createdDBPost?.image || null,
       author: {
         id: authorEmail,
         email: authorEmail,
@@ -837,6 +843,9 @@ function AppContent() {
         city: authorCity
       }
     };
+
+    // Save to IndexedDB (Unlimited Browser Storage - Solves 5MB localStorage limit)
+    savePostToIndexedDB(postToSave);
 
     setPosts(prev => {
       const filtered = prev.filter(p => 
