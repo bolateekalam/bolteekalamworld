@@ -643,7 +643,11 @@ function AppContent() {
       localStorage.setItem(`onboarding_completed_${userEmail}`, 'true');
       setShowFirstTimeModal(false);
       setShowAuthModal(false);
-      handleNavigateView('profile');
+
+      const currentPath = (window.location.pathname || '/').toLowerCase();
+      if (currentPath === '/profile' || window.location.hash === '#/profile') {
+        handleNavigateView('profile');
+      }
       return;
     }
 
@@ -654,7 +658,10 @@ function AppContent() {
       setShowFirstTimeModal(true);
     } else {
       setShowFirstTimeModal(false);
-      handleNavigateView('profile');
+      const currentPath = (window.location.pathname || '/').toLowerCase();
+      if (currentPath === '/profile' || window.location.hash === '#/profile') {
+        handleNavigateView('profile');
+      }
     }
   };
 
@@ -858,17 +865,85 @@ function AppContent() {
   };
 
   const handleDeletePost = (postId) => {
-    setPosts(prev => prev.filter(p => p.id !== postId));
-    deletePostFromDB(postId);
+    const pIdStr = String(postId);
 
     try {
-      const savedUserPosts = localStorage.getItem('bolteekalam_user_created_posts');
-      if (savedUserPosts) {
-        const existingUserPosts = JSON.parse(savedUserPosts);
-        const updatedUserPosts = existingUserPosts.filter(p => p.id !== postId);
-        localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedUserPosts));
+      const storedDeleted = localStorage.getItem('bolteekalam_deleted_post_ids');
+      const deletedList = storedDeleted ? JSON.parse(storedDeleted) : [];
+      if (!deletedList.includes(pIdStr)) {
+        deletedList.push(pIdStr);
+        localStorage.setItem('bolteekalam_deleted_post_ids', JSON.stringify(deletedList));
       }
     } catch (e) {}
+
+    setPosts(prev => prev.filter(p => String(p.id) !== pIdStr));
+    deletePostFromDB(postId);
+  };
+
+  const handleFollowAuthor = (authorObj, isFollowingState, newFollowersCount) => {
+    if (!authorObj) return;
+    const authorKey = authorObj.email || authorObj.username || authorObj.name;
+    
+    try {
+      const storedFollowed = localStorage.getItem('bolteekalam_user_followed_authors');
+      let followedList = storedFollowed ? JSON.parse(storedFollowed) : [];
+      if (isFollowingState) {
+        if (!followedList.includes(authorKey)) followedList.push(authorKey);
+      } else {
+        followedList = followedList.filter(k => k !== authorKey);
+      }
+      localStorage.setItem('bolteekalam_user_followed_authors', JSON.stringify(followedList));
+    } catch (e) {}
+
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(p => {
+        const isMatch = (authorObj.email && p.author?.email === authorObj.email) ||
+          (authorObj.username && p.author?.username === authorObj.username) ||
+          (authorObj.name && p.author?.name === authorObj.name);
+
+        if (isMatch) {
+          return {
+            ...p,
+            author: {
+              ...p.author,
+              isFollowing: isFollowingState,
+              followers: newFollowersCount
+            }
+          };
+        }
+        return p;
+      });
+
+      try {
+        localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(updatedPosts));
+      } catch (e) {}
+
+      return updatedPosts;
+    });
+
+    if (isFollowingState) {
+      handleRewardPoints(5, `${authorObj.name || 'लेखक'} को फ़ॉलो करने पर`);
+
+      const followNotif = {
+        id: Date.now(),
+        type: 'follow',
+        title: `आपने ${authorObj.name || 'कवि'} को फ़ॉलो किया! 👤`,
+        desc: `नई साहित्यिक रचनाएँ आपकी टाइमलाइन में दिखने लगेंगी। (+5 Pts)`,
+        time: 'अभी-अभी',
+        isUnread: true
+      };
+
+      setNotificationsList(prev => {
+        const updated = [followNotif, ...prev];
+        try { localStorage.setItem('bolteekalam_notifications_v1', JSON.stringify(updated)); } catch(e){}
+        return updated;
+      });
+      setUnreadNotifications(prev => {
+        const updated = prev + 1;
+        try { localStorage.setItem('bolteekalam_unread_notifications_v1', String(updated)); } catch(e){}
+        return updated;
+      });
+    }
   };
 
   const handleToggleArchivePost = (postId) => {
@@ -977,6 +1052,7 @@ function AppContent() {
               onOpenPoetryChallenge={handleOpenPoetryChallenge}
               onLikePost={handleLikePost}
               onAddComment={handleAddCommentToPost}
+              onFollowAuthor={handleFollowAuthor}
               onOpenMembershipCard={() => setShowGlobalMembershipModal(true)}
               userProfile={userProfile}
               requireAuth={requireAuth}
@@ -1047,6 +1123,7 @@ function AppContent() {
               onToggleArchivePost={handleToggleArchivePost}
               onLikePost={handleLikePost}
               onAddComment={handleAddCommentToPost}
+              onFollowAuthor={handleFollowAuthor}
               requireAuth={requireAuth}
             />
           )}

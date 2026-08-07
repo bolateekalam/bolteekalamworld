@@ -9,12 +9,13 @@ import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
 import PoemCardShareModal from './PoemCardShareModal';
 
-export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, onAddComment, isAuthorView, requireAuth, userProfile }) => {
+export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, onAddComment, onFollowAuthor, isAuthorView, requireAuth, userProfile }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [isFollowing, setIsFollowing] = useState(post.author?.isFollowing || false);
+  const [followersCount, setFollowersCount] = useState(post.author?.followers || 0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -36,7 +37,13 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
 
   const handleFollowToggle = () => {
     if (requireAuth && !requireAuth()) return;
-    setIsFollowing(!isFollowing);
+    const nextState = !isFollowing;
+    const nextCount = nextState ? followersCount + 1 : Math.max(0, followersCount - 1);
+    setIsFollowing(nextState);
+    setFollowersCount(nextCount);
+    if (onFollowAuthor) {
+      onFollowAuthor(post.author, nextState, nextCount);
+    }
   };
 
   const handleBookmarkToggle = () => {

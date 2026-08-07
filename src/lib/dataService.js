@@ -57,6 +57,18 @@ const decodeContentAndAuthor = (rawContent, defaultAuthor) => {
 // 1. Fetch All Shared Posts from Supabase DB + Global Shared Cloud Feed
 export const fetchPostsFromDB = async () => {
   let dbPosts = [];
+  let deletedIds = new Set();
+  let likedIds = new Set();
+
+  try {
+    const savedDeleted = localStorage.getItem('bolteekalam_deleted_post_ids');
+    if (savedDeleted) deletedIds = new Set(JSON.parse(savedDeleted));
+  } catch (e) {}
+
+  try {
+    const savedLikes = localStorage.getItem('bolteekalam_user_liked_posts');
+    if (savedLikes) likedIds = new Set(JSON.parse(savedLikes));
+  } catch (e) {}
 
   // A. Fetch from Supabase PostgreSQL Database
   try {
@@ -79,17 +91,19 @@ export const fetchPostsFromDB = async () => {
         };
 
         const decoded = decodeContentAndAuthor(p.content, defaultAuthor);
+        const pId = String(p.id);
+        const isUserLiked = likedIds.has(pId);
 
         return {
-          id: String(p.id),
+          id: pId,
           author: decoded.author,
           title: p.title || 'बिना शीर्षक',
           category: p.category || 'कविता',
           content: decoded.content,
           isArchived: decoded.isArchived,
           tags: p.tags || ['हिंदीसाहित्य'],
-          likes: p.likes_count || 0,
-          isLiked: false,
+          likes: isUserLiked ? Math.max(p.likes_count || 0, 1) : (p.likes_count || 0),
+          isLiked: isUserLiked,
           comments: p.comments || [],
           bookmarks: p.bookmarks_count || 0,
           isBookmarked: false,
@@ -131,12 +145,18 @@ export const fetchPostsFromDB = async () => {
     if (!p) return;
     const pId = String(p.id);
     const fp = getPostFingerprint(p);
-    if (seenIds.has(pId) || (fp && seenFingerprints.has(fp))) {
+    if (deletedIds.has(pId) || (fp && deletedIds.has(fp)) || seenIds.has(pId) || (fp && seenFingerprints.has(fp))) {
       return;
     }
     seenIds.add(pId);
     if (fp) seenFingerprints.add(fp);
-    finalPosts.push(p);
+
+    const isUserLiked = likedIds.has(pId);
+    finalPosts.push({
+      ...p,
+      isLiked: isUserLiked || p.isLiked,
+      likes: isUserLiked ? Math.max(p.likes || 0, 1) : (p.likes || 0)
+    });
   };
 
   // 1. Add DB posts first
@@ -211,7 +231,7 @@ export const createPostInDB = async (postData, userId) => {
       try {
         const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
         const existing = stored ? JSON.parse(stored) : [];
-        const updated = [dbPost, ...existing.filter(p => p.id !== postId)];
+        const updated = [dbPost, ...existing.filter(p => p.id !== postId && String(p.id) !== String(dbPost.id))];
         localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
       } catch (e) {}
 
@@ -258,7 +278,7 @@ export const archivePostInDB = async (postId, currentContent, authorInfo, isArch
     const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
     if (stored) {
       const postsList = JSON.parse(stored);
-      const updated = postsList.map(p => p.id === postId ? { ...p, isArchived } : p);
+      const updated = postsList.map(p => (p.id === postId || String(p.id) === String(postId)) ? { ...p, isArchived } : p);
       localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
     }
   } catch (e) {}
@@ -266,8 +286,21 @@ export const archivePostInDB = async (postId, currentContent, authorInfo, isArch
   return true;
 };
 
-// 4. Delete Post
+// 4. Delete Post Across DB and Local Storage Keys
 export const deletePostFromDB = async (postId) => {
+  const pIdStr = String(postId);
+
+  // Store in deleted IDs list so fetchPostsFromDB ignores it permanently
+  try {
+    const storedDeleted = localStorage.getItem('bolteekalam_deleted_post_ids');
+    const deletedList = storedDeleted ? JSON.parse(storedDeleted) : [];
+    if (!deletedList.includes(pIdStr)) {
+      deletedList.push(pIdStr);
+      localStorage.setItem('bolteekalam_deleted_post_ids', JSON.stringify(deletedList));
+    }
+  } catch (e) {}
+
+  // Delete from Supabase DB
   try {
     await supabase
       .from('posts')
@@ -275,14 +308,24 @@ export const deletePostFromDB = async (postId) => {
       .eq('id', postId);
   } catch (err) {}
 
-  try {
-    const stored = localStorage.getItem(GLOBAL_CLOUD_FEED_KEY);
-    if (stored) {
-      const postsList = JSON.parse(stored);
-      const updated = postsList.filter(p => p.id !== postId);
-      localStorage.setItem(GLOBAL_CLOUD_FEED_KEY, JSON.stringify(updated));
-    }
-  } catch (e) {}
+  // Clean from all Local Storage keys
+  const keysToClean = [
+    GLOBAL_CLOUD_FEED_KEY,
+    'bolteekalam_global_shared_posts',
+    'bolteekalam_global_shared_public_posts_v2',
+    'bolteekalam_user_created_posts'
+  ];
+
+  keysToClean.forEach(key => {
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        const postsList = JSON.parse(stored);
+        const updated = postsList.filter(p => String(p.id) !== pIdStr);
+        localStorage.setItem(key, JSON.stringify(updated));
+      }
+    } catch (e) {}
+  });
 
   return true;
 };

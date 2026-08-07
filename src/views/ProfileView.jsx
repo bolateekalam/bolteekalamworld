@@ -20,6 +20,7 @@ export const ProfileView = ({
   onToggleArchivePost,
   onLikePost,
   onAddComment,
+  onFollowAuthor,
   requireAuth,
   onOpenMembershipCard
 }) => {
@@ -290,6 +291,7 @@ export const ProfileView = ({
               onToggleArchivePost={onToggleArchivePost}
               onLikePost={onLikePost}
               onAddComment={onAddComment}
+              onFollowAuthor={onFollowAuthor}
               userProfile={userProfile}
               requireAuth={requireAuth}
               isAuthorView={true}

@@ -16,6 +16,7 @@ export const HomeFeedView = ({
   onOpenPoetryChallenge,
   onLikePost,
   onAddComment,
+  onFollowAuthor,
   onOpenMembershipCard,
   userProfile,
   requireAuth
@@ -125,6 +126,7 @@ export const HomeFeedView = ({
             onOpenPoetryChallenge={onOpenPoetryChallenge}
             onLikePost={onLikePost}
             onAddComment={onAddComment}
+            onFollowAuthor={onFollowAuthor}
             userProfile={userProfile}
             requireAuth={requireAuth}
           />
