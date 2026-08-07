@@ -98,7 +98,7 @@ export const HomeFeedView = ({
           className="z-10 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-2 shadow-lg active:scale-95 transition"
         >
           <Sparkles className="w-4 h-4 text-rose-950" />
-          <span>🎨 bolateeworld.in/studio</span>
+          <span>🎨 कवि पोस्टर Studio खोलें</span>
         </button>
       </div>
 

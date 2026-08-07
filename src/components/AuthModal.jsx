@@ -132,21 +132,33 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         });
       } catch (e) {}
 
-      const googleUserDraft = {
-        name: 'बोलती कलम लेखक',
+      // Single Google Account Constraint: Check for existing saved profile
+      let existingProfile = null;
+      try {
+        const savedProf = localStorage.getItem('bolteekalam_user_profile');
+        if (savedProf) {
+          const parsed = JSON.parse(savedProf);
+          if (parsed && (parsed.email || parsed.username || parsed.name)) {
+            existingProfile = parsed;
+          }
+        }
+      } catch (e) {}
+
+      const googleUserDraft = existingProfile || {
+        name: 'साहित्य साधक',
         username: `@writer_${Math.floor(1000 + Math.random() * 9000)}`,
         email: 'user.verified@gmail.com',
         phone: '+91 9812345678',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
         role: 'user',
-        city: 'प्रयागराज',
+        city: 'वाराणसी (बनारस)',
         isVerified: true,
         points: 150
       };
 
       setTimeout(() => {
         onClose();
-        onLoginSuccess(googleUserDraft, true);
+        onLoginSuccess(googleUserDraft, !existingProfile);
       }, 500);
 
     } catch (err) {

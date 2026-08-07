@@ -43,6 +43,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const lines = content.split('\n').map(l => l.replace(/^["'“”«»-]+|["'“”«»-]+$/g, '').trim());
   const validLinesCount = lines.filter(l => l.length > 0).length;
   const isTextTooLong = validLinesCount > 14 || content.length > 380;
+  const isFormInvalid = !title.trim() || !content.trim();
 
   const currentTheme = THEMES.find(t => t.id === selectedThemeId) || THEMES[0];
 
@@ -62,7 +63,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
     setUploadedPhotoUrl(null);
   };
 
-  // Render 4:5 Poster Canvas (1080x1350) with ZERO OVERLAPPING GUARANTEE
+  // Render 4:5 Poster Canvas with ZERO OVERLAPPING GUARANTEE
   const drawPosterCanvas = () => {
     return new Promise((resolve) => {
       const canvas = canvasRef.current || document.createElement('canvas');
@@ -111,7 +112,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
       // Function to Draw Poem Lines & Author Footer
       const renderTextAndFooter = (startY = 255, maxTextW = 930, maxLinesY = 1140) => {
-        // Dynamic Font Scaling based on poem length
         let fontSize = 34;
         let lineHeight = 54;
         let fontWeight = 'bold';
@@ -202,7 +202,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           ctx.save();
 
           if (selectedLayoutId === 'side') {
-            // Side Photo (Right 370px, X = 635 to 1005) -> ZERO OVERLAP! Text max width 510px.
             const photoX = 635;
             const photoY = 220;
             const photoW = 370;
@@ -239,7 +238,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             renderTextAndFooter(255, 510, 1140);
 
           } else if (selectedLayoutId === 'topRight') {
-            // Top Right Photo Stack (Photo X = 650, Y = 175, W = 355, H = 420)
             const photoX = 650;
             const photoY = 175;
             const photoW = 355;
@@ -276,7 +274,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             renderTextAndFooter(255, 520, 1140);
 
           } else if (selectedLayoutId === 'bottomRight') {
-            // Bottom Right Photo Stack (Photo X = 650, Y = 730, W = 355, H = 420)
             const photoX = 650;
             const photoY = 730;
             const photoW = 355;
@@ -313,7 +310,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             renderTextAndFooter(255, 520, 1140);
 
           } else if (selectedLayoutId === 'topCenter') {
-            // Top Center Photo (X = 390, Y = 140, W = 300, H = 340) -> Centered Poem Below!
             const photoX = 390;
             const photoY = 140;
             const photoW = 300;
@@ -357,7 +353,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
         img.src = uploadedPhotoUrl;
       } else {
-        // Full Text Poem Mode without photo
         renderTextAndFooter(255, 930, 1140);
       }
     });
@@ -387,7 +382,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       link.click();
       document.body.removeChild(link);
 
-      // Deduct 25 Points
       if (onRewardPoints) {
         onRewardPoints(-25, 'कवि इमेज़ पोस्टर डाउनलोड करने पर');
       }
@@ -415,8 +409,8 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
       if (onPublishPosterPost) {
         onPublishPosterPost({
-          title,
-          content,
+          title: title.trim() || 'कवि इमेज़ पोस्टर',
+          content: content.trim(),
           imageUrl: pngUrl
         });
       }
@@ -443,7 +437,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             कवि इमेज़ पोस्टर Studio
           </h2>
           <p className="text-xs sm:text-sm text-rose-100 max-w-xl font-tiro">
-            अपनी कविता और तस्वीर को एक सुंदर 4:5 HD इमेज़ पोस्टर में बदलें। (डाउनलोड: 25 Pts | सीधी पोस्ट: 15 Pts)
+            अपनी कविता और तस्वीर को एक सुंदर HD इमेज़ पोस्टर में बदलें। (डाउनलोड: 25 Pts | सीधी पोस्ट: 15 Pts)
           </p>
         </div>
 
@@ -505,7 +499,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             {isTextTooLong && (
               <p className="text-[10px] text-rose-600 font-bold flex items-center gap-1 mt-1">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>4:5 पोस्ट पर 14 पंक्तियों से अधिक न लिखें ताकि अक्षर स्पष्ट रहें।</span>
+                <span>14 पंक्तियों से अधिक न लिखें ताकि अक्षर स्पष्ट रहें।</span>
               </p>
             )}
           </div>
@@ -583,17 +577,17 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
         </div>
 
-        {/* Right Live 4:5 Preview Canvas Container (7 cols) */}
+        {/* Right Live Preview Canvas Container (7 cols) */}
         <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-lg flex flex-col items-center justify-center space-y-4">
           
           {/* Header Bar */}
           <div className="flex items-center justify-between w-full border-b border-slate-200 dark:border-slate-800 pb-2 text-xs font-bold text-slate-700 dark:text-slate-300">
             <span className="flex items-center gap-1.5">
               <ImageIcon className="w-4 h-4 text-rose-600" />
-              <span>तुरंत 4:5 लाइव पोस्टर प्रिव्यू (Live Preview)</span>
+              <span>तुरंत लाइव पोस्टर प्रिव्यू (Live Preview)</span>
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 font-extrabold uppercase">
-              24px Rounded PNG
+              HD PNG
             </span>
           </div>
 
@@ -612,7 +606,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               {/* Download Option */}
               <button
                 onClick={handleGenerateAndDownload}
-                disabled={downloading || !HAS_25_POINTS || isTextTooLong}
+                disabled={downloading || !HAS_25_POINTS || isTextTooLong || isFormInvalid}
                 className="py-3 px-3 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-extrabold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {HAS_25_POINTS ? (
@@ -631,7 +625,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               {/* Direct Post Option */}
               <button
                 onClick={handlePublishDirectly}
-                disabled={posting || !HAS_15_POINTS || isTextTooLong}
+                disabled={posting || !HAS_15_POINTS || isTextTooLong || isFormInvalid}
                 className="py-3 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {HAS_15_POINTS ? (
@@ -648,9 +642,17 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               </button>
             </div>
 
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center">
-              * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
-            </p>
+            {isFormInvalid && (
+              <p className="text-[10px] text-amber-600 font-bold text-center">
+                * डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना आवश्यक है।
+              </p>
+            )}
+
+            {!isFormInvalid && (
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center">
+                * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
+              </p>
+            )}
           </div>
 
         </div>
