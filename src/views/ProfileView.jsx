@@ -22,7 +22,9 @@ export const ProfileView = ({
   onAddComment,
   onFollowAuthor,
   requireAuth,
-  onOpenMembershipCard
+  onOpenMembershipCard,
+  walletTransactions = [],
+  onRechargePoints
 }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('works');
