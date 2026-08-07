@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Home, Swords, Flame, Trophy, Calendar, Award, 
-  BookOpen, Shield, User
+  BookOpen, Shield, User, Headphones
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -14,6 +14,7 @@ export const Sidebar = ({ activeView, setActiveView, userRole, userProfile }) =>
     { id: 'battles', label: 'काव्य दंगल', icon: Swords, badge: 'LIVE', badgeColor: 'bg-rose-600', path: '/poetry-battle' },
     { id: 'dailyChallenge', label: 'साप्ताहिक चुनौती', icon: Flame, badge: 'WEEKLY', badgeColor: 'bg-amber-500', path: '/sahityik-chunautiyan' },
     { id: 'competitions', label: 'साहित्यिक दर्पण', icon: Trophy, path: '/sahityik-darpan' },
+    { id: 'audioStories', label: 'ऑडियो स्टोरी', icon: Headphones, badge: 'शीघ्र', badgeColor: 'bg-purple-600', path: '/audio-stories' },
     { id: 'events', label: 'साहित्यिक आयोजन', icon: Calendar, path: '/events' },
     { id: 'leaderboard', label: 'साहित्य साधक सूची', icon: Award, path: '/leaderboard' },
     { id: 'magazine', label: 'पत्रिका', icon: BookOpen, path: '/magazine' },

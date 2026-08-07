@@ -32,6 +32,7 @@ import ProfileView from './views/ProfileView';
 import AdminDashboardView from './views/AdminDashboardView';
 import SearchResultsView from './views/SearchResultsView';
 import PosterStudioView from './views/PosterStudioView';
+import AudioStoriesView from './views/AudioStoriesView';
 
 import { mockPosts, mockDailyChallenge, mockPoetryBattle } from './data/mockPosts';
 import { mockCompetitions } from './data/mockCompetitions';
@@ -194,6 +195,21 @@ function AppContent() {
       if (saved !== null) return parseInt(saved, 10);
     } catch (e) {}
     return 2;
+  });
+
+  // Wallet Transactions History Ledger State (Persisted in localStorage, max 15 items displayed)
+  const [walletTransactions, setWalletTransactions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_wallet_transactions');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [
+      { id: 1, type: 'debit', amount: 15, reason: 'मंच पर डायरेक्ट इमेज़ पोस्टर पोस्ट करने पर', time: '1 घंटे पहले' },
+      { id: 2, type: 'debit', amount: 25, reason: 'AI इमेज़ पोस्टर जनरेट करने पर', time: '3 घंटे पहले' },
+      { id: 3, type: 'credit', amount: 10, reason: 'नई साहित्य रचना पोस्ट करने पर', time: '1 दिन पहले' },
+      { id: 4, type: 'credit', amount: 5, reason: 'दैनिक उपस्थिति (Daily Login Bonus)', time: '1 दिन पहले' },
+      { id: 5, type: 'credit', amount: 100, reason: '₹10 रीचार्ज पैक (100 Points Credit)', time: '2 दिन पहले' }
+    ];
   });
 
   // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket
@@ -625,16 +641,33 @@ function AppContent() {
     return true;
   };
 
-  // 3. Real-time Points Ledger System & Toast Notification
+  // 3. Real-time Points Ledger System, Passbook Logging & Toast Notification
   const handleRewardPoints = (amount, reason) => {
     setUserProfile(prev => {
       const currentPts = prev.points || 0;
       const updated = {
         ...prev,
-        points: currentPts + amount
+        points: Math.max(0, currentPts + amount)
       };
       localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updated));
       return updated;
+    });
+
+    const isDebit = amount < 0;
+    const txObj = {
+      id: Date.now(),
+      type: isDebit ? 'debit' : 'credit',
+      amount: Math.abs(amount),
+      reason: reason || (isDebit ? 'पॉइंट्स उपयोग' : 'रिवॉर्ड पॉइंट्स प्राप्त'),
+      time: 'अभी-अभी'
+    };
+
+    setWalletTransactions(prev => {
+      const updatedList = [txObj, ...(prev || [])].slice(0, 50);
+      try {
+        localStorage.setItem('bolteekalam_wallet_transactions', JSON.stringify(updatedList));
+      } catch (e) {}
+      return updatedList;
     });
 
     setUnreadNotifications(prev => prev + 1);
@@ -643,6 +676,12 @@ function AppContent() {
     setTimeout(() => {
       setPointsToast(null);
     }, 4000);
+  };
+
+  // Buy Points Recharge Store Handler
+  const handleRechargePoints = (rupees, points) => {
+    handleRewardPoints(points, `₹${rupees} रीचार्ज पैक (${points} Points Credit)`);
+    alert(`🎉 बधाई हो! ₹${rupees} का रीचार्ज सफल हुआ। आपके वॉलेट में ${points} रिवॉर्ड पॉइंट्स जोड़ दिए गए हैं!`);
   };
 
   // 4. Handle Successful Login & Store Session Permanently
@@ -1191,6 +1230,10 @@ function AppContent() {
             <MagazineView onOpenMagazine={() => setShowMagazineModal(true)} />
           )}
 
+          {activeView === 'audioStories' && (
+            <AudioStoriesView setActiveView={handleNavigateView} />
+          )}
+
           {activeView === 'profile' && (
             <ProfileView
               posts={posts.filter(p => 
@@ -1205,6 +1248,8 @@ function AppContent() {
                 ...(userProfile || {}),
                 points: Math.max(userProfile?.points || 0, 50 + ((posts || []).filter(p => p && (p.author?.id === currentUser?.email || p.author?.email === currentUser?.email || p.author?.id === 'user-me' || (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase()))).length * 10))
               }}
+              walletTransactions={walletTransactions}
+              onRechargePoints={handleRechargePoints}
               onOpenCertificate={openCertificateModal}
               onOpenEditProfile={() => setShowEditProfileModal(true)}
               onOpenReferEarn={() => setShowReferEarnModal(true)}

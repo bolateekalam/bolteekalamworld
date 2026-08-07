@@ -258,6 +258,18 @@ export const ProfileView = ({
           >
             <span>सहेजी गई सूची ({posts.filter(p => p.isBookmarked).length})</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('wallet')}
+            aria-label="साहित्य वॉलेट देखें"
+            className={`py-3 border-b-2 transition flex items-center gap-1.5 ${
+              activeTab === 'wallet' 
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400 font-bold' 
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <span>💰 साहित्य वॉलेट ({profile.points || 0} Pts)</span>
+          </button>
         </div>
 
       </div>
@@ -265,6 +277,155 @@ export const ProfileView = ({
       {/* Tab Content */}
       <div className="space-y-4">
         {(() => {
+          if (activeTab === 'wallet') {
+            const defaultTransactions = [
+              { id: 1, type: 'debit', amount: 15, reason: 'मंच पर डायरेक्ट इमेज़ पोस्टर पोस्ट करने पर', time: '1 घंटे पहले' },
+              { id: 2, type: 'debit', amount: 25, reason: 'AI इमेज़ पोस्टर जनरेट करने पर', time: '3 घंटे पहले' },
+              { id: 3, type: 'credit', amount: 10, reason: 'नई साहित्य रचना पोस्ट करने पर', time: '1 दिन पहले' },
+              { id: 4, type: 'credit', amount: 5, reason: 'दैनिक उपस्थिति (Daily Login Bonus)', time: '1 दिन पहले' },
+              { id: 5, type: 'credit', amount: 100, reason: '₹10 रीचार्ज पैक (100 Points Credit)', time: '2 दिन पहले' }
+            ];
+
+            const displayTransactions = (walletTransactions && walletTransactions.length > 0) 
+              ? walletTransactions.slice(0, 15) 
+              : defaultTransactions;
+
+            const rechargePacks = [
+              { rupees: 10, points: 100, tag: 'बेसिक', popular: false },
+              { rupees: 20, points: 200, tag: 'स्टैंडर्ड', popular: false },
+              { rupees: 30, points: 300, tag: 'पॉपुलर', popular: false },
+              { rupees: 45, points: 500, tag: 'बेस्ट वैल्यू 🔥', popular: true }
+            ];
+
+            return (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                
+                {/* 1. Wallet Balance Hero Card */}
+                <div className="bg-gradient-to-br from-amber-500 via-amber-600 to-rose-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 -mt-8 -mr-8 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                  
+                  <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-amber-100 uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-yellow-300" />
+                        <span>कुल उपलब्ध वॉलेट बैलेंस</span>
+                      </p>
+                      <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
+                        {profile.points || 0} <span className="text-lg font-bold text-amber-200">पॉइंट्स</span>
+                      </h2>
+                      <p className="text-xs text-amber-100/90 font-medium">
+                        1 पॉइंट = ₹0.10 मूल्य मान | साहित्य स्टूडियो व पोस्ट में उपयोग योग्य
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setShowPointsModal(true)}
+                      className="px-4 py-2.5 bg-white/20 hover:bg-white/30 text-white font-bold rounded-2xl text-xs backdrop-blur-md border border-white/30 transition active:scale-95"
+                    >
+                      पॉइंट्स नियम देखें
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Recharge Packs Section */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <span>💳 पॉइंट्स रीचार्ज स्टोर</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium">
+                        अपने वॉलेट में तुरंत पॉइंट्स जोड़ने के लिए पसंदीदा पैक चुनें:
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                    {rechargePacks.map((pack) => (
+                      <div 
+                        key={pack.rupees}
+                        className={`border rounded-2xl p-4 text-center space-y-3 relative transition hover:shadow-md ${
+                          pack.popular 
+                            ? 'border-amber-500 bg-amber-500/5 dark:bg-amber-500/10' 
+                            : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50'
+                        }`}
+                      >
+                        {pack.popular && (
+                          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[10px] font-black uppercase shadow-sm">
+                            {pack.tag}
+                          </span>
+                        )}
+
+                        <div className="space-y-0.5 pt-1">
+                          <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100">
+                            {pack.points} <span className="text-xs text-amber-600 font-bold">Pts</span>
+                          </div>
+                          <div className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                            मात्र ₹{pack.rupees}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => onRechargePoints && onRechargePoints(pack.rupees, pack.points)}
+                          className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition active:scale-95 shadow-sm ${
+                            pack.popular
+                              ? 'bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-extrabold'
+                              : 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:opacity-90'
+                          }`}
+                        >
+                          अभी खरीदें
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Transaction History Passbook (Last 15) */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <span>📜 लास्ट 15 लेन-देन इतिहास (Passbook)</span>
+                    </h3>
+                    <span className="text-[11px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                      हालिया रिकॉर्ड
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    {displayTransactions.map((tx, idx) => (
+                      <div key={tx.id || idx} className="py-3 flex items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                            tx.type === 'debit' 
+                              ? 'bg-rose-500/10 text-rose-600' 
+                              : 'bg-emerald-500/10 text-emerald-600'
+                          }`}>
+                            {tx.type === 'debit' ? '-' : '+'}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800 dark:text-slate-200">
+                              {tx.reason}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              {tx.time || 'हाल ही में'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={`font-black text-sm ${
+                          tx.type === 'debit' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                        }`}>
+                          {tx.type === 'debit' ? `-${tx.amount}` : `+${tx.amount}`} Pts
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            );
+          }
+
           const displayPosts = activeTab === 'works'
             ? posts.filter(p => !p.isArchived)
             : activeTab === 'archived'
