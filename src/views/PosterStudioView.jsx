@@ -29,10 +29,8 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const fixedAuthorName = userProfile?.name || 'साहित्य साधक';
   const fixedAuthorUsername = (userProfile?.username || '@writer').replace(/^[@#]/, '');
 
-  const [title, setTitle] = useState('कलम की लौ');
-  const [content, setContent] = useState(
-    "शब्द अगर सच के हों, दीपक बन जाते हैं,\nअँधियारे रास्तों में भी, सूरज उग आते हैं।\n\nझुककर जो सीखता है, वही शिखर छूता है,\nअहंकार का महल तो, पल में ही टूटता है।"
-  );
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   const [selectedThemeId, setSelectedThemeId] = useState('parchment');
   const [selectedLayoutId, setSelectedLayoutId] = useState('side');
@@ -135,12 +133,13 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         // Title
         ctx.fillStyle = titleColor;
         ctx.font = selectedLayoutId === 'topCenter' ? 'bold 40px serif' : 'bold 44px serif';
-        const truncatedTitle = title.length > 22 ? title.slice(0, 22) + '...' : title;
+        const displayTitle = title.trim() ? title : '★ शीर्षक (Title)';
+        const truncatedTitle = displayTitle.length > 24 ? displayTitle.slice(0, 24) + '...' : displayTitle;
         
         if (selectedLayoutId === 'topCenter') {
           const tWidth = ctx.measureText(truncatedTitle).width;
           ctx.fillText(truncatedTitle, (1080 - tWidth) / 2, startY);
-          startY += 60;
+          startY += 65;
         } else {
           ctx.fillText(truncatedTitle, 75, 175);
         }
@@ -150,9 +149,10 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         ctx.font = `${fontWeight} ${fontSize}px serif`;
 
         let currentY = startY;
+        const renderLinesList = validLinesCount > 0 ? lines : ['★ यहाँ अपनी कविता की पंक्तियाँ लिखें...'];
 
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
+        for (let i = 0; i < renderLinesList.length; i++) {
+          const line = renderLinesList[i];
           if (currentY > maxLinesY) break;
 
           if (line === '') {
@@ -347,7 +347,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             }
             ctx.stroke();
 
-            renderTextAndFooter(530, 930, 1140);
+            renderTextAndFooter(580, 930, 1140);
           }
         };
 
@@ -473,14 +473,15 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
           {/* Title Input */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              कविता का शीर्षक (Title)
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+              <span>कविता का शीर्षक (Title) <span className="text-rose-600">*</span></span>
+              <span className="text-[10px] text-slate-400 font-normal">आवश्यक</span>
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="शीर्षक लिखें..."
+              placeholder="अपनी कविता का शीर्षक लिखें..."
               className="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-rose-500 font-bold"
             />
           </div>
@@ -489,7 +490,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           <div className="space-y-1">
             <div className="flex justify-between items-center text-xs font-bold">
               <label className="text-slate-700 dark:text-slate-300">
-                कविता की पंक्तियाँ (Poem Content)
+                कविता की पंक्तियाँ (Poem Content) <span className="text-rose-600">*</span>
               </label>
               <span className={`text-[10px] ${isTextTooLong ? 'text-rose-600 font-extrabold' : 'text-slate-500'}`}>
                 {validLinesCount}/14 पंक्तियाँ

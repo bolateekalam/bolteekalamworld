@@ -43,11 +43,15 @@ export const PublicProfileModal = ({ isOpen, onClose, author, authorPosts = [], 
     }
   };
 
-  const handleCopyProfileLink = () => {
-    const link = `https://www.bolateeworld.in/#author/${author.username?.replace(/^@/, '') || 'profile'}`;
-    navigator.clipboard.writeText(link);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
+  const profileUrl = `https://www.bolateeworld.in/${author?.username?.replace(/^@/, '') || 'profile'}`;
+  const shareText = `बोलती कलम (bolateeworld.in) पर कवि ${author?.name || 'लेखक'} की साहित्य प्रोफ़ाइल एवं रचनाएँ देखें: ${profileUrl}`;
+
+  const handleShareWhatsApp = () => {
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+  };
+
+  const handleShareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`, '_blank');
   };
 
   return (
@@ -89,26 +93,36 @@ export const PublicProfileModal = ({ isOpen, onClose, author, authorPosts = [], 
               </div>
             </div>
 
-            {/* Instagram Style Follow & Share Buttons */}
-            <div className="flex items-center gap-2">
+            {/* Instagram Style Follow & Social Share Buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={handleToggleFollow}
-                className={`px-5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition active:scale-95 shadow-md ${
+                className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition active:scale-95 shadow-md ${
                   isFollowing
                     ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700'
                     : 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-900/20'
                 }`}
               >
                 {isFollowing ? <UserCheck className="w-4 h-4 text-emerald-500" /> : <UserPlus className="w-4 h-4" />}
-                <span>{isFollowing ? 'फ़ॉलो कर रहे हैं' : '+ फ़ॉलो करें'}</span>
+                <span>{isFollowing ? '✓ फ़ॉलो कर रहे हैं' : '+ फ़ॉलो करें'}</span>
               </button>
 
+              {/* Direct WhatsApp Share */}
+              <button
+                onClick={handleShareWhatsApp}
+                className="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition active:scale-95 shadow-md"
+                title="WhatsApp पर प्रोफ़ाइल शेयर करें"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+
+              {/* Copy Profile Link */}
               <button
                 onClick={handleCopyProfileLink}
                 className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition active:scale-95"
-                title="प्रोफ़ाइल शेयर करें"
+                title="लिंक कॉपी करें"
               >
-                {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
+                {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -125,11 +139,11 @@ export const PublicProfileModal = ({ isOpen, onClose, author, authorPosts = [], 
             </div>
 
             <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-              <span className="text-rose-600 dark:text-rose-400 font-bold">{(author.username || 'writer').replace(/^[@#]/, '')}</span>
+              <span className="text-rose-600 dark:text-rose-400 font-bold">@{(author.username || 'writer').replace(/^[@#]/, '')}</span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-rose-500" />
-                {author.city || 'प्रयागराज'}
+                {author.city || author.location || 'वाराणसी (बनारस)'}
               </span>
             </div>
 
