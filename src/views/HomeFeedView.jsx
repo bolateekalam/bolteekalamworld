@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Award, ShieldCheck, CheckCircle2, Sparkles } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import DailyChallenge from '../components/DailyChallenge';
 import PostCard from '../components/PostCard';
