@@ -84,13 +84,12 @@ export const HomeFeedView = ({
             <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-rose-950 font-extrabold text-[10px] uppercase">
               ✨ नया ख़ास फ़ीचर
             </span>
-            <span className="text-xs text-amber-300 font-bold">1080 × 1350 (Instagram 4:5 Poster)</span>
           </div>
           <h3 className="text-lg sm:text-xl font-bold font-rozha text-purple-200">
-            कवि इमेज़ पोस्टर Studio — अपनी कविता + स्केच से सुंदर पोस्ट बनाएँ!
+            कवि इमेज़ पोस्टर Studio — अपनी कविता + इमेज़ से सुंदर पोस्टर बनाएँ!
           </h3>
           <p className="text-xs text-purple-200 font-tiro">
-            अपनी कविता को अपनी फोटो या स्केच के साथ 4:5 इमेज़ पोस्टर में बदलें और सीधे Instagram / WhatsApp पर शेयर करें! (लागत: 25 Pts)
+            अपनी कविता को अपनी फोटो या इमेज़ के साथ सुंदर पोस्टर में बदलें और सीधे शेयर या मंच पर पोस्ट करें!
           </p>
         </div>
 
@@ -99,7 +98,7 @@ export const HomeFeedView = ({
           className="z-10 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-2 shadow-lg active:scale-95 transition"
         >
           <Sparkles className="w-4 h-4 text-rose-950" />
-          <span>🎨 पोस्टर Studio खोलें (25 Pts)</span>
+          <span>🎨 bolateeworld.in/studio</span>
         </button>
       </div>
 

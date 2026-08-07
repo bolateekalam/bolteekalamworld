@@ -1000,6 +1000,7 @@ function AppContent() {
       title: posterData.title || 'कवि इमेज़ पोस्टर',
       category: 'कविता',
       content: posterData.content || '',
+      imageUrl: posterData.imageUrl || null,
       authorName: userProfile?.name || 'साहित्य साधक',
       authorUsername: userProfile?.username || '@writer',
       authorAvatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',

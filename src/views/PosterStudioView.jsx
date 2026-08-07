@@ -436,10 +436,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-amber-400 text-rose-950 font-extrabold text-xs uppercase flex items-center gap-1 shadow">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>प्रीमियम पोस्टर फीचर</span>
-            </span>
-            <span className="text-xs text-rose-200 font-bold">
-              1080 × 1350 (Instagram 4:5 Aspect Ratio)
+              <span>बोलती कलम Studio</span>
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold font-rozha text-amber-200">

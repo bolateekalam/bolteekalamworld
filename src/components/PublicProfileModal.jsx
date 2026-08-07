@@ -46,6 +46,14 @@ export const PublicProfileModal = ({ isOpen, onClose, author, authorPosts = [], 
   const profileUrl = `https://www.bolateeworld.in/${author?.username?.replace(/^@/, '') || 'profile'}`;
   const shareText = `बोलती कलम (bolateeworld.in) पर कवि ${author?.name || 'लेखक'} की साहित्य प्रोफ़ाइल एवं रचनाएँ देखें: ${profileUrl}`;
 
+  const handleCopyProfileLink = () => {
+    try {
+      navigator.clipboard.writeText(profileUrl);
+    } catch(e) {}
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   const handleShareWhatsApp = () => {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
   };
