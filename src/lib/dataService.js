@@ -441,21 +441,30 @@ export const deletePostFromDB = async (postId) => {
 // 5. Update Profile
 export const updateUserProfileInDB = async (userProfile, userId) => {
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const activeUserId = (userId && isValidUUID(userId)) ? userId : (session?.user?.id);
+
     const payload = {
-      name: userProfile.name,
-      username: userProfile.username,
-      avatar_url: userProfile.avatar,
-      city: userProfile.city,
-      bio: userProfile.bio,
-      birthday: userProfile.birthday
+      name: userProfile.name || 'साहित्य अनुरागी',
+      username: userProfile.username || '@writer',
+      email: userProfile.email || session?.user?.email || '',
+      avatar_url: userProfile.avatar || '',
+      city: userProfile.city || 'प्रयागराज',
+      bio: userProfile.bio || '',
+      birthday: userProfile.birthday || ''
     };
 
-    if (userId && isValidUUID(userId)) {
-      payload.id = userId;
+    if (activeUserId && isValidUUID(activeUserId)) {
+      payload.id = activeUserId;
+      await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
+    } else if (payload.email) {
+      await supabase.from('profiles').upsert(payload, { onConflict: 'email' });
+    } else {
+      await supabase.from('profiles').insert(payload);
     }
-
-    await supabase.from('profiles').upsert(payload);
-  } catch (err) {}
+  } catch (err) {
+    console.error('Error syncing profile to Supabase:', err);
+  }
   return true;
 };
 
