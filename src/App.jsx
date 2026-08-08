@@ -16,6 +16,7 @@ import PublicProfileModal from './components/PublicProfileModal';
 import PoetryBattleChallengeModal from './components/PoetryBattleChallengeModal';
 import LiteraryMembershipCardModal from './components/LiteraryMembershipCardModal';
 import ReferEarnModal from './components/ReferEarnModal';
+import AdminAuthModal from './components/AdminAuthModal';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -55,23 +56,32 @@ function AppContent() {
     }
   });
 
-  const [userRole, setUserRole] = useState(() => {
-    return (currentUser?.role === 'admin' || window.location.hash.includes('admin')) ? 'admin' : 'user';
-  });
+  // Admin Security Modal State
+  const [showAdminAuthModal, setShowAdminAuthModal] = useState(false);
 
-  // Auto-grant Admin Role & Open Admin View if URL has #admin or ?admin
-  useEffect(() => {
-    const checkAdminHash = () => {
-      const href = window.location.href || '';
-      if (href.includes('#admin') || href.includes('admin=true') || href.includes('/admin')) {
-        setUserRole('admin');
-        setActiveView('admin');
+  // Official Authorized Super Admin Email Accounts
+  const AUTHORIZED_ADMIN_EMAILS = [
+    'bolateeworld@gmail.com',
+    'admin@bolateeworld.in',
+    'bolteekalam@gmail.com',
+    'sanjayrai@gmail.com',
+    'akashsingh@gmail.com'
+  ];
+
+  const [userRole, setUserRole] = useState(() => {
+    try {
+      const isSessionAuth = sessionStorage.getItem('bolteekalam_admin_authenticated') === 'true';
+      if (isSessionAuth) return 'admin';
+      const savedUser = localStorage.getItem('bolteekalam_active_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed?.email && AUTHORIZED_ADMIN_EMAILS.includes(parsed.email.toLowerCase())) {
+          return 'admin';
+        }
       }
-    };
-    checkAdminHash();
-    window.addEventListener('hashchange', checkAdminHash);
-    return () => window.removeEventListener('hashchange', checkAdminHash);
-  }, []);
+    } catch (e) {}
+    return 'user';
+  });
 
   // First-Time User Onboarding State
   const [showFirstTimeModal, setShowFirstTimeModal] = useState(false);
@@ -364,10 +374,14 @@ function AppContent() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // View Navigation Handler with Clean URL PushState & Admin Role Grant
+  // View Navigation Handler with Clean URL PushState & Admin Role Gatekeeper
   const handleNavigateView = (viewId) => {
     if (viewId === 'admin') {
-      setUserRole('admin');
+      const isAuth = userRole === 'admin' || sessionStorage.getItem('bolteekalam_admin_authenticated') === 'true';
+      if (!isAuth) {
+        setShowAdminAuthModal(true);
+        return;
+      }
     }
     setActiveView(viewId);
     try {
@@ -1386,6 +1400,16 @@ function AppContent() {
       />
 
       {/* Modals & Dialogs */}
+      <AdminAuthModal
+        isOpen={showAdminAuthModal}
+        onClose={() => setShowAdminAuthModal(false)}
+        onAdminLoginSuccess={() => {
+          setUserRole('admin');
+          try { sessionStorage.setItem('bolteekalam_admin_authenticated', 'true'); } catch (e) {}
+          setActiveView('admin');
+          try { history.pushState(null, '', '/admin'); } catch (e) {}
+        }}
+      />
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}

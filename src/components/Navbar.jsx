@@ -231,15 +231,15 @@ export const Navbar = ({
 
                   <button
                     onClick={() => { setActiveView('admin'); setShowUserDropdown(false); }}
-                    aria-label="एडमिन डैशबोर्ड देखें"
+                    aria-label="एडमिन लॉगिन करें"
                     className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-rose-600 font-bold"
                   >
                     <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4 text-rose-600" />
-                      <span>🛠️ एडमिन डैशबोर्ड</span>
+                      <span>{userRole === 'admin' ? '🛠️ एडमिन डैशबोर्ड' : '🔒 एडमिन लॉगिन'}</span>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-rose-600 text-white font-bold">
-                      Super Admin
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${userRole === 'admin' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
+                      {userRole === 'admin' ? 'ACTIVE' : 'LOCK'}
                     </span>
                   </button>
 
