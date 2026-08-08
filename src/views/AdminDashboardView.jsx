@@ -39,79 +39,65 @@ export const AdminDashboardView = ({
   const [customName, setCustomName] = useState('');
   const [customCity, setCustomCity] = useState('');
 
-  // Registered Users Directory Data (With Mandatory Verified Mobile & Govt Audit Compliance)
-  const [registeredUsers] = useState([
-    {
-      id: 'u-1',
-      name: 'आप (User Author)',
-      email: userProfile?.email || 'user@bolteekalam.com',
-      phone: userProfile?.phone || '+91 9876543210',
-      username: userProfile?.username || '@writer_user',
-      city: userProfile?.city || 'नई दिल्ली',
-      joined: '02 अगस्त 2026',
-      avatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-      lastActive: '🟢 ऑनलाइन (अभी सक्रिय)',
-      isVerified: true,
-      postsCount: posts.length,
-      points: userProfile?.points || 4890
-    },
-    {
-      id: 'u-2',
-      name: 'अमित वर्मा',
-      email: 'amit.verma@gmail.com',
-      phone: '+91 9812345678',
-      username: '@amit_writer',
-      city: 'लखनऊ',
-      joined: '01 अगस्त 2026',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
-      lastActive: '🟡 15 मिनट पहले',
-      isVerified: true,
-      postsCount: 14,
-      points: 1250
-    },
-    {
-      id: 'u-3',
-      name: 'प्रिया सिंह',
-      email: 'priya.singh@gmail.com',
-      phone: '+91 9898765432',
-      username: '@priya_poetry',
-      city: 'भोपाल',
-      joined: '30 जुलाई 2026',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
-      lastActive: '🟢 ऑनलाइन (अभी सक्रिय)',
-      isVerified: true,
-      postsCount: 22,
-      points: 2100
-    }
-  ]);
+  // Dynamically derive real registered users from active posts + current user profile (No Dummy Data!)
+  const registeredUsers = React.useMemo(() => {
+    const userMap = new Map();
 
-  // Weekly Submissions for Jury Review
-  const [weeklySubmissions] = useState([
-    {
-      id: 'ws-1',
-      author: 'अनामिका शर्मा',
-      authorId: 'u-3',
-      title: 'बरसात का पहला ख़त',
-      content: 'सावन की पहली बूँद पड़ी जब धरती की प्यासी छाती पर,\nएक भीगी याद तैर आई पुरानी चिट्ठी के पन्नों पर।',
-      time: '2 घंटे पहले'
-    },
-    {
-      id: 'ws-2',
-      author: 'लोकेश शर्मा',
-      authorId: 'u-2',
-      title: 'बूंदों का राग',
-      content: 'रिमझिम-रिमझिम गाती बारिश, मन में लाती मीठी उमंग,\nकागज़ की कश्ती बहती जाए, यादों के रंगों के संग।',
-      time: '25 मिनट पहले'
-    },
-    {
-      id: 'ws-3',
-      author: 'आप (User Author)',
-      authorId: 'user-me',
-      title: 'बरसात का पहला पैग़ाम',
-      content: 'छाता भी रह गया कमरे के कोने में पड़े-पड़े,\nहम भीगते रहे तेरी यादों के बारिश में खड़े-खड़े।',
-      time: '5 मिनट पहले'
+    // 1. Current Active Profile User
+    if (userProfile) {
+      const uEmail = userProfile.email || 'user@bolateeworld.in';
+      userMap.set(uEmail, {
+        id: 'u-me',
+        name: userProfile.name || 'साहित्य साधक',
+        email: uEmail,
+        phone: userProfile.phone || '+91 9876543210',
+        username: userProfile.username || '@writer',
+        city: userProfile.city || 'प्रयागराज',
+        joined: 'अगस्त 2026',
+        avatar: userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+        lastActive: '🟢 ऑनलाइन (अभी सक्रिय)',
+        isVerified: true,
+        postsCount: posts.filter(p => (p.author?.email === uEmail || p.author?.name === userProfile.name)).length,
+        points: userProfile.points || 150
+      });
     }
-  ]);
+
+    // 2. Extract unique real authors from live posts array
+    posts.forEach(p => {
+      const authorKey = p.author?.email || p.author?.username || p.author?.name;
+      if (authorKey && !userMap.has(authorKey)) {
+        userMap.set(authorKey, {
+          id: `u-${p.id}`,
+          name: p.author?.name || p.authorName || 'साहित्यिक लेखक',
+          email: p.author?.email || `${(p.author?.username || 'writer').replace(/^[@#]/, '')}@bolateeworld.in`,
+          phone: p.author?.phone || '+91 98*** ****',
+          username: p.author?.username || `@${(p.author?.name || 'writer').toLowerCase().replace(/\s+/g, '_')}`,
+          city: p.author?.city || 'प्रयागराज',
+          joined: p.createdAt || 'अगस्त 2026',
+          avatar: p.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+          lastActive: '🟢 सक्रिय लेखक',
+          isVerified: true,
+          postsCount: posts.filter(item => (item.author?.name === p.author?.name || item.authorName === p.authorName)).length,
+          points: (p.likes ? p.likes * 10 : 50) + 100
+        });
+      }
+    });
+
+    return Array.from(userMap.values());
+  }, [posts, userProfile]);
+
+  // Derive weekly submissions dynamically from live posts in database (No Dummy Data!)
+  const weeklySubmissions = React.useMemo(() => {
+    if (!posts || posts.length === 0) return [];
+    return posts.map(p => ({
+      id: p.id,
+      author: p.author?.name || p.authorName || 'साहित्य साधक',
+      authorId: p.author?.id || 'u-real',
+      title: p.title || 'काव्य रचना',
+      content: p.content || '',
+      time: p.createdAt || 'हाल ही में'
+    }));
+  }, [posts]);
 
   // Winners State
   const [winner1stId, setWinner1stId] = useState(null);
