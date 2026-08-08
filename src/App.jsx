@@ -1217,7 +1217,7 @@ function AppContent() {
       />
 
       {/* Main Layout Container */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex gap-6">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-6 flex gap-6 pb-24 md:pb-6">
         
         {/* Left Sidebar Navigation (Desktop) */}
         <Sidebar
