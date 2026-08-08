@@ -25,12 +25,12 @@ export const AdminDashboardView = ({
 
   // New Weekly Topic Form State
   const [newTopicTitle, setNewTopicTitle] = useState('15 अगस्त: स्वतंत्रता और मेरी कलम');
-  const [newTopicPrompt, setNewTopicPrompt] = useState('79वें स्वतंत्रता दिवस पर भारत माँ के अमर वाशिंदों एवं आज़ादी की भोर पर 4 उत्कृष्ट पंक्तियाँ लिखें।');
+  const [newTopicPrompt, setNewTopicPrompt] = useState('80वें स्वतंत्रता दिवस पर भारत माँ के अमर वाशिंदों एवं आज़ादी की भोर पर 4 उत्कृष्ट पंक्तियाँ लिखें।');
   const [topicPublished, setTopicPublished] = useState(false);
 
-  // Dynamic Festival Banner Edit State (Supporting 15 August, Rakshabandhan, Diwali, Holi, Christmas!)
-  const [festiveTag, setFestiveTag] = useState(patrioticBanner?.tag || '79वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳');
-  const [bannerTitle, setBannerTitle] = useState(patrioticBanner?.title || 'समस्त देशवासियों को 79वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!');
+  // Dynamic Festival Banner Edit State
+  const [festiveTag, setFestiveTag] = useState(patrioticBanner?.tag || '80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳');
+  const [bannerTitle, setBannerTitle] = useState(patrioticBanner?.title || 'समस्त देशवासियों को 80वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!');
   const [bannerDesc, setBannerDesc] = useState(patrioticBanner?.description || 'स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें।');
   const [bannerBgImage, setBannerBgImage] = useState(patrioticBanner?.bgImage || 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800');
   const [bannerUpdated, setBannerUpdated] = useState(false);
@@ -38,7 +38,6 @@ export const AdminDashboardView = ({
   // Custom Birthday Card Creator Form State
   const [customName, setCustomName] = useState('');
   const [customCity, setCustomCity] = useState('');
-  const [customAvatar, setCustomAvatar] = useState('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200');
 
   // Registered Users Directory Data (With Mandatory Verified Mobile & Govt Audit Compliance)
   const [registeredUsers] = useState([
@@ -82,45 +81,26 @@ export const AdminDashboardView = ({
       lastActive: '🟢 ऑनलाइन (अभी सक्रिय)',
       isVerified: true,
       postsCount: 22,
-      points: 2450
-    },
-    {
-      id: 'u-4',
-      name: 'शैलेंद्र मिश्र',
-      email: 'shailendra.mishra@gmail.com',
-      phone: '+91 9765432109',
-      username: '@shailendra_kavi',
-      city: 'वाराणसी',
-      joined: '28 जुलाई 2026',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
-      lastActive: '🔴 2 दिन पहले (निष्क्रिय)',
-      isVerified: true,
-      postsCount: 8,
-      points: 620
+      points: 2100
     }
   ]);
 
-  // Track 1st and 2nd winner IDs for this week's challenge
-  const [winner1stId, setWinner1stId] = useState(null);
-  const [winner2ndId, setWinner2ndId] = useState(null);
-  const [disqualifiedIds, setDisqualifiedIds] = useState([]);
-
-  // Weekly Challenge Submissions Queue for current topic
-  const [weeklySubmissions, setWeeklySubmissions] = useState([
+  // Weekly Submissions for Jury Review
+  const [weeklySubmissions] = useState([
     {
       id: 'ws-1',
-      author: 'अमित वर्मा',
-      authorId: 'user-amit',
-      title: 'बूंदों की स्याही और पहला ख़त',
-      content: 'कागज़ की कश्ती पर बहती थी मेरी यादें,\nसावन की पहली फुहार में आया तुम्हारा ख़त।\nबूँदों ने छुआ तो लगा जैसे तुमने छुआ हो,\nभीग गई हथेली, भीग गया पूरा ख़त।',
-      time: '10 मिनट पहले'
+      author: 'अनामिका शर्मा',
+      authorId: 'u-3',
+      title: 'बरसात का पहला ख़त',
+      content: 'सावन की पहली बूँद पड़ी जब धरती की प्यासी छाती पर,\nएक भीगी याद तैर आई पुरानी चिट्ठी के पन्नों पर।',
+      time: '2 घंटे पहले'
     },
     {
       id: 'ws-2',
-      author: 'प्रिया सिंह',
-      authorId: 'user-priya',
-      title: 'गीली मिट्टी की सुगंध',
-      content: 'मिट्टी की सोंधी ख़ुशबू में घुली तुम्हारी बातें,\nबरसात का पहला ख़त लाया खुशियों की सौगातें।',
+      author: 'लोकेश शर्मा',
+      authorId: 'u-2',
+      title: 'बूंदों का राग',
+      content: 'रिमझिम-रिमझिम गाती बारिश, मन में लाती मीठी उमंग,\nकागज़ की कश्ती बहती जाए, यादों के रंगों के संग।',
       time: '25 मिनट पहले'
     },
     {
@@ -133,10 +113,15 @@ export const AdminDashboardView = ({
     }
   ]);
 
+  // Winners State
+  const [winner1stId, setWinner1stId] = useState(null);
+  const [winner2ndId, setWinner2ndId] = useState(null);
+  const [disqualifiedIds, setDisqualifiedIds] = useState([]);
+
   // Today's Birthday Writers List
   const [birthdayUsers] = useState([
-    { id: 'b1', name: 'लोकेश शर्मा', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200', city: 'जयपुर', date: '02 अगस्त 2026' },
-    { id: 'b2', name: 'अनामिका शर्मा', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200', city: 'मेरठ', date: '02 अगस्त 2026' }
+    { id: 'b1', name: 'लोकेश शर्मा', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200', city: 'जयपुर', date: '08 अगस्त 2026' },
+    { id: 'b2', name: 'अनामिका शर्मा', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200', city: 'मेरठ', date: '08 अगस्त 2026' }
   ]);
 
   // Flagged AI Moderation Queue State
@@ -188,25 +173,26 @@ export const AdminDashboardView = ({
     setDisqualifiedIds([]);
   };
 
+  // Publish New Weekly Topic Handler
   const handlePublishNewTopic = (e) => {
     e.preventDefault();
-    if (!newTopicTitle.trim()) return;
+    if (!newTopicTitle.trim() || !newTopicPrompt.trim()) return;
 
     if (setWeeklyChallenge) {
       setWeeklyChallenge({
-        topic: newTopicTitle,
-        title: newTopicTitle,
-        prompt: newTopicPrompt,
-        endsIn: '6 दिन 23 घंटे',
-        reward1st: 500,
-        reward2nd: 250
+        topic: newTopicTitle.trim(),
+        title: newTopicTitle.trim(),
+        prompt: newTopicPrompt.trim(),
+        reward: 500,
+        deadline: '07 दिन शेष'
       });
     }
 
     setTopicPublished(true);
-    setTimeout(() => setTopicPublished(false), 2000);
+    setTimeout(() => setTopicPublished(false), 4000);
   };
 
+  // Save Festive Banner Handler
   const handleSaveBannerEdit = (e) => {
     e.preventDefault();
     if (setPatrioticBanner) {
@@ -218,12 +204,17 @@ export const AdminDashboardView = ({
       });
     }
     setBannerUpdated(true);
-    setTimeout(() => setBannerUpdated(false), 2000);
+    setTimeout(() => setBannerUpdated(false), 4000);
   };
 
+  // Upload Custom Banner Photo Handler
   const handleBannerImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('फ़ोटो की साइज़ 5MB से कम रखें!');
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setBannerBgImage(reader.result);
@@ -232,19 +223,23 @@ export const AdminDashboardView = ({
     }
   };
 
+  // Generate Custom Birthday Card Handler
   const handleGenerateCustomBirthday = (e) => {
     e.preventDefault();
     if (!customName.trim()) return;
     onOpenBirthdayCard({
-      name: customName,
-      city: customCity || 'प्रयागराज',
-      avatar: customAvatar,
-      date: '02 अगस्त 2026'
+      id: `custom-bday-${Date.now()}`,
+      name: customName.trim(),
+      city: customCity.trim() || 'प्रयागराज',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+      date: 'आज का विशेष दिन 🎉'
     });
   };
 
-  const handleDeletePost = (postId) => {
-    setPosts(prev => prev.filter(p => p.id !== postId));
+  const handleDeletePost = (id) => {
+    if (setPosts) {
+      setPosts(prev => prev.filter(p => p.id !== id));
+    }
   };
 
   const handleDismissFlagged = (id) => {
@@ -255,12 +250,12 @@ export const AdminDashboardView = ({
     setKitShipments(prev => prev.map(s => s.id === id ? { ...s, status: 'DISPATCHED' } : s));
   };
 
-  const currentTopicDisplay = weeklyChallenge?.topic || weeklyChallenge?.title || 'बरसात का पहला ख़त';
+  const currentTopicDisplay = weeklyChallenge?.topic || weeklyChallenge?.title || '15 अगस्त: स्वतंत्रता और मेरी कलम';
 
   return (
     <div className="space-y-6">
       
-      {/* Admin Header */}
+      {/* 1. Admin Header */}
       <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 border border-rose-900/40">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-900/40">
@@ -268,8 +263,8 @@ export const AdminDashboardView = ({
           </div>
           <div>
             <h1 className="text-2xl font-rozha text-rose-100 flex items-center gap-2">
-              <span>{t('admin.title')}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-rose-600 text-white font-sans font-bold">ONLY SUPER ADMIN</span>
+              <span>बोलती कलम सुपर एडमिन डैशबोर्ड</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-600 text-white font-sans font-bold">SUPER ADMIN ONLY</span>
             </h1>
             <p className="text-xs text-rose-200/80 mt-0.5 font-tiro">
               सरकारी सुरक्षा मानक (Govt Audit Ready): केवल OTP-सत्यापित मोबाइल व ईमेल धारक सदस्य ही पंजीकृत हैं।
@@ -278,17 +273,79 @@ export const AdminDashboardView = ({
         </div>
       </div>
 
-      {/* Admin Navigation Tabs */}
+      {/* 2. 🌟 TOP FEATURE: Global Festival Theme Engine Controller (ALWAYS VISIBLE) */}
+      <div className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 shadow-2xl space-y-4 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
+        
+        <div className="flex items-center gap-3 border-b border-purple-500/30 pb-3 relative z-10">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold ring-2 ring-amber-400/40">
+            <Sparkles className="w-6 h-6 animate-pulse text-amber-300" />
+          </div>
+          <div>
+            <h3 className="font-black text-lg font-rozha text-amber-300">
+              🎉 ग्लोबल त्यौहार एवं फेस्टिवल थीम इंजन (Global Festival Theme Controller)
+            </h3>
+            <p className="text-xs text-purple-200/80 font-medium">
+              यहाँ से आप 15 अगस्त, रक्षाबंधन, जन्माष्टमी, दिवाली, होली के लिए पूरे देश के यूज़र्स की थीम बदल सकते हैं:
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 relative z-10">
+          <div className="space-y-1.5">
+            <label className="font-bold block text-xs text-amber-200">
+              एक्टिव ग्लोबल फेस्टिवल थीम चुनें:
+            </label>
+            <select
+              value={selectedFestivalKey}
+              onChange={(e) => {
+                const key = e.target.value;
+                setSelectedFestivalKey(key);
+                const themeObj = key === 'auto' ? detectCurrentAutoFestivalTheme() : FESTIVAL_THEMES[key];
+                if (themeObj && onUpdateFestivalTheme) {
+                  onUpdateFestivalTheme(themeObj);
+                }
+              }}
+              className="w-full p-3.5 rounded-2xl bg-slate-950 border-2 border-amber-500/60 font-bold text-amber-300 text-xs shadow-inner cursor-pointer"
+            >
+              {Object.values(FESTIVAL_THEMES).map((thm) => (
+                <option key={thm.id} value={thm.id}>
+                  {thm.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={() => {
+                const themeObj = selectedFestivalKey === 'auto' ? detectCurrentAutoFestivalTheme() : FESTIVAL_THEMES[selectedFestivalKey];
+                if (onUpdateFestivalTheme) {
+                  onUpdateFestivalTheme(themeObj || FESTIVAL_THEMES.default);
+                }
+                alert(`🎉 फेस्टिवल थीम लागू हो गई! पूरी वेबसाइट पर "${themeObj.name || 'चयनित थीम'}" थीम और बैनर लाइव हो गया है।`);
+              }}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs shadow-xl active:scale-95 transition flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 fill-slate-950" />
+              <span>पूरी वेबसाइट पर यह फेस्टिवल थीम लागू करें 🚀</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Sub Navigation Tabs */}
       <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto p-1 gap-2 bg-white dark:bg-slate-900 rounded-2xl">
         {[
-          { id: 'weeklyJury', label: 'साप्ताहिक चुनौती ज्यूरी (1st +500 | 2nd +250)', icon: Trophy, badge: weeklySubmissions.length },
-          { id: 'usersList', label: 'सत्यापित यूज़र व मोबाइल ऑडिट (User Directory)', icon: ShieldCheck, badge: registeredUsers.length },
-          { id: 'editBanner', label: 'त्योहार विशेषांक बैनर व फोटो एडिटर', icon: Edit3 },
-          { id: 'createTopic', label: 'नया साप्ताहिक विषय जारी करें', icon: PlusCircle },
-          { id: 'birthdays', label: 'जन्मदिन कार्ड जनरेटर', icon: Cake, badge: birthdayUsers.length },
-          { id: 'moderation', label: 'सामग्री नियंत्रण (Remove Posts)', icon: Trash2, badge: posts.length },
-          { id: 'flagged', label: 'AI फ़्लैग्ड पोस्ट्स', icon: AlertTriangle, badge: flaggedPosts.length },
-          { id: 'kits', label: t('admin.dispatches'), icon: Package, badge: kitShipments.filter(k => k.status === 'PENDING').length }
+          { id: 'weeklyJury', label: '1. 🏆 साप्ताहिक चुनौती ज्यूरी', icon: Trophy, badge: weeklySubmissions.length },
+          { id: 'usersList', label: '2. 📱 सत्यापित यूज़र व मोबाइल ऑडिट', icon: ShieldCheck, badge: registeredUsers.length },
+          { id: 'editBanner', label: '3. 🖼️ बैनर व फ़ोटो एडिटर', icon: Edit3 },
+          { id: 'createTopic', label: '4. ➕ नया साप्ताहिक विषय', icon: PlusCircle },
+          { id: 'birthdays', label: '5. 🎂 जन्मदिन कार्ड जनरेटर', icon: Cake, badge: birthdayUsers.length },
+          { id: 'moderation', label: '6. 🗑️ सामग्री नियंत्रण (Posts)', icon: Trash2, badge: posts.length },
+          { id: 'flagged', label: '7. ⚠️ AI फ़्लैग्ड पोस्ट्स', icon: AlertTriangle, badge: flaggedPosts.length },
+          { id: 'kits', label: '8. 📦 पार्सल किट डिस्पैच', icon: Package, badge: kitShipments.filter(k => k.status === 'PENDING').length }
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -313,201 +370,7 @@ export const AdminDashboardView = ({
         })}
       </div>
 
-      {/* 1. Registered Users & Govt Audit Compliant Directory View */}
-      {activeTab === 'usersList' && (
-        <div className="space-y-4">
-          <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/30 text-emerald-600 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
-              <span>सरकारी सुरक्षा मानक (Govt Audit Ready): सभी सदस्यों का मोबाइल व ईमेल OTP द्वारा 100% सत्यापित है।</span>
-            </div>
-            <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-xl text-[10px]">
-              सरकारी जांच हेतु तैयार डेटाबेस
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {registeredUsers.map((usr) => (
-              <div 
-                key={usr.id}
-                className="p-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 flex-wrap text-xs shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <img src={usr.avatar} alt={usr.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500 shrink-0" />
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{usr.name}</h4>
-                      <span className="px-2 py-0.2 rounded bg-emerald-500/10 text-emerald-600 font-bold text-[10px] flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                        <span>OTP Verified</span>
-                      </span>
-                    </div>
-                    <p className="text-slate-600 dark:text-slate-300 text-[11px] font-semibold">
-                      📧 {usr.email} • 📱 <strong className="text-slate-900 dark:text-slate-100">{usr.phone}</strong> • {usr.city}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 text-xs font-semibold shrink-0">
-                  <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                    {usr.postsCount} रचनाएँ
-                  </span>
-                  <span className="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 font-mono font-bold">
-                    {usr.points} pts
-                  </span>
-                  <span className="px-3 py-1 rounded-xl bg-slate-900 dark:bg-slate-800 text-white font-bold text-[11px]">
-                    {usr.lastActive}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 2. Dynamic Festival Banner & Image Editor */}
-      {activeTab === 'editBanner' && (
-        <div className="space-y-6">
-          
-          {/* Global Festival Theme Preset Selector */}
-          <div className="bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 shadow-xl space-y-4 text-white">
-            <div className="flex items-center gap-3 border-b border-rose-500/30 pb-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold">
-                <Sparkles className="w-5 h-5 animate-pulse" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-base font-rozha text-amber-300">
-                  🎉 ग्लोबल त्योहार एवं फेस्टिवल थीम इंजन (Global Festival Engine)
-                </h3>
-                <p className="text-xs text-rose-200/80 font-medium">
-                  पूरे देश में सभी यूज़र्स के लिए त्यौहार (15 अगस्त, रक्षाबंधन, जन्माष्टमी, दिवाली) पर थीम बदलें:
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-              <div className="space-y-1.5">
-                <label className="font-bold block text-xs text-amber-200">
-                  एक्टिव ग्लोबल थीम चुनें (Select Active Festive Theme):
-                </label>
-                <select
-                  value={selectedFestivalKey}
-                  onChange={(e) => {
-                    const key = e.target.value;
-                    setSelectedFestivalKey(key);
-                    const themeObj = key === 'auto' ? detectCurrentAutoFestivalTheme() : FESTIVAL_THEMES[key];
-                    if (themeObj) {
-                      setFestiveTag(themeObj.tag || themeObj.badgeText || '');
-                      setBannerTitle(themeObj.title || '');
-                      setBannerDesc(themeObj.description || '');
-                      if (themeObj.bgImage) setBannerBgImage(themeObj.bgImage);
-                    }
-                  }}
-                  className="w-full p-3 rounded-2xl bg-slate-950 border border-amber-500/50 font-bold text-amber-300 text-xs shadow"
-                >
-                  {Object.values(FESTIVAL_THEMES).map((thm) => (
-                    <option key={thm.id} value={thm.id}>
-                      {thm.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const themeObj = selectedFestivalKey === 'auto' ? detectCurrentAutoFestivalTheme() : FESTIVAL_THEMES[selectedFestivalKey];
-                    if (onUpdateFestivalTheme) {
-                      onUpdateFestivalTheme(themeObj || FESTIVAL_THEMES.default);
-                    }
-                    setBannerUpdated(true);
-                    setTimeout(() => setBannerUpdated(false), 4000);
-                  }}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs shadow-xl active:scale-95 transition flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4 fill-slate-950" />
-                  <span>पूरी वेबसाइट पर फेस्टिवल थीम लागू करें 🚀</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-orange-600" />
-              <span>कस्टम बैनर व बैकग्राउंड विवरण फोटो संपादित करें</span>
-            </h3>
-
-            {bannerUpdated ? (
-              <div className="p-4 bg-emerald-500/10 text-emerald-600 rounded-2xl text-xs font-bold flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" />
-                <span>त्योहार बैनर व बैकग्राउंड फोटो होमपेज पर सफलतापूर्वक अपडेट हो गई!</span>
-              </div>
-            ) : (
-            <form onSubmit={handleSaveBannerEdit} className="space-y-4 text-xs">
-              
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
-                <label className="font-bold block text-slate-800 dark:text-slate-200">
-                  बैनर का बैकग्राउंड फोटो (Festive Banner Image):
-                </label>
-                <div className="flex items-center gap-4">
-                  <img src={bannerBgImage} alt="Banner Preview" className="w-24 h-16 rounded-xl object-cover ring-2 ring-orange-500 shrink-0 shadow" />
-                  <label className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 shadow">
-                    <Upload className="w-4 h-4" />
-                    <span>गैलरी/डिवाइस से फोटो चुनें (Upload Photo)</span>
-                    <input type="file" accept="image/*" onChange={handleBannerImageUpload} className="hidden" />
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold block mb-1">त्योहार/पर्व टैग (Festive Tag):</label>
-                <input
-                  type="text"
-                  value={festiveTag}
-                  onChange={(e) => setFestiveTag(e.target.value)}
-                  placeholder="उदा. रक्षाबंधन विशेषांक 🪢, दीपावली विशेषांक 🪔, होली विशेषांक 🎨"
-                  className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="font-bold block mb-1">बैनर का मुख्य शीर्षक (Banner Main Title):</label>
-                <input
-                  type="text"
-                  value={bannerTitle}
-                  onChange={(e) => setBannerTitle(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="font-bold block mb-1">बैनर का विवरण संदेश (Banner Message):</label>
-                <textarea
-                  value={bannerDesc}
-                  onChange={(e) => setBannerDesc(e.target.value)}
-                  rows={3}
-                  className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-tiro text-xs border border-slate-200 dark:border-slate-700"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow transition active:scale-95"
-              >
-                बैनर अपडेट करें (Save Festive Banner)
-              </button>
-            </form>
-          )}
-        </div>
-      </div>
-      )}
-
-      {/* 3. Weekly Challenge Jury & Submissions View */}
+      {/* Tab 1: Weekly Jury View */}
       {activeTab === 'weeklyJury' && (
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs flex items-center justify-between flex-wrap gap-2">
@@ -609,7 +472,133 @@ export const AdminDashboardView = ({
         </div>
       )}
 
-      {/* 4. Admin Weekly Topic Creator Form */}
+      {/* Tab 2: Users Directory */}
+      {activeTab === 'usersList' && (
+        <div className="space-y-4">
+          <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/30 text-emerald-600 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+              <span>सरकारी सुरक्षा मानक (Govt Audit Ready): सभी सदस्यों का मोबाइल व ईमेल OTP द्वारा 100% सत्यापित है।</span>
+            </div>
+            <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-xl text-[10px]">
+              सरकारी जांच हेतु तैयार डेटाबेस
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {registeredUsers.map((usr) => (
+              <div 
+                key={usr.id}
+                className="p-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 flex-wrap text-xs shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <img src={usr.avatar} alt={usr.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500 shrink-0" />
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{usr.name}</h4>
+                      <span className="px-2 py-0.2 rounded bg-emerald-500/10 text-emerald-600 font-bold text-[10px] flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                        <span>OTP Verified</span>
+                      </span>
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-300 text-[11px] font-semibold">
+                      📧 {usr.email} • 📱 <strong className="text-slate-900 dark:text-slate-100">{usr.phone}</strong> • {usr.city}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs font-semibold shrink-0">
+                  <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    {usr.postsCount} रचनाएँ
+                  </span>
+                  <span className="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 font-mono font-bold">
+                    {usr.points} pts
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-slate-900 dark:bg-slate-800 text-white font-bold text-[11px]">
+                    {usr.lastActive}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 3: Banner & Photo Editor */}
+      {activeTab === 'editBanner' && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Edit3 className="w-4 h-4 text-orange-600" />
+            <span>कस्टम होमपेज बैनर व बैकग्राउंड फोटो संपादित करें</span>
+          </h3>
+
+          {bannerUpdated ? (
+            <div className="p-4 bg-emerald-500/10 text-emerald-600 rounded-2xl text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5" />
+              <span>बैनर व फोटो होमपेज पर सफलतापूर्वक अपडेट हो गई!</span>
+            </div>
+          ) : (
+            <form onSubmit={handleSaveBannerEdit} className="space-y-4 text-xs">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
+                <label className="font-bold block text-slate-800 dark:text-slate-200">
+                  बैनर का बैकग्राउंड फोटो (Festive Banner Image):
+                </label>
+                <div className="flex items-center gap-4">
+                  <img src={bannerBgImage} alt="Banner Preview" className="w-24 h-16 rounded-xl object-cover ring-2 ring-orange-500 shrink-0 shadow" />
+                  <label className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 shadow">
+                    <Upload className="w-4 h-4" />
+                    <span>गैलरी/डिवाइस से फोटो चुनें (Upload Photo)</span>
+                    <input type="file" accept="image/*" onChange={handleBannerImageUpload} className="hidden" />
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">त्योहार/पर्व टैग (Festive Tag):</label>
+                <input
+                  type="text"
+                  value={festiveTag}
+                  onChange={(e) => setFestiveTag(e.target.value)}
+                  placeholder="उदा. 80वाँ स्वतंत्रता दिवस विशेषांक 🇮🇳"
+                  className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">बैनर का मुख्य शीर्षक (Banner Main Title):</label>
+                <input
+                  type="text"
+                  value={bannerTitle}
+                  onChange={(e) => setBannerTitle(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">बैनर का विवरण संदेश (Banner Message):</label>
+                <textarea
+                  value={bannerDesc}
+                  onChange={(e) => setBannerDesc(e.target.value)}
+                  rows={3}
+                  className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-tiro text-xs border border-slate-200 dark:border-slate-700"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow transition active:scale-95"
+              >
+                बैनर अपडेट करें (Save Banner)
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
+      {/* Tab 4: Create Weekly Topic */}
       {activeTab === 'createTopic' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
@@ -635,7 +624,7 @@ export const AdminDashboardView = ({
                   type="text"
                   value={newTopicTitle}
                   onChange={(e) => setNewTopicTitle(e.target.value)}
-                  placeholder="उदा. 15 अगस्त: आज़ादी की 79वीं भोर"
+                  placeholder="उदा. 15 अगस्त: आज़ादी की 80वीं भोर"
                   className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700"
                   required
                 />
@@ -653,10 +642,6 @@ export const AdminDashboardView = ({
                 />
               </div>
 
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 text-[11px] text-amber-700 dark:text-amber-300">
-                💡 <strong>नोट:</strong> 'विषय लाइव करें' बटन दबाते ही यह नया विषय होमपेज पर "विषय: [आपका विषय]" के रूप में सभी यूज़र्स को तुरंत दिखने लगेगा।
-              </div>
-
               <button
                 type="submit"
                 className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow transition active:scale-95"
@@ -668,11 +653,9 @@ export const AdminDashboardView = ({
         </div>
       )}
 
-      {/* 5. Birthday List & Custom Birthday Card Generator */}
+      {/* Tab 5: Birthday Cards */}
       {activeTab === 'birthdays' && (
         <div className="space-y-6">
-          
-          {/* Custom Birthday Card Creator for ANY Author */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Cake className="w-4 h-4 text-amber-500" />
@@ -731,7 +714,7 @@ export const AdminDashboardView = ({
         </div>
       )}
 
-      {/* 6. Published Posts Removal View */}
+      {/* Tab 6: Moderation (Remove Posts) */}
       {activeTab === 'moderation' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -752,7 +735,7 @@ export const AdminDashboardView = ({
                       {post.category}
                     </span>
                   </div>
-                  <p className="text-slate-500 truncate">लेखक: {post.author.name} ({post.author.username}) • {post.createdAt}</p>
+                  <p className="text-slate-500 truncate">लेखक: {post.author?.name || 'लेखक'} • {post.createdAt}</p>
                 </div>
 
                 <button
@@ -768,7 +751,7 @@ export const AdminDashboardView = ({
         </div>
       )}
 
-      {/* 7. AI Flagged Violation Queue View */}
+      {/* Tab 7: AI Flagged Violation Queue View */}
       {activeTab === 'flagged' && (
         <div className="space-y-4">
           <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -802,7 +785,7 @@ export const AdminDashboardView = ({
         </div>
       )}
 
-      {/* 8. Bolti Kalam Kit Shipping Queue (5,000 pts) */}
+      {/* Tab 8: Bolti Kalam Kit Shipping Queue */}
       {activeTab === 'kits' && (
         <div className="space-y-4">
           <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
