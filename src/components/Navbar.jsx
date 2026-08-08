@@ -227,16 +227,19 @@ export const Navbar = ({
                     <span>सहायता एवं मार्गदर्शन (Help)</span>
                   </button>
 
-                  {userRole === 'admin' && (
-                    <button
-                      onClick={() => { setActiveView('admin'); setShowUserDropdown(false); }}
-                      aria-label="एडमिन डैशबोर्ड देखें"
-                      className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-rose-600 font-bold"
-                    >
+                  <button
+                    onClick={() => { setActiveView('admin'); setShowUserDropdown(false); }}
+                    aria-label="एडमिन डैशबोर्ड देखें"
+                    className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-rose-600 font-bold"
+                  >
+                    <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4 text-rose-600" />
-                      <span>एडमिन डैशबोर्ड</span>
-                    </button>
-                  )}
+                      <span>🛠️ एडमिन डैशबोर्ड</span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-rose-600 text-white font-bold">
+                      Super Admin
+                    </span>
+                  </button>
 
                   <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
 

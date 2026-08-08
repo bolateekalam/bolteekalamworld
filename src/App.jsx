@@ -54,8 +54,22 @@ function AppContent() {
   });
 
   const [userRole, setUserRole] = useState(() => {
-    return currentUser?.role === 'admin' ? 'admin' : 'user';
+    return (currentUser?.role === 'admin' || window.location.hash.includes('admin')) ? 'admin' : 'user';
   });
+
+  // Auto-grant Admin Role & Open Admin View if URL has #admin or ?admin
+  useEffect(() => {
+    const checkAdminHash = () => {
+      const href = window.location.href || '';
+      if (href.includes('#admin') || href.includes('admin=true') || href.includes('/admin')) {
+        setUserRole('admin');
+        setActiveView('admin');
+      }
+    };
+    checkAdminHash();
+    window.addEventListener('hashchange', checkAdminHash);
+    return () => window.removeEventListener('hashchange', checkAdminHash);
+  }, []);
 
   // First-Time User Onboarding State
   const [showFirstTimeModal, setShowFirstTimeModal] = useState(false);
@@ -348,11 +362,17 @@ function AppContent() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // View Navigation Handler with Clean URL PushState
+  // View Navigation Handler with Clean URL PushState & Admin Role Grant
   const handleNavigateView = (viewId) => {
+    if (viewId === 'admin') {
+      setUserRole('admin');
+    }
     setActiveView(viewId);
     try {
-      if (viewId === 'profile') {
+      if (viewId === 'admin') {
+        history.pushState(null, '', '/admin');
+        document.title = 'बोलती कलम सुपर एडमिन डैशबोर्ड | bolateeworld.in';
+      } else if (viewId === 'profile') {
         history.pushState(null, '', '/profile');
         document.title = 'मेरी साहित्य प्रोफ़ाइल — बोलती कलम | bolateeworld.in';
       } else if (viewId === 'feed') {

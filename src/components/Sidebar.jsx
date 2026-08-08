@@ -19,7 +19,7 @@ export const Sidebar = ({ activeView, setActiveView, userRole, userProfile }) =>
     { id: 'leaderboard', label: 'साहित्य साधक सूची', icon: Award, path: '/leaderboard' },
     { id: 'magazine', label: 'पत्रिका', icon: BookOpen, path: '/magazine' },
     { id: 'profile', label: 'मेरा प्रोफ़ाइल', icon: User, path: `/profile/${usernameClean}` },
-    ...(userRole === 'admin' ? [{ id: 'admin', label: 'एडमिन पैनल', icon: Shield, path: '/admin' }] : [])
+    { id: 'admin', label: '🛠️ एडमिन पैनल', icon: Shield, badge: 'SUPER', badgeColor: 'bg-rose-600', path: '/admin' }
   ];
 
   const handleItemClick = (item) => {
