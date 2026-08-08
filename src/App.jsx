@@ -911,12 +911,15 @@ function AppContent() {
         if (isUserPost) {
           return {
             ...p,
+            authorName: updatedProfile.name || p.authorName || p.author?.name,
+            authorAvatar: updatedProfile.avatar || p.authorAvatar || p.author?.avatar,
+            avatar: updatedProfile.avatar || p.avatar || p.author?.avatar,
             author: {
               ...p.author,
-              name: updatedProfile.name || p.author.name,
-              username: updatedProfile.username || p.author.username,
-              avatar: updatedProfile.avatar || p.author.avatar,
-              city: updatedProfile.city || p.author.city
+              name: updatedProfile.name || p.author?.name,
+              username: updatedProfile.username || p.author?.username,
+              avatar: updatedProfile.avatar || p.author?.avatar,
+              city: updatedProfile.city || p.author?.city
             }
           };
         }

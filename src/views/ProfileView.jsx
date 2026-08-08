@@ -74,9 +74,9 @@ export const ProfileView = ({
         {/* Cover Photo */}
         <div className="h-44 sm:h-52 bg-slate-800 relative">
           <img 
-            src={profile.cover || 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200'} 
+            src={profile.cover || '/profile_cover_banner.png'} 
             alt="Cover" 
-            className="w-full h-full object-cover opacity-80"
+            className="w-full h-full object-cover opacity-90"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
           

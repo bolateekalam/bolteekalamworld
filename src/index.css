@@ -26,6 +26,17 @@
   }
 }
 
+/* Global Font Scaling for Crisp, Compact & Consistent Typography */
+html {
+  font-size: 15px;
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
 /* Base Body Setup */
 body {
   font-family: 'Inter', sans-serif;
