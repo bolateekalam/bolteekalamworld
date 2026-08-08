@@ -52,7 +52,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
     setIsLiked(nextState);
     setLikesCount(nextCount);
     if (onLikePost) {
-      onLikePost({ ...post, isLiked: nextState, likes: nextCount });
+      onLikePost(post, nextState, nextCount);
     }
   };
 
@@ -354,7 +354,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
         <CommentSection
           postId={post.id}
           comments={post.comments || []}
-          onAddComment={onAddComment}
+          onAddComment={(commentObj) => onAddComment && onAddComment(post.id, commentObj)}
           requireAuth={requireAuth}
           currentUser={currentUser}
         />
