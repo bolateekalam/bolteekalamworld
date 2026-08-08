@@ -69,66 +69,7 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
         </div>
       </div>
 
-      {/* 2. 🎭 15 Ras Chakra Wheel Widget */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4 text-center">
-        <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 flex items-center justify-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-orange-500" />
-          <span>15 रस चक्र</span>
-        </h3>
 
-        {/* Interactive 15 Ras Wheel Diagram */}
-        <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full border-4 border-dashed border-emerald-500/40 animate-spin-slow" />
-          <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-600 flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400">
-            <span className="text-xl font-black">15</span>
-            <span className="text-[10px] font-bold uppercase">रस</span>
-          </div>
-        </div>
-
-        <button
-          onClick={() => setActiveView && setActiveView('magazine')}
-          className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95"
-        >
-          <span>रस पढ़ें</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* 3. 🔥 Real Popular Poems List (Dynamic from Feed) */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
-        <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-          <Flame className="w-4 h-4 text-orange-500" />
-          <span>लोकप्रिय रचनाएँ</span>
-        </h3>
-
-        <div className="space-y-3">
-          {popularPoems.map((poem) => (
-            <div key={poem.rank} className="flex items-center justify-between gap-3 text-xs border-b border-slate-100 dark:border-slate-800/60 pb-2.5 last:border-none last:pb-0">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
-                  {poem.rank}
-                </span>
-                <div className="truncate">
-                  <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{poem.title}</p>
-                  <p className="text-[10px] text-slate-500 truncate">{poem.poet}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 text-[11px] font-bold text-rose-500 shrink-0">
-                <Heart className="w-3 h-3 fill-rose-500" />
-                <span>{poem.likes}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button
-          onClick={() => setActiveView && setActiveView('battles')}
-          className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition"
-        >
-          <span>और देखें</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
 
       {/* 4. 🏆 Real Top Creators List (Dynamic from Feed & Active Profile) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
