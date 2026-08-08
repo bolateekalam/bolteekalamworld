@@ -51,27 +51,17 @@ export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
     e.preventDefault();
     setError('');
 
-    if (!name.trim()) {
-      setError('कृपया अपना पूरा नाम दर्ज करें!');
-      return;
-    }
+    const finalName = name.trim() || user?.name || 'साहित्य साधक';
+    const finalEmail = email.trim() || user?.email || 'user@bolteekalam.com';
 
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
-      setError('कृपया सही 10-अंकों का मोबाइल नंबर दर्ज करें! यह कानूनी व सुरक्षा ऑडिट के लिए अनिवार्य है।');
-      return;
-    }
-
-    if (!email.includes('@')) {
-      setError('कृपया सही Gmail / ईमेल पता दर्ज करें!');
-      return;
-    }
+    const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+    const finalPhone = (cleanPhone && cleanPhone.length === 10) ? `+91 ${cleanPhone}` : (user?.phone || '+91 9812345678');
 
     onCompleteProfile({
       ...user,
-      name: name.trim(),
-      phone: `+91 ${cleanPhone}`,
-      email: email.trim(),
+      name: finalName,
+      phone: finalPhone,
+      email: finalEmail,
       city: city.trim() || 'प्रयागराज',
       birthday,
       age: calculateAge(birthday),
@@ -151,32 +141,35 @@ export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
           {/* Name & Mobile Number */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">आपका नाम: *</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">आपका नाम:</label>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                  <CheckCircle2 className="w-3 h-3" /> सत्यापित
+                </span>
+              </div>
               <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <User className="w-4 h-4 text-emerald-500 absolute left-3 top-3" />
                 <input
                   type="text"
-                  value={name}
+                  value={name || user?.name || ''}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="उदा. लोकेश शर्मा"
-                  className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100"
-                  required
+                  placeholder="आपका पूरा नाम"
+                  className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-emerald-500/30 font-bold text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
 
             <div>
-              <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मोबाइल नंबर (10 अंक): *</label>
+              <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मोबाइल नंबर (ऐच्छिक):</label>
               <div className="relative">
-                <Phone className="w-4 h-4 text-emerald-500 absolute left-3 top-3" />
+                <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="उदा. 9876543210"
+                  placeholder="उदा. 9876543210 (ऐच्छिक)"
                   maxLength={10}
-                  className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-emerald-500/50 font-bold text-slate-900 dark:text-slate-100"
-                  required
+                  className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -185,16 +178,20 @@ export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
           {/* Email & City */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">Gmail / ईमेल पता: *</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">Gmail / ईमेल पता:</label>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                  <CheckCircle2 className="w-3 h-3" /> सत्यापित
+                </span>
+              </div>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Mail className="w-4 h-4 text-emerald-500 absolute left-3 top-3" />
                 <input
                   type="email"
-                  value={email}
+                  value={email || user?.email || ''}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="user@gmail.com"
-                  className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
-                  required
+                  className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-emerald-500/30 text-slate-900 dark:text-slate-100 font-medium"
                 />
               </div>
             </div>

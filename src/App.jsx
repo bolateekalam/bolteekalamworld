@@ -733,9 +733,9 @@ function AppContent() {
       return;
     }
 
-    const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
+    const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`) || localStorage.getItem('onboarding_completed_global');
 
-    if (!hasCompletedOnboarding && (!storedPhone || storedPhone.length < 10)) {
+    if (!hasCompletedOnboarding && isDirectLogin === false) {
       setPendingFirstTimeUser(userObj);
       setShowFirstTimeModal(true);
     } else {
@@ -766,6 +766,7 @@ function AppContent() {
     setUserRole('user');
     const userEmail = completedUser.email || '';
 
+    localStorage.setItem('onboarding_completed_global', 'true');
     localStorage.setItem(`onboarding_completed_${userEmail}`, 'true');
     if (completedUser.phone) {
       localStorage.setItem(`user_phone_${userEmail}`, completedUser.phone);
@@ -803,8 +804,8 @@ function AppContent() {
     updateUserProfileInDB(updated, userEmail);
 
     setShowFirstTimeModal(false);
+    setShowAuthModal(false);
     setPendingFirstTimeUser(null);
-    handleNavigateView('profile');
 
     handleRewardPoints(50, 'प्रथम प्रोफ़ाइल पूर्ण करने पर (Welcome Bonus)');
   };
