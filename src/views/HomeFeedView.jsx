@@ -68,46 +68,7 @@ export const HomeFeedView = ({
           </div>
         </div>
 
-        {/* Banner 2: आज का संदेश - एकता का सूत्र (Pure Clean Quote Card) */}
-        <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-orange-500/20 border-2 border-orange-500/30 text-slate-900 dark:text-slate-100 shadow-sm flex items-center justify-between flex-wrap gap-4">
-          <div className="space-y-1.5 max-w-xl">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              <h3 className="text-base sm:text-lg font-bold font-rozha text-orange-600 dark:text-orange-400">
-                आज का संदेश : एकता का सूत्र
-              </h3>
-            </div>
-            <p className="text-xs sm:text-sm font-tiro italic font-semibold text-slate-700 dark:text-slate-300">
-              "हम भले ही अलग-अलग भाषाएं बोलते हों, पर हमारा दिल एक है – भारत माता के लिए!"
-            </p>
-          </div>
 
-          <div className="text-4xl">🚩</div>
-        </div>
-
-        {/* Banner 3: 15 अगस्त पर लिखें और साझा करें */}
-        <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-600/10 via-amber-500/10 to-orange-500/20 border-2 border-emerald-500/30 text-slate-900 dark:text-slate-100 shadow-sm flex items-center justify-between flex-wrap gap-4">
-          <div className="space-y-1.5 max-w-xl">
-            <h3 className="text-base sm:text-lg font-bold font-rozha text-emerald-600 dark:text-emerald-400">
-              15 अगस्त पर लिखें और साझा करें
-            </h3>
-            <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
-              कविता | शायरी | देशभक्ति लेख | भाषण | पोस्टर
-            </p>
-            
-            <div className="pt-1">
-              <button
-                onClick={() => onOpenCreatePost && onOpenCreatePost()}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full text-xs shadow flex items-center gap-1.5 active:scale-95 transition"
-              >
-                <span>अपनी रचना साझा करें</span>
-                <span>➔</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="text-4xl">✒️</div>
-        </div>
 
       </div>
 
