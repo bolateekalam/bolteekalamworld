@@ -5,18 +5,11 @@ import {
 } from 'lucide-react';
 
 const THEMES = [
-  { id: 'parchment', name: '📜 पार्चमेंट रॉयल (Parchment Classic)', bg1: '#fffdf9', bg2: '#fef3c7', border: '#be123c', title: '#881337', text: '#1e293b', brand: '#be123c' },
-  { id: 'purple', name: '💜 हिन्दवी पर्पल (Hindwi Purple)', bg1: '#581c87', bg2: '#3b0764', border: '#f59e0b', title: '#ffffff', text: '#f3e8ff', brand: '#fbbf24' },
-  { id: 'ivory', name: '🤍 क्लासिक आइवरी (Ivory White)', bg1: '#fffdfa', bg2: '#f5f5f4', border: '#09090b', title: '#09090b', text: '#27272a', brand: '#e11d48' },
-  { id: 'dark', name: '🖤 डार्क वेलवेट (Dark Velvet)', bg1: '#0f172a', bg2: '#020617', border: '#e11d48', title: '#fbbf24', text: '#f8fafc', brand: '#e11d48' },
-  { id: 'sage', name: '🌿 विंटेज सेज ग्रीन (Vintage Sage)', bg1: '#f0fdf4', bg2: '#dcfce7', border: '#15803d', title: '#14532d', text: '#166534', brand: '#15803d' }
-];
-
-const LAYOUTS = [
-  { id: 'fullText', name: '📜 केवल कविता टेक्स्ट (Full Text Poster)' },
-  { id: 'side', name: '📐 दाएँ तरफ फोटो (Side Photo Layout)' },
-  { id: 'topRight', name: '🖼️ ऊपर दाएँ फोटो (Top Right Photo Stack)' },
-  { id: 'topCenter', name: '✨ ऊपर सेंटर फोटो + नीचे कविता (Top Center Photo + Poem)' }
+  { id: 'parchment', name: '📜 पार्चमेंट रॉयल', colorBg: 'bg-amber-100 text-amber-900 border-amber-400', bg1: '#fffdf9', bg2: '#fef3c7', border: '#be123c', title: '#881337', text: '#1e293b', brand: '#be123c' },
+  { id: 'purple', name: '💜 हिन्दवी पर्पल', colorBg: 'bg-purple-900 text-amber-300 border-amber-400', bg1: '#581c87', bg2: '#3b0764', border: '#f59e0b', title: '#ffffff', text: '#f3e8ff', brand: '#fbbf24' },
+  { id: 'ivory', name: '🤍 क्लासिक आइवरी', colorBg: 'bg-slate-100 text-slate-900 border-slate-400', bg1: '#fffdfa', bg2: '#f5f5f4', border: '#09090b', title: '#09090b', text: '#27272a', brand: '#e11d48' },
+  { id: 'dark', name: '🖤 डार्क वेलवेट', colorBg: 'bg-slate-950 text-rose-400 border-rose-600', bg1: '#0f172a', bg2: '#020617', border: '#e11d48', title: '#fbbf24', text: '#f8fafc', brand: '#e11d48' },
+  { id: 'sage', name: '🌿 विंटेज सेज', colorBg: 'bg-emerald-100 text-emerald-900 border-emerald-500', bg1: '#f0fdf4', bg2: '#dcfce7', border: '#15803d', title: '#14532d', text: '#166534', brand: '#15803d' }
 ];
 
 export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterPost, requireAuth, setActiveView }) => {
@@ -24,16 +17,13 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const HAS_25_POINTS = userPoints >= 25;
   const HAS_15_POINTS = userPoints >= 15;
 
-  // Fixed Non-editable Author Details from Profile
   const fixedAuthorName = userProfile?.name || 'साहित्य साधक';
   const fixedAuthorUsername = (userProfile?.username || '@writer').replace(/^[@#]/, '');
 
-  // Default sample poem prefilled so live preview is instantly stunning!
   const [title, setTitle] = useState('स्वतंत्रता के स्वर');
   const [content, setContent] = useState('विहंस रही आज स्वतंत्र क्षितिज पर,\nसत्य-अहिंसा की अमर अमरता।\nकोटि-कोटि कंठों से गूँजे,\nभारत माँ की पावन ममता।');
 
   const [selectedThemeId, setSelectedThemeId] = useState('parchment');
-  const [selectedLayoutId, setSelectedLayoutId] = useState('fullText');
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
   const [downloading, setDownloading] = useState(false);
   const [posting, setPosting] = useState(false);
@@ -69,7 +59,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
   const currentTheme = THEMES.find(t => t.id === selectedThemeId) || THEMES[0];
 
-  // Custom Image Upload Handler
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -85,7 +74,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
     setUploadedPhotoUrl(null);
   };
 
-  // Render High Resolution Crisp 4:5 Poster Canvas
   const drawPosterCanvas = () => {
     return new Promise((resolve) => {
       const canvas = canvasRef.current || document.createElement('canvas');
@@ -105,11 +93,11 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
       // 2. Royal Double Border
       ctx.strokeStyle = borderColor;
-      ctx.lineWidth = 14;
+      ctx.lineWidth = 16;
       ctx.strokeRect(36, 36, 1008, 1278);
 
-      ctx.lineWidth = 3;
-      ctx.strokeRect(52, 52, 976, 1246);
+      ctx.lineWidth = 4;
+      ctx.strokeRect(54, 54, 972, 1242);
 
       // 3. Render Poem Title
       ctx.textAlign = 'center';
@@ -117,7 +105,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.font = 'bold 56px serif';
       ctx.fillText(title.trim() || 'कविता का शीर्षक', 540, 150);
 
-      // Title Divider Line
+      // Title Divider Decorative Line
       ctx.strokeStyle = borderColor;
       ctx.lineWidth = 4;
       ctx.beginPath();
@@ -159,7 +147,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
   useEffect(() => {
     drawPosterCanvas();
-  }, [title, content, selectedThemeId, selectedLayoutId, uploadedPhotoUrl]);
+  }, [title, content, selectedThemeId, uploadedPhotoUrl]);
 
   // Option 1: Download PNG (-25 Points)
   const handleGenerateAndDownload = async () => {
@@ -221,7 +209,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
       
       {/* Studio Header Banner */}
       <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-orange-600 via-rose-700 to-amber-600 text-white shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
@@ -241,7 +229,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         </div>
 
         {/* Current Points Counter Badge */}
-        <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/30 text-amber-200 text-center shrink-0 z-10 shadow-lg">
+        <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/30 text-amber-200 text-center shrink-0 z-10 shadow-lg w-full md:w-auto">
           <span className="text-[10px] text-amber-100 uppercase font-bold block">आपके कुल रिवॉर्ड पॉइंट्स</span>
           <span className="text-3xl font-black text-amber-300 drop-shadow">{userPoints} Pts</span>
           <span className="text-[10px] text-emerald-300 font-bold block mt-0.5">
@@ -250,24 +238,24 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         </div>
       </div>
 
-      {/* Main Studio Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Main Studio 2-Column Responsive Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full">
         
-        {/* Left Form Controls (5 cols) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
+        {/* Left Form Controls Panel (xl:col-span-5) */}
+        <div className="xl:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-6 w-full shrink-0">
           
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Palette className="w-5 h-5 text-orange-600" />
-              <span>पोस्टर कस्टमाइज़ेशन</span>
+              <span>1. पोस्टर कस्टमाइज़ेशन</span>
             </h3>
-            <span className="text-[10px] bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-2 py-0.5 rounded-full">
+            <span className="text-[10px] bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-2.5 py-0.5 rounded-full">
               HD Studio
             </span>
           </div>
 
           {/* Title Input */}
-          <div className="space-y-1.5">
+          <div className="space-y-2 w-full">
             <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
               <span>कविता का शीर्षक (Title) <span className="text-orange-600">*</span></span>
               <span className="text-[10px] text-slate-400 font-normal">आवश्यक</span>
@@ -277,12 +265,12 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="अपनी कविता का शीर्षक लिखें..."
-              className="w-full px-4 py-3 text-xs sm:text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-extrabold shadow-inner"
+              className="w-full px-4 py-3 text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-extrabold shadow-inner transition-all"
             />
           </div>
 
-          {/* Poem Content Input with Line Count Limit */}
-          <div className="space-y-1.5">
+          {/* Poem Content Input */}
+          <div className="space-y-2 w-full">
             <div className="flex justify-between items-center text-xs font-extrabold">
               <label className="text-slate-800 dark:text-slate-200">
                 कविता की पंक्तियाँ (Poem Content) <span className="text-orange-600">*</span>
@@ -297,7 +285,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="यहाँ अपनी कविता लिखें..."
-              className="w-full p-4 text-xs sm:text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-tiro leading-relaxed shadow-inner"
+              className="w-full p-4 text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-tiro leading-relaxed shadow-inner transition-all"
             />
 
             {isTextTooLong && (
@@ -311,46 +299,34 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           {/* Fixed Non-Editable Poet Info */}
           <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 space-y-1">
             <span className="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase block">कवि पहचान (Fixed Account Info)</span>
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="font-extrabold text-slate-900 dark:text-slate-100">{fixedAuthorName}</span>
               <span className="text-slate-500 font-medium">@{fixedAuthorUsername}</span>
             </div>
           </div>
 
-          {/* Theme Dropdown */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-              थीम व बैकग्राउंड स्टाइल चुनें (5 Themes)
+          {/* Visual Theme Selection Pills */}
+          <div className="space-y-2 w-full">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 block">
+              थीम व बैकग्राउंड स्टाइल चुनें:
             </label>
-            <select
-              value={selectedThemeId}
-              onChange={(e) => setSelectedThemeId(e.target.value)}
-              className="w-full px-4 py-3 text-xs sm:text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-extrabold cursor-pointer focus:ring-2 focus:ring-orange-500"
-            >
+            <div className="grid grid-cols-2 gap-2">
               {THEMES.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedThemeId(t.id)}
+                  className={`p-2.5 rounded-2xl text-xs font-extrabold border-2 transition-all flex items-center gap-2 ${t.colorBg} ${
+                    selectedThemeId === t.id ? 'ring-2 ring-orange-500 scale-[1.02] shadow-md' : 'opacity-80 hover:opacity-100'
+                  }`}
+                >
+                  <span className="truncate">{t.name}</span>
+                </button>
               ))}
-            </select>
-          </div>
-
-          {/* Layout Dropdown */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-              इमेज़ व टेक्स्ट लेआउट स्टाइल चुनें
-            </label>
-            <select
-              value={selectedLayoutId}
-              onChange={(e) => setSelectedLayoutId(e.target.value)}
-              className="w-full px-4 py-3 text-xs sm:text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-extrabold cursor-pointer focus:ring-2 focus:ring-orange-500"
-            >
-              {LAYOUTS.map(l => (
-                <option key={l.id} value={l.id}>{l.name}</option>
-              ))}
-            </select>
+            </div>
           </div>
 
           {/* Custom Photo Upload */}
-          <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800 w-full">
             <div className="flex items-center justify-between">
               <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
                 अपनी इमेज़/फोटो जोड़ें (Optional)
@@ -366,7 +342,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               )}
             </div>
 
-            <label className="w-full py-3 px-4 rounded-2xl border-2 border-dashed border-orange-500/40 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-100/50 transition">
+            <label className="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-orange-500/40 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-100/50 transition">
               <Upload className="w-4 h-4 text-orange-600" />
               <span>{uploadedPhotoUrl ? 'दूसरी फोटो बदलें' : 'अपनी फोटो अपलोड करें'}</span>
               <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
@@ -375,46 +351,46 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
         </div>
 
-        {/* Right Live Preview Canvas Container (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col items-center justify-center space-y-5">
+        {/* Right Live Preview Canvas Container (xl:col-span-7) */}
+        <div className="xl:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col items-center justify-center space-y-6 w-full">
           
           {/* Header Bar */}
           <div className="flex items-center justify-between w-full border-b border-slate-200 dark:border-slate-800 pb-3 text-xs font-extrabold text-slate-800 dark:text-slate-200">
             <span className="flex items-center gap-2">
               <ImageIcon className="w-4 h-4 text-orange-600" />
-              <span>तुरंत लाइव पोस्टर प्रिव्यू (Live HD Preview)</span>
+              <span>2. तुरंत लाइव पोस्टर प्रिव्यू (Live HD Preview)</span>
             </span>
-            <span className="text-[10px] px-2.5 py-1 rounded-full bg-orange-500 text-white font-black uppercase shadow-sm">
+            <span className="text-[10px] px-3 py-1 rounded-full bg-orange-500 text-white font-black uppercase shadow-sm">
               HD PNG 4:5
             </span>
           </div>
 
-          {/* Live Canvas Element (Directly Rendered First!) */}
-          <div className="relative w-full max-w-[440px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-orange-500/50 ring-4 ring-orange-500/20">
+          {/* Live Canvas Element Container */}
+          <div className="relative w-full max-w-[480px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-orange-500/50 ring-4 ring-orange-500/20 bg-slate-100 dark:bg-slate-950">
             <canvas 
               ref={canvasRef} 
               className="w-full h-full object-contain"
             />
           </div>
 
-          {/* Action Download & Direct Post Buttons Directly Below Live Preview */}
-          <div className="w-full max-w-[440px] space-y-3 pt-1">
+          {/* Action Download & Direct Post Buttons */}
+          <div className="w-full max-w-[480px] space-y-3 pt-2">
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
               {/* Download Option */}
               <button
                 onClick={handleGenerateAndDownload}
                 disabled={downloading || !HAS_25_POINTS || isTextTooLong || isFormInvalid}
-                className="py-3.5 px-4 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-black rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 px-5 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {HAS_25_POINTS ? (
                   <>
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4.5 h-4.5" />
                     <span>{downloading ? 'डाउनलोडिंग...' : 'इमेज़ डाउनलोड (-25 Pts)'}</span>
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4 text-amber-200" />
+                    <Lock className="w-4.5 h-4.5 text-amber-200" />
                     <span>25 Pts आवश्यक</span>
                   </>
                 )}
@@ -424,16 +400,16 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               <button
                 onClick={handlePublishDirectly}
                 disabled={posting || !HAS_15_POINTS || isTextTooLong || isFormInvalid}
-                className="py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 px-5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {HAS_15_POINTS ? (
                   <>
-                    <Send className="w-4 h-4 text-white" />
+                    <Send className="w-4.5 h-4.5 text-white" />
                     <span>{posting ? 'पोस्ट हो रहा...' : 'मंच पर पोस्ट करें (-15 Pts)'}</span>
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4 text-emerald-200" />
+                    <Lock className="w-4.5 h-4.5 text-emerald-200" />
                     <span>15 Pts आवश्यक</span>
                   </>
                 )}
@@ -441,13 +417,13 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             </div>
 
             {isFormInvalid && (
-              <p className="text-[10px] text-orange-600 dark:text-orange-400 font-bold text-center">
+              <p className="text-[10px] sm:text-xs text-orange-600 dark:text-orange-400 font-bold text-center">
                 * डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना आवश्यक है।
               </p>
             )}
 
             {!isFormInvalid && (
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 text-center font-medium">
                 * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
               </p>
             )}
