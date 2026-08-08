@@ -1344,7 +1344,12 @@ function AppContent() {
               currentUser={currentUser}
               userProfile={userProfile}
               posts={posts}
-              registeredUsers={registeredUsers}
+              registeredUsers={posts.map(p => ({
+                id: p.author?.id || p.id,
+                name: p.author?.name || p.authorName || 'साहित्यिक लेखक',
+                username: p.author?.username || '@writer',
+                avatar: p.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'
+              }))}
               requireAuth={requireAuth}
             />
           )}
