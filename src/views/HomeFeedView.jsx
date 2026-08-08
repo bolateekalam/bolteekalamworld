@@ -34,40 +34,7 @@ export const HomeFeedView = ({
   return (
     <div className="space-y-6">
 
-      {/* 🇮🇳 15 AUGUST PATRIOTIC SPECIAL HERO BANNER (Controlled by Admin Theme Engine) */}
-      {activeFestivalTheme?.id === 'independenceDay' && (
-        <div className="space-y-4">
-          <div className="p-5 sm:p-7 rounded-3xl bg-gradient-to-r from-orange-600 via-amber-500 to-emerald-600 text-white shadow-xl relative overflow-hidden flex items-center justify-between flex-wrap gap-4">
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-            
-            <div className="space-y-1.5 max-w-xl z-10">
-              <p className="text-xs font-bold text-amber-100 tracking-wide">
-                स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-black font-rozha text-white drop-shadow">
-                15 अगस्त स्वतंत्रता दिवस
-              </h1>
-              <p className="text-xs font-bold text-amber-100 flex items-center gap-2">
-                <span>स्वतंत्रता</span> • <span>समर्पण</span> • <span>स्वाभिमान</span>
-              </p>
 
-              <div className="pt-2">
-                <button
-                  onClick={() => setActiveView && setActiveView('festival')}
-                  className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-extrabold rounded-full text-xs shadow-md flex items-center gap-1.5 active:scale-95 transition"
-                >
-                  <span>15 अगस्त विशेषांक देखें</span>
-                  <span>➔</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="z-10 text-4xl sm:text-5xl">
-              🇮🇳
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 📸 New Feature: Poet Image Poster Studio Banner */}
       <div 
