@@ -61,7 +61,7 @@ export const Navbar = ({
                 बोलती कलम
               </h1>
               <span className="px-2 py-0.5 text-[10px] font-extrabold bg-gradient-to-r from-orange-500 via-emerald-600 to-green-700 text-white rounded-full uppercase tracking-wider shadow flex items-center gap-1">
-                <span>🇮🇳</span>
+                <img src="/images/waving_flag.png" alt="Flag" className="w-4 h-3 object-contain inline-block" />
                 <span>15 अगस्त स्पेशल</span>
               </span>
             </div>

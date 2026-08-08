@@ -1349,8 +1349,11 @@ function AppContent() {
           )}
         </main>
 
-        {/* Right Sidebar Column (Matching 15 August UI mockup) */}
+        {/* Right Sidebar Column (Dynamic real authors & posts) */}
         <RightSidebar
+          posts={posts}
+          currentUser={currentUser}
+          userProfile={userProfile}
           onOpenCreatePost={handleOpenCreatePostProtected}
           setActiveView={handleNavigateView}
         />
