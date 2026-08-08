@@ -19,7 +19,8 @@ export const HomeFeedView = ({
   onFollowAuthor,
   onOpenMembershipCard,
   userProfile,
-  requireAuth
+  requireAuth,
+  activeFestivalTheme
 }) => {
   const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -32,7 +33,39 @@ export const HomeFeedView = ({
 
   return (
     <div className="space-y-6">
-      
+
+      {/* 🇮🇳 🎀 🪈 Dynamic Global Festival Theme Banner */}
+      {activeFestivalTheme && (
+        <div className={`p-6 rounded-3xl bg-gradient-to-br ${activeFestivalTheme.bannerGradient || 'from-amber-600 via-slate-900 to-emerald-700'} border-2 border-amber-400/40 text-white shadow-2xl flex items-center justify-between flex-wrap gap-5 relative overflow-hidden animate-in fade-in duration-300`}>
+          <div className="space-y-2 max-w-xl z-10">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-xs uppercase shadow flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
+                <span>{activeFestivalTheme.tag || activeFestivalTheme.badgeText || 'पर्व विशेषांक'}</span>
+              </span>
+            </div>
+
+            <h2 className="text-xl sm:text-3xl font-extrabold font-rozha text-amber-300 leading-tight">
+              {activeFestivalTheme.title}
+            </h2>
+
+            <p className="text-xs sm:text-sm text-amber-100/90 font-tiro leading-relaxed">
+              {activeFestivalTheme.description}
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              if (setActiveView) setActiveView('posterStudio');
+            }}
+            className="z-10 px-5 py-3 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs sm:text-sm flex items-center gap-2 shadow-xl active:scale-95 transition"
+          >
+            <Sparkles className="w-4 h-4 text-slate-950" />
+            <span>🎨 फेस्टिवल पोस्टर बनाएँ</span>
+          </button>
+        </div>
+      )}
+
       {/* 🌟 Top Hero: 6-Month Free Digital Literary Membership Banner */}
       <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-950 via-rose-900 to-slate-950 border-2 border-amber-400/40 text-white shadow-2xl flex items-center justify-between flex-wrap gap-5 relative overflow-hidden">
         

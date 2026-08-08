@@ -4,6 +4,7 @@ import {
   Flag, Trophy, Calendar, Bell, Cake, Award, Sparkles, RefreshCw, Trash2, Package, AlertTriangle, Crown, RefreshCcw, PlusCircle, Send, Edit3, UserCheck, Activity, Image, Upload, Phone, ShieldCheck 
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { FESTIVAL_THEMES, detectCurrentAutoFestivalTheme } from '../data/festivalThemes';
 
 export const AdminDashboardView = ({ 
   posts = [], 
@@ -14,10 +15,13 @@ export const AdminDashboardView = ({
   weeklyChallenge,
   setWeeklyChallenge,
   patrioticBanner,
-  setPatrioticBanner
+  setPatrioticBanner,
+  activeFestivalTheme,
+  onUpdateFestivalTheme
 }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('weeklyJury');
+  const [selectedFestivalKey, setSelectedFestivalKey] = useState(activeFestivalTheme?.id || 'auto');
 
   // New Weekly Topic Form State
   const [newTopicTitle, setNewTopicTitle] = useState('15 अगस्त: स्वतंत्रता और मेरी कलम');
@@ -363,18 +367,84 @@ export const AdminDashboardView = ({
 
       {/* 2. Dynamic Festival Banner & Image Editor */}
       {activeTab === 'editBanner' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Edit3 className="w-4 h-4 text-orange-600" />
-            <span>होमपेज त्योहार विशेषांक बैनर व फोटो संपादित करें (15 अगस्त, रक्षाबंधन, दीपावली, होली...)</span>
-          </h3>
-
-          {bannerUpdated ? (
-            <div className="p-4 bg-emerald-500/10 text-emerald-600 rounded-2xl text-xs font-bold flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5" />
-              <span>त्योहार बैनर व बैकग्राउंड फोटो होमपेज पर सफलतापूर्वक अपडेट हो गई!</span>
+        <div className="space-y-6">
+          
+          {/* Global Festival Theme Preset Selector */}
+          <div className="bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 shadow-xl space-y-4 text-white">
+            <div className="flex items-center gap-3 border-b border-rose-500/30 pb-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold">
+                <Sparkles className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-base font-rozha text-amber-300">
+                  🎉 ग्लोबल त्योहार एवं फेस्टिवल थीम इंजन (Global Festival Engine)
+                </h3>
+                <p className="text-xs text-rose-200/80 font-medium">
+                  पूरे देश में सभी यूज़र्स के लिए त्यौहार (15 अगस्त, रक्षाबंधन, जन्माष्टमी, दिवाली) पर थीम बदलें:
+                </p>
+              </div>
             </div>
-          ) : (
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <div className="space-y-1.5">
+                <label className="font-bold block text-xs text-amber-200">
+                  एक्टिव ग्लोबल थीम चुनें (Select Active Festive Theme):
+                </label>
+                <select
+                  value={selectedFestivalKey}
+                  onChange={(e) => {
+                    const key = e.target.value;
+                    setSelectedFestivalKey(key);
+                    const themeObj = key === 'auto' ? detectCurrentAutoFestivalTheme() : FESTIVAL_THEMES[key];
+                    if (themeObj) {
+                      setFestiveTag(themeObj.tag || themeObj.badgeText || '');
+                      setBannerTitle(themeObj.title || '');
+                      setBannerDesc(themeObj.description || '');
+                      if (themeObj.bgImage) setBannerBgImage(themeObj.bgImage);
+                    }
+                  }}
+                  className="w-full p-3 rounded-2xl bg-slate-950 border border-amber-500/50 font-bold text-amber-300 text-xs shadow"
+                >
+                  {Object.values(FESTIVAL_THEMES).map((thm) => (
+                    <option key={thm.id} value={thm.id}>
+                      {thm.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const themeObj = selectedFestivalKey === 'auto' ? detectCurrentAutoFestivalTheme() : FESTIVAL_THEMES[selectedFestivalKey];
+                    if (onUpdateFestivalTheme) {
+                      onUpdateFestivalTheme(themeObj || FESTIVAL_THEMES.default);
+                    }
+                    setBannerUpdated(true);
+                    setTimeout(() => setBannerUpdated(false), 4000);
+                  }}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs shadow-xl active:scale-95 transition flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4 fill-slate-950" />
+                  <span>पूरी वेबसाइट पर फेस्टिवल थीम लागू करें 🚀</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Edit3 className="w-4 h-4 text-orange-600" />
+              <span>कस्टम बैनर व बैकग्राउंड विवरण फोटो संपादित करें</span>
+            </h3>
+
+            {bannerUpdated ? (
+              <div className="p-4 bg-emerald-500/10 text-emerald-600 rounded-2xl text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                <span>त्योहार बैनर व बैकग्राउंड फोटो होमपेज पर सफलतापूर्वक अपडेट हो गई!</span>
+              </div>
+            ) : (
             <form onSubmit={handleSaveBannerEdit} className="space-y-4 text-xs">
               
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
@@ -434,6 +504,7 @@ export const AdminDashboardView = ({
             </form>
           )}
         </div>
+      </div>
       )}
 
       {/* 3. Weekly Challenge Jury & Submissions View */}

@@ -37,6 +37,7 @@ import AudioStoriesView from './views/AudioStoriesView';
 import { mockPosts, mockDailyChallenge, mockPoetryBattle } from './data/mockPosts';
 import { mockCompetitions } from './data/mockCompetitions';
 import { mockEvents } from './data/mockEvents';
+import { FESTIVAL_THEMES, detectCurrentAutoFestivalTheme } from './data/festivalThemes';
 import { Sparkles, Trophy, CheckCircle2 } from 'lucide-react';
 
 function AppContent() {
@@ -163,6 +164,26 @@ function AppContent() {
 
   // Global 6-Month Membership Card Modal State
   const [showGlobalMembershipModal, setShowGlobalMembershipModal] = useState(false);
+
+  // Global Festival Ambient Theme Engine State
+  const [activeFestivalTheme, setActiveFestivalTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_active_festival_theme');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.id === 'auto') return detectCurrentAutoFestivalTheme();
+        return parsed;
+      }
+    } catch (e) {}
+    return detectCurrentAutoFestivalTheme();
+  });
+
+  const handleUpdateFestivalTheme = (newThemeObj) => {
+    setActiveFestivalTheme(newThemeObj);
+    try {
+      localStorage.setItem('bolteekalam_active_festival_theme', JSON.stringify(newThemeObj));
+    } catch (e) {}
+  };
 
   // Notifications List State (Persisted in localStorage)
   const [notificationsList, setNotificationsList] = useState(() => {
@@ -1177,6 +1198,7 @@ function AppContent() {
               userProfile={userProfile}
               requireAuth={requireAuth}
               setActiveView={handleNavigateView}
+              activeFestivalTheme={activeFestivalTheme}
             />
           )}
 
@@ -1271,6 +1293,8 @@ function AppContent() {
               setWeeklyChallenge={setWeeklyChallenge}
               patrioticBanner={patrioticBanner}
               setPatrioticBanner={setPatrioticBanner}
+              activeFestivalTheme={activeFestivalTheme}
+              onUpdateFestivalTheme={handleUpdateFestivalTheme}
             />
           )}
 
