@@ -1342,6 +1342,9 @@ function AppContent() {
               onOpenCreatePost={handleOpenCreatePostProtected}
               onOpenPoetryChallenge={handleOpenPoetryChallenge}
               currentUser={currentUser}
+              userProfile={userProfile}
+              posts={posts}
+              registeredUsers={registeredUsers}
               requireAuth={requireAuth}
             />
           )}
