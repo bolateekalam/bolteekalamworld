@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Download, Image as ImageIcon, Upload, Check, 
-  AlertCircle, Lock, Award, RefreshCw, Palette, Type, Feather, Trash2, Send
+  AlertCircle, Lock, Award, RefreshCw, Palette, Type, Feather, Trash2, Send, X, Eye
 } from 'lucide-react';
 
 const THEMES = [
@@ -20,7 +20,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const fixedAuthorName = userProfile?.name || 'साहित्य साधक';
   const fixedAuthorUsername = (userProfile?.username || '@writer').replace(/^[@#]/, '');
 
-  // Initial empty state so user MUST type title & content before downloading/posting!
+  // Initial empty state so user MUST type title & content before previewing/downloading/posting!
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
@@ -28,6 +28,9 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
   const [downloading, setDownloading] = useState(false);
   const [posting, setPosting] = useState(false);
+
+  // Live Preview Modal Popup State
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const canvasRef = useRef(null);
 
@@ -154,7 +157,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
   useEffect(() => {
     drawPosterCanvas();
-  }, [title, content, selectedThemeId, uploadedPhotoUrl]);
+  }, [title, content, selectedThemeId, uploadedPhotoUrl, showPreviewModal]);
 
   // Option 1: Download PNG (-25 Points)
   const handleGenerateAndDownload = async () => {
@@ -179,6 +182,8 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       if (onRewardPoints) {
         onRewardPoints(-25, 'कवि इमेज़ पोस्टर डाउनलोड करने पर');
       }
+
+      setShowPreviewModal(false);
 
     } catch (e) {
       console.error('Poster download error:', e);
@@ -208,6 +213,8 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           imageUrl: compressedUrl
         });
       }
+
+      setShowPreviewModal(false);
     } catch (e) {
       console.error('Poster publish error:', e);
     } finally {
@@ -216,7 +223,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
+    <div className="w-full max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
       
       {/* Studio Header Banner */}
       <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-orange-600 via-rose-700 to-amber-600 text-white shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
@@ -231,7 +238,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             कवि इमेज़ पोस्टर Studio
           </h2>
           <p className="text-xs sm:text-sm text-amber-100/90 max-w-xl font-tiro leading-relaxed">
-            अपनी कविता और रचना को एक सुंदर HD इमेज़ पोस्टर में बदलें और 1-क्लिक में डाउनलोड करें।
+            अपनी कविता और रचना का शीर्षक व पंक्तियाँ दर्ज करें, फिर 'प्रिव्यू देखें' पर क्लिक करके अपना 4:5 HD इमेज़ पोस्टर डाउनलोड करें।
           </p>
         </div>
 
@@ -245,201 +252,220 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         </div>
       </div>
 
-      {/* Main Studio 2-Column Responsive Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full">
+      {/* Main Form Customization Card */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 w-full">
         
-        {/* Left Form Controls Panel (xl:col-span-5) */}
-        <div className="xl:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-6 w-full shrink-0">
-          
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Palette className="w-5 h-5 text-orange-600" />
-              <span>1. पोस्टर कस्टमाइज़ेशन</span>
-            </h3>
-            <span className="text-[10px] bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-2.5 py-0.5 rounded-full">
-              HD Studio
-            </span>
-          </div>
-
-          {/* Title Input */}
-          <div className="space-y-2 w-full">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-              <span>कविता का शीर्षक (Title) <span className="text-orange-600">*</span></span>
-              <span className="text-[10px] text-slate-400 font-normal">आवश्यक</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="अपनी कविता का शीर्षक लिखें..."
-              className="w-full px-4 py-3 text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-extrabold shadow-inner transition-all"
-            />
-          </div>
-
-          {/* Poem Content Input */}
-          <div className="space-y-2 w-full">
-            <div className="flex justify-between items-center text-xs font-extrabold">
-              <label className="text-slate-800 dark:text-slate-200">
-                कविता की पंक्तियाँ (Poem Content) <span className="text-orange-600">*</span>
-              </label>
-              <span className={`text-[10px] ${isTextTooLong ? 'text-rose-600 font-extrabold' : 'text-slate-500'}`}>
-                {validLinesCount}/14 पंक्तियाँ
-              </span>
-            </div>
-
-            <textarea
-              rows={6}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="यहाँ अपनी कविता लिखें..."
-              className="w-full p-4 text-sm rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-tiro leading-relaxed shadow-inner transition-all"
-            />
-
-            {isTextTooLong && (
-              <p className="text-[10px] text-rose-600 font-bold flex items-center gap-1 mt-1">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>14 पंक्तियों से अधिक न लिखें ताकि अक्षर स्पष्ट रहें।</span>
-              </p>
-            )}
-          </div>
-
-          {/* Fixed Non-Editable Poet Info */}
-          <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 space-y-1">
-            <span className="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase block">कवि पहचान (Fixed Account Info)</span>
-            <div className="flex items-center justify-between text-xs sm:text-sm">
-              <span className="font-extrabold text-slate-900 dark:text-slate-100">{fixedAuthorName}</span>
-              <span className="text-slate-500 font-medium">@{fixedAuthorUsername}</span>
-            </div>
-          </div>
-
-          {/* Visual Theme Selection Pills */}
-          <div className="space-y-2 w-full">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 block">
-              थीम व बैकग्राउंड स्टाइल चुनें:
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {THEMES.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedThemeId(t.id)}
-                  className={`p-2.5 rounded-2xl text-xs font-extrabold border-2 transition-all flex items-center gap-2 ${t.colorBg} ${
-                    selectedThemeId === t.id ? 'ring-2 ring-orange-500 scale-[1.02] shadow-md' : 'opacity-80 hover:opacity-100'
-                  }`}
-                >
-                  <span className="truncate">{t.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom Photo Upload */}
-          <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800 w-full">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                अपनी इमेज़/फोटो जोड़ें (Optional)
-              </label>
-              {uploadedPhotoUrl && (
-                <button 
-                  onClick={handleClearPhoto}
-                  className="text-[10px] text-rose-600 font-bold hover:underline flex items-center gap-1"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  फोटो हटाएँ
-                </button>
-              )}
-            </div>
-
-            <label className="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-orange-500/40 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-100/50 transition">
-              <Upload className="w-4 h-4 text-orange-600" />
-              <span>{uploadedPhotoUrl ? 'दूसरी फोटो बदलें' : 'अपनी फोटो अपलोड करें'}</span>
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-            </label>
-          </div>
-
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Palette className="w-5 h-5 text-orange-600" />
+            <span>पोस्टर कस्टमाइज़ेशन फ़ॉर्म</span>
+          </h3>
+          <span className="text-xs bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-3 py-1 rounded-full">
+            100% HD Quality
+          </span>
         </div>
 
-        {/* Right Live Preview Canvas Container (xl:col-span-7) */}
-        <div className="xl:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col items-center justify-center space-y-6 w-full">
-          
-          {/* Header Bar */}
-          <div className="flex items-center justify-between w-full border-b border-slate-200 dark:border-slate-800 pb-3 text-xs font-extrabold text-slate-800 dark:text-slate-200">
-            <span className="flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-orange-600" />
-              <span>2. तुरंत लाइव पोस्टर प्रिव्यू (Live HD Preview)</span>
+        {/* Title Input */}
+        <div className="space-y-2 w-full">
+          <label className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+            <span>कविता का शीर्षक (Title) <span className="text-orange-600">*</span></span>
+            <span className="text-xs text-slate-400 font-normal">आवश्यक</span>
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="अपनी कविता का शीर्षक लिखें..."
+            className="w-full px-4 py-3.5 text-sm sm:text-base rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-extrabold shadow-inner transition-all"
+          />
+        </div>
+
+        {/* Poem Content Input */}
+        <div className="space-y-2 w-full">
+          <div className="flex justify-between items-center text-xs sm:text-sm font-extrabold">
+            <label className="text-slate-800 dark:text-slate-200">
+              कविता की पंक्तियाँ (Poem Content) <span className="text-orange-600">*</span>
+            </label>
+            <span className={`text-xs ${isTextTooLong ? 'text-rose-600 font-extrabold' : 'text-slate-500'}`}>
+              {validLinesCount}/14 पंक्तियाँ
             </span>
-            <span className="text-[10px] px-3 py-1 rounded-full bg-orange-500 text-white font-black uppercase shadow-sm">
-              HD PNG 4:5
-            </span>
           </div>
 
-          {/* Live Canvas Element Container */}
-          <div className="relative w-full max-w-[480px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-orange-500/50 ring-4 ring-orange-500/20 bg-slate-100 dark:bg-slate-950">
-            <canvas 
-              ref={canvasRef} 
-              className="w-full h-full object-contain"
-            />
+          <textarea
+            rows={6}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="यहाँ अपनी कविता की पंक्तियाँ लिखें..."
+            className="w-full p-4 text-sm sm:text-base rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-tiro leading-relaxed shadow-inner transition-all"
+          />
+
+          {isTextTooLong && (
+            <p className="text-xs text-rose-600 font-bold flex items-center gap-1 mt-1">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>14 पंक्तियों से अधिक न लिखें ताकि अक्षर स्पष्ट रहें।</span>
+            </p>
+          )}
+        </div>
+
+        {/* Fixed Non-Editable Poet Info */}
+        <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 space-y-1">
+          <span className="text-xs text-orange-600 dark:text-orange-400 font-bold uppercase block">कवि पहचान (Fixed Account Info)</span>
+          <div className="flex items-center justify-between text-xs sm:text-sm">
+            <span className="font-extrabold text-slate-900 dark:text-slate-100">{fixedAuthorName}</span>
+            <span className="text-slate-500 font-medium">@{fixedAuthorUsername}</span>
           </div>
+        </div>
 
-          {/* Action Download & Direct Post Buttons */}
-          <div className="w-full max-w-[480px] space-y-3 pt-2">
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
-              {/* Download Option */}
+        {/* Visual Theme Selection Pills */}
+        <div className="space-y-2 w-full">
+          <label className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 block">
+            थीम व बैकग्राउंड स्टाइल चुनें:
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {THEMES.map(t => (
               <button
-                onClick={handleGenerateAndDownload}
-                disabled={downloading || !HAS_25_POINTS || isTextTooLong || isFormInvalid}
-                className="w-full py-4 px-5 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                key={t.id}
+                onClick={() => setSelectedThemeId(t.id)}
+                className={`p-3 rounded-2xl text-xs sm:text-sm font-extrabold border-2 transition-all flex items-center justify-center gap-2 ${t.colorBg} ${
+                  selectedThemeId === t.id ? 'ring-2 ring-orange-500 scale-[1.02] shadow-md' : 'opacity-80 hover:opacity-100'
+                }`}
               >
-                {HAS_25_POINTS ? (
-                  <>
-                    <Download className="w-4.5 h-4.5" />
-                    <span>{downloading ? 'डाउनलोडिंग...' : 'इमेज़ डाउनलोड (-25 Pts)'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4.5 h-4.5 text-amber-200" />
-                    <span>25 Pts आवश्यक</span>
-                  </>
-                )}
+                <span className="truncate">{t.name}</span>
               </button>
+            ))}
+          </div>
+        </div>
 
-              {/* Direct Post Option */}
-              <button
-                onClick={handlePublishDirectly}
-                disabled={posting || !HAS_15_POINTS || isTextTooLong || isFormInvalid}
-                className="w-full py-4 px-5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* Custom Photo Upload */}
+        <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800 w-full">
+          <div className="flex items-center justify-between">
+            <label className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200">
+              अपनी इमेज़/फोटो जोड़ें (Optional)
+            </label>
+            {uploadedPhotoUrl && (
+              <button 
+                onClick={handleClearPhoto}
+                className="text-xs text-rose-600 font-bold hover:underline flex items-center gap-1"
               >
-                {HAS_15_POINTS ? (
-                  <>
-                    <Send className="w-4.5 h-4.5 text-white" />
-                    <span>{posting ? 'पोस्ट हो रहा...' : 'मंच पर पोस्ट करें (-15 Pts)'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4.5 h-4.5 text-emerald-200" />
-                    <span>15 Pts आवश्यक</span>
-                  </>
-                )}
+                <Trash2 className="w-3.5 h-3.5" />
+                फोटो हटाएँ
               </button>
-            </div>
-
-            {isFormInvalid && (
-              <p className="text-xs text-rose-600 dark:text-rose-400 font-extrabold text-center bg-rose-50 dark:bg-rose-950/50 p-3 rounded-2xl border border-rose-300 dark:border-rose-800 flex items-center justify-center gap-1.5 shadow-sm">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>* इमेज़ डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना अनिवार्य है। (दर्ज न करने तक कोई कॉइन/पॉइंट्स नहीं कटेंगे)</span>
-              </p>
-            )}
-
-            {!isFormInvalid && (
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 text-center font-medium">
-                * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
-              </p>
             )}
           </div>
 
+          <label className="w-full py-4 px-4 rounded-2xl border-2 border-dashed border-orange-500/40 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-100/50 transition">
+            <Upload className="w-4 h-4 text-orange-600" />
+            <span>{uploadedPhotoUrl ? 'दूसरी फोटो बदलें' : 'अपनी फोटो अपलोड करें'}</span>
+            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+          </label>
+        </div>
+
+        {/* 🚀 Main CTA Button to Trigger Modal Popup Preview */}
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+          <button
+            onClick={() => {
+              if (isFormInvalid) {
+                alert('⚠️ प्रिव्यू देखने के लिए शीर्षक एवं कविता की पंक्तियाँ दर्ज करना आवश्यक है।');
+                return;
+              }
+              setShowPreviewModal(true);
+            }}
+            disabled={isFormInvalid}
+            className="w-full py-4 px-6 bg-gradient-to-r from-orange-600 via-rose-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Eye className="w-5 h-5 text-amber-200" />
+            <span>✨ HD इमेज़ पोस्टर प्रिव्यू देखें (Open Live Preview Modal)</span>
+          </button>
+
+          {isFormInvalid && (
+            <p className="text-xs text-rose-600 dark:text-rose-400 font-extrabold text-center bg-rose-50 dark:bg-rose-950/50 p-3 rounded-2xl border border-rose-300 dark:border-rose-800 flex items-center justify-center gap-1.5 shadow-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>* प्रिव्यू, डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना अनिवार्य है। (कोई कॉइन/पॉइंट्स नहीं कटेंगे)</span>
+            </p>
+          )}
         </div>
 
       </div>
+
+      {/* 🖼️ LIVE PREVIEW MODAL POPUP WINDOW */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl max-w-lg w-full relative space-y-5 text-center my-auto">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-orange-600" />
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                  लाइव HD पोस्टर प्रिव्यू
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Live HD Canvas Preview */}
+            <div className="relative w-full max-w-[420px] aspect-[4/5] mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-orange-500/50 ring-4 ring-orange-500/20 bg-slate-100 dark:bg-slate-950">
+              <canvas 
+                ref={canvasRef} 
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Action Buttons Inside Modal */}
+            <div className="space-y-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                {/* Download Option */}
+                <button
+                  onClick={handleGenerateAndDownload}
+                  disabled={downloading || !HAS_25_POINTS || isTextTooLong || isFormInvalid}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {HAS_25_POINTS ? (
+                    <>
+                      <Download className="w-4.5 h-4.5" />
+                      <span>{downloading ? 'डाउनलोडिंग...' : 'इमेज़ डाउनलोड (-25 Pts)'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4.5 h-4.5 text-amber-200" />
+                      <span>25 Pts आवश्यक</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Direct Post Option */}
+                <button
+                  onClick={handlePublishDirectly}
+                  disabled={posting || !HAS_15_POINTS || isTextTooLong || isFormInvalid}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {HAS_15_POINTS ? (
+                    <>
+                      <Send className="w-4.5 h-4.5 text-white" />
+                      <span>{posting ? 'पोस्ट हो रहा...' : 'मंच पर पोस्ट करें (-15 Pts)'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4.5 h-4.5 text-emerald-200" />
+                      <span>15 Pts आवश्यक</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 text-center font-medium">
+                * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
+              </p>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
