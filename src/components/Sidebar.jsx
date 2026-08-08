@@ -20,7 +20,7 @@ export const Sidebar = ({ activeView, setActiveView, userRole, userProfile }) =>
     { id: 'posterStudio', label: 'चित्र / पोस्टर', icon: Award, badge: 'HOT', badgeColor: 'bg-rose-600', path: '/studio' },
     { id: 'magazine', label: 'पत्रिका / समाचार', icon: BookOpen, path: '/magazine' },
     { id: 'profile', label: 'मेरा प्रोफ़ाइल', icon: User, path: `/profile/${usernameClean}` },
-    { id: 'admin', label: userRole === 'admin' ? '🛠️ एडमिन डैशबोर्ड' : '🔒 एडमिन लॉगिन', icon: Shield, badge: userRole === 'admin' ? 'ACTIVE' : 'LOCK', badgeColor: userRole === 'admin' ? 'bg-emerald-600' : 'bg-rose-600', path: '/admin' }
+    ...(userRole === 'admin' ? [{ id: 'admin', label: '🛠️ एडमिन डैशबोर्ड', icon: Shield, badge: 'ACTIVE', badgeColor: 'bg-emerald-600', path: '/admin' }] : [])
   ];
 
   const handleItemClick = (item) => {
