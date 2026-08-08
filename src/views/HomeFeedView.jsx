@@ -63,9 +63,8 @@ export const HomeFeedView = ({
             </div>
           </div>
 
-          <div className="z-10 flex items-center gap-3">
-            <img src="/images/flag_stand.jpg" alt="Indian Flag Stand" className="w-16 h-24 object-contain rounded-xl shadow-lg border border-amber-300/40 hidden sm:block" />
-            <img src="/images/emblem_flag.png" alt="National Emblem Flag" className="h-32 sm:h-40 object-contain drop-shadow-2xl" />
+          <div className="z-10 text-5xl sm:text-7xl">
+            🇮🇳
           </div>
         </div>
 

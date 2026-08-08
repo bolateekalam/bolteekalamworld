@@ -61,13 +61,8 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
           </p>
         </div>
 
-        {/* Emblem & Flag Artwork */}
-        <div className="pt-1 flex items-center justify-center relative z-10">
-          <img src="/images/emblem_flag.png" alt="Satyamev Jayate Emblem" className="h-28 object-contain drop-shadow-xl" />
-        </div>
-
         {/* Badge */}
-        <div className="pt-1 relative z-10">
+        <div className="pt-2 relative z-10">
           <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-black border border-white/30 shadow">
             🇮🇳 80वाँ स्वतंत्रता दिवस पर्व
           </span>

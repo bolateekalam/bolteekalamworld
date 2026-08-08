@@ -1153,13 +1153,32 @@ function AppContent() {
   return (
     <div className={`min-h-screen ${activeFestivalTheme?.pageBgClass || 'bg-slate-50 dark:bg-slate-950'} text-slate-900 dark:text-slate-100 flex flex-col font-inter transition-colors duration-500 relative overflow-hidden`}>
       
-      {/* 🎆 Floating Global Festival Emblems Overlay (Flags for 15 Aug, Rakhi for Rakshabandhan, Diyas for Diwali) */}
-      {activeFestivalTheme?.floatingEmblems && activeFestivalTheme.floatingEmblems.length > 0 && (
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30 select-none">
-          <div className="absolute top-12 left-5 text-4xl animate-bounce duration-1000">🇮🇳</div>
-          <div className="absolute top-1/4 right-8 text-3xl animate-pulse">🚩</div>
-          <div className="absolute top-2/4 left-12 text-4xl animate-bounce">🕊️</div>
-          <div className="absolute top-3/4 right-16 text-3xl animate-pulse">🇮🇳</div>
+      {/* 🎈 Floating Tricolor Balloons & Ambient Overlay for 15 August Special */}
+      {activeFestivalTheme?.id === 'independenceDay' && (
+        <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden opacity-80 select-none">
+          {/* Left Side Floating Balloons */}
+          <div className="absolute top-24 left-4 flex flex-col items-center animate-bounce duration-1000">
+            <span className="text-3xl filter drop-shadow">🟠</span>
+            <span className="text-2xl filter drop-shadow -mt-2">⚪</span>
+            <span className="text-3xl filter drop-shadow -mt-2">🟢</span>
+            <div className="w-0.5 h-12 bg-slate-400/40" />
+          </div>
+
+          {/* Right Side Floating Balloons */}
+          <div className="absolute top-36 right-4 flex flex-col items-center animate-bounce duration-700">
+            <span className="text-3xl filter drop-shadow">🟠</span>
+            <span className="text-2xl filter drop-shadow -mt-2">⚪</span>
+            <span className="text-3xl filter drop-shadow -mt-2">🟢</span>
+            <div className="w-0.5 h-16 bg-slate-400/40" />
+          </div>
+
+          {/* Bottom Floating Balloons */}
+          <div className="absolute bottom-16 left-8 flex flex-col items-center animate-pulse">
+            <span className="text-2xl filter drop-shadow">🎈</span>
+          </div>
+          <div className="absolute bottom-24 right-8 flex flex-col items-center animate-pulse">
+            <span className="text-2xl filter drop-shadow">🎈</span>
+          </div>
         </div>
       )}
       
