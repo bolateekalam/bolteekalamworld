@@ -147,7 +147,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
                 @{(isUserOwnPost && userProfile?.username ? userProfile.username : (post.author?.username || 'writer')).replace(/^[@#]/, '')}
               </span>
               <span>•</span>
-              <span>{post.createdAt}</span>
+              <span>{(!post.createdAt || post.createdAt.includes('मिनट') || post.createdAt.includes('घंटे') || post.createdAt.includes('अभी')) ? new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : post.createdAt}</span>
             </div>
           </div>
         </div>
@@ -223,10 +223,6 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
         <span className="flex items-center gap-1">
           <Clock className="w-3.5 h-3.5 text-rose-500" />
           <span>{post.readingTime}</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <Eye className="w-3.5 h-3.5 text-amber-500" />
-          <span>{(post.views || 0).toLocaleString()} व्यूज़</span>
         </span>
 
         {/* Audio Recite Player Button */}
@@ -304,7 +300,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
             }`}
           >
             <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-600' : ''}`} />
-            <span>{likesCount}</span>
+            <span>{likesCount} पसंद</span>
           </button>
 
           {/* Comment Button */}
@@ -314,7 +310,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95"
           >
             <MessageCircle className="w-4 h-4 text-emerald-500" />
-            <span>{post.comments?.length || 0}</span>
+            <span>{post.comments?.length || 0} टिप्पणियाँ</span>
           </button>
 
           {/* Share Button */}
