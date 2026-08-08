@@ -52,16 +52,17 @@ export const Navbar = ({
           onClick={() => setActiveView('feed')}
           className="flex items-center gap-2.5 cursor-pointer shrink-0 group"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-rose-600 to-rose-950 flex items-center justify-center text-amber-200 shadow-md shadow-rose-900/30 border border-amber-400/40 group-hover:scale-105 transition-transform">
-            <Feather className="w-5 h-5 transform -rotate-45 text-amber-300 drop-shadow" />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="BOLATEE WORLD" 
+            className="h-10 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform" 
+          />
           <div className="hidden sm:block">
             <div className="flex items-center gap-1.5">
               <h1 className="font-rozha text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-none">
                 बोलती कलम
               </h1>
               <span className="px-2 py-0.5 text-[10px] font-extrabold bg-gradient-to-r from-orange-500 via-emerald-600 to-green-700 text-white rounded-full uppercase tracking-wider shadow flex items-center gap-1">
-                <img src="/images/waving_flag.png" alt="Flag" className="w-4 h-3 object-contain inline-block" />
                 <span>15 अगस्त स्पेशल</span>
               </span>
             </div>
