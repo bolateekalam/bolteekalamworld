@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import RightSidebar from './components/RightSidebar';
 import MobileBottomNav from './components/MobileBottomNav';
 import AuthModal from './components/AuthModal';
 import FirstTimeUserModal from './components/FirstTimeUserModal';
@@ -1326,6 +1327,12 @@ function AppContent() {
             />
           )}
         </main>
+
+        {/* Right Sidebar Column (Matching 15 August UI mockup) */}
+        <RightSidebar
+          onOpenCreatePost={handleOpenCreatePostProtected}
+          setActiveView={handleNavigateView}
+        />
       </div>
 
       {/* Mobile Bottom Navigation Bar */}

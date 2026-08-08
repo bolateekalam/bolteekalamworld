@@ -80,8 +80,8 @@ export const detectCurrentAutoFestivalTheme = () => {
   const month = today.getMonth() + 1; // 1 to 12
   const date = today.getDate();
 
-  // 15 August Independence Day (Active Aug 12 - Aug 16)
-  if (month === 8 && date >= 10 && date <= 16) {
+  // 15 August Independence Day (Active Aug 1 - Aug 17)
+  if (month === 8 && date >= 1 && date <= 17) {
     return FESTIVAL_THEMES.independenceDay;
   }
 
