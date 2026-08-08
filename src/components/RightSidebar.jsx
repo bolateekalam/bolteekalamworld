@@ -85,41 +85,9 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
                 <img src={author.avatar} alt={author.name} className="w-8 h-8 rounded-full object-cover ring-2 ring-orange-500 shrink-0" />
                 <span className="font-bold text-slate-900 dark:text-slate-100 truncate">{author.name}</span>
               </div>
-              <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 shrink-0">
-                {author.points}
-              </span>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* 5. 📅 Upcoming Events Card */}
-      <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/20 border-2 border-orange-500/30 rounded-3xl p-5 shadow-sm space-y-3">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-extrabold text-orange-600 dark:text-orange-400 flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
-            <span>आगामी कार्यक्रम</span>
-          </span>
-          <span className="text-[10px] bg-orange-500 text-white font-bold px-2 py-0.5 rounded-full">
-            LIVE EVENT
-          </span>
-        </div>
-
-        <div className="space-y-1">
-          <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-sm font-rozha">
-            स्वतंत्रता दिवस विशेष काव्य संध्या
-          </h4>
-          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-            15 अगस्त 2026 | समय: शाम 7:00 बजे
-          </p>
-        </div>
-
-        <button
-          onClick={() => setActiveView && setActiveView('events')}
-          className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold rounded-xl text-xs shadow transition active:scale-95"
-        >
-          भाग लें
-        </button>
       </div>
 
     </aside>
