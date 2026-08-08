@@ -75,7 +75,6 @@ export const PoetryBattlesView = ({
     }));
 
     setUserVotes(prev => ({ ...prev, [battleId]: targetUserId }));
-    if (onRewardPoints) onRewardPoints(5, 'पोएट्री बैटल में वोट देने पर');
   };
 
   const handleAcceptChallenge = (challengeId) => {
@@ -409,7 +408,7 @@ export const PoetryBattlesView = ({
                       }`}
                     >
                       <Vote className="w-4 h-4" />
-                      <span>{userVotes[b.id] === b.user1.id ? 'वोट दिया गया ✓' : 'इनकी कविता को वोट दें (+5 Pts)'}</span>
+                      <span>{userVotes[b.id] === b.user1.id ? 'वोट दिया गया ✓' : 'इनकी कविता को वोट दें'}</span>
                     </button>
                   </div>
 
@@ -442,7 +441,7 @@ export const PoetryBattlesView = ({
                       }`}
                     >
                       <Vote className="w-4 h-4" />
-                      <span>{userVotes[b.id] === b.user2.id ? 'वोट दिया गया ✓' : 'इनकी कविता को वोट दें (+5 Pts)'}</span>
+                      <span>{userVotes[b.id] === b.user2.id ? 'वोट दिया गया ✓' : 'इनकी कविता को वोट दें'}</span>
                     </button>
                   </div>
 
