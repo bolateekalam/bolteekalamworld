@@ -54,7 +54,7 @@ export const HomeFeedView = ({
 
             <div className="pt-2">
               <button
-                onClick={() => setActiveView && setActiveView('posterStudio')}
+                onClick={() => setActiveView && setActiveView('festival')}
                 className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold rounded-full text-xs shadow-lg flex items-center gap-2 active:scale-95 transition"
               >
                 <span>15 अगस्त पर जाएं</span>
@@ -68,7 +68,7 @@ export const HomeFeedView = ({
           </div>
         </div>
 
-        {/* Banner 2: 오늘 का संदेश - एकता का सूत्र */}
+        {/* Banner 2: आज का संदेश - एकता का सूत्र (Pure Clean Quote Card) */}
         <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-orange-500/20 border-2 border-orange-500/30 text-slate-900 dark:text-slate-100 shadow-sm flex items-center justify-between flex-wrap gap-4">
           <div className="space-y-1.5 max-w-xl">
             <div className="flex items-center gap-2">
@@ -80,16 +80,6 @@ export const HomeFeedView = ({
             <p className="text-xs sm:text-sm font-tiro italic font-semibold text-slate-700 dark:text-slate-300">
               "हम भले ही अलग-अलग भाषाएं बोलते हों, पर हमारा दिल एक है – भारत माता के लिए!"
             </p>
-            
-            <div className="pt-1">
-              <button
-                onClick={() => setActiveView && setActiveView('daily')}
-                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full text-xs shadow flex items-center gap-1.5 active:scale-95 transition"
-              >
-                <span>प्रेरणादायक संदेश पढ़ें</span>
-                <span>➔</span>
-              </button>
-            </div>
           </div>
 
           <div className="text-4xl">🚩</div>

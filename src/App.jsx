@@ -34,6 +34,7 @@ import AdminDashboardView from './views/AdminDashboardView';
 import SearchResultsView from './views/SearchResultsView';
 import PosterStudioView from './views/PosterStudioView';
 import AudioStoriesView from './views/AudioStoriesView';
+import FestivalView from './views/FestivalView';
 
 import { mockPosts, mockDailyChallenge, mockPoetryBattle } from './data/mockPosts';
 import { mockCompetitions } from './data/mockCompetitions';
@@ -400,6 +401,9 @@ function AppContent() {
       } else if (viewId === 'posterStudio') {
         history.pushState(null, '', '/studio');
         document.title = 'कवि इमेज़ पोस्टर Studio — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'festival') {
+        history.pushState(null, '', '/festival');
+        document.title = '15 अगस्त स्वतंत्रता दिवस विशेषांक — बोलती कलम | bolateeworld.in';
       }
     } catch (e) {}
   };
@@ -1147,7 +1151,17 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-inter">
+    <div className={`min-h-screen ${activeFestivalTheme?.pageBgClass || 'bg-slate-50 dark:bg-slate-950'} text-slate-900 dark:text-slate-100 flex flex-col font-inter transition-colors duration-500 relative overflow-hidden`}>
+      
+      {/* 🎆 Floating Global Festival Emblems Overlay (Flags for 15 Aug, Rakhi for Rakshabandhan, Diyas for Diwali) */}
+      {activeFestivalTheme?.floatingEmblems && activeFestivalTheme.floatingEmblems.length > 0 && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30 select-none">
+          <div className="absolute top-12 left-5 text-4xl animate-bounce duration-1000">🇮🇳</div>
+          <div className="absolute top-1/4 right-8 text-3xl animate-pulse">🚩</div>
+          <div className="absolute top-2/4 left-12 text-4xl animate-bounce">🕊️</div>
+          <div className="absolute top-3/4 right-16 text-3xl animate-pulse">🇮🇳</div>
+        </div>
+      )}
       
       {/* Top Floating Toast Notification for Points Reward */}
       {pointsToast && (
@@ -1324,6 +1338,13 @@ function AppContent() {
               query={searchQuery}
               posts={posts}
               onOpenCertificate={openCertificateModal}
+            />
+          )}
+
+          {activeView === 'festival' && (
+            <FestivalView
+              setActiveView={handleNavigateView}
+              activeFestivalTheme={activeFestivalTheme}
             />
           )}
         </main>
