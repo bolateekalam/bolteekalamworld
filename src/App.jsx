@@ -454,6 +454,18 @@ function AppContent() {
         const rawPath = (window.location.pathname || '/').toLowerCase();
         const rawHash = (window.location.hash || '').toLowerCase();
 
+        // 0. Direct Admin Route Check
+        if (rawPath.includes('/admin') || rawHash.includes('admin') || window.location.search.includes('admin')) {
+          const isAuth = userRole === 'admin' || sessionStorage.getItem('bolteekalam_admin_authenticated') === 'true';
+          if (isAuth) {
+            setUserRole('admin');
+            setActiveView('admin');
+          } else {
+            setShowAdminAuthModal(true);
+          }
+          return;
+        }
+
         // 1. Direct Page Views Navigation Mapping
         if (rawPath.includes('/poetry-battle') || rawHash.includes('poetry-battle')) {
           setActiveView('battles');
