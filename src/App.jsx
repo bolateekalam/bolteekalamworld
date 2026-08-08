@@ -1306,6 +1306,32 @@ function AppContent() {
 
         {/* Middle Main Content View Area */}
         <main className="flex-1 min-w-0">
+          {/* Top Battlefield Invitation Notification Strip */}
+          {(() => {
+            try {
+              const pending = JSON.parse(localStorage.getItem('bolteekalam_pending_challenges_v2') || '[]');
+              if (Array.isArray(pending) && pending.length > 0) {
+                const latestCh = pending[0];
+                return (
+                  <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-amber-600 via-rose-600 to-rose-800 text-white shadow-lg flex items-center justify-between flex-wrap gap-3 border border-amber-400/40 animate-pulse">
+                    <div className="flex items-center gap-2.5">
+                      <Swords className="w-5 h-5 text-amber-300 shrink-0" />
+                      <span className="text-xs font-bold font-tiro">
+                        ⚔️ <strong>{latestCh.challengerName}</strong> ने आपको 1-on-1 काव्य संग्राम बैटलफील्ड के लिए आमंत्रित किया है! [विषय: {latestCh.topic}]
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleNavigateView('battles')}
+                      className="px-3.5 py-1.5 rounded-xl bg-white text-rose-900 font-extrabold text-[11px] hover:bg-amber-100 shadow transition active:scale-95 shrink-0"
+                    >
+                      बैटलफील्ड देखें (View Invitation)
+                    </button>
+                  </div>
+                );
+              }
+            } catch (e) {}
+            return null;
+          })()}
           {activeView === 'feed' && (
             <HomeFeedView
               posts={posts}

@@ -17,8 +17,17 @@ export const PoetryBattlesView = ({
   const [userVotes, setUserVotes] = useState({});
   const [customAlertMsg, setCustomAlertMsg] = useState('');
 
-  // Live Pending Battle Challenges State (Starts Empty [])
-  const [pendingChallenges, setPendingChallenges] = useState([]);
+  // Live Pending Battle Challenges State (Persisted in localStorage)
+  const [pendingChallenges, setPendingChallenges] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_pending_challenges_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  });
 
   // Response Poem State for Accepted Battle
   const [responsePoem, setResponsePoem] = useState('');
@@ -42,6 +51,13 @@ export const PoetryBattlesView = ({
       localStorage.setItem('bolteekalam_active_battles_v2', JSON.stringify(battles));
     } catch (e) {}
   }, [battles]);
+
+  // Save pending challenges state to localStorage whenever updated
+  useEffect(() => {
+    try {
+      localStorage.setItem('bolteekalam_pending_challenges_v2', JSON.stringify(pendingChallenges));
+    } catch (e) {}
+  }, [pendingChallenges]);
 
   const handleVote = (battleId, targetUserId) => {
     if (requireAuth && !requireAuth()) return;
@@ -130,6 +146,7 @@ export const PoetryBattlesView = ({
 
     // Deduct 15 points from Acceptor upon accepting challenge (-15 Pts)
     if (onRewardPoints) onRewardPoints(-15, 'काव्य संग्राम चुनौती स्वीकार करने पर (-15 Pts)');
+    setCustomAlertMsg('काव्य संग्राम अब लाइव है! 3 घंटे का मुकाबला शुरू हो चुका है। (-15 Pts)');
   };
 
   const handleDeclineChallenge = (challengeId) => {
@@ -138,6 +155,18 @@ export const PoetryBattlesView = ({
     setCustomAlertMsg('आपने इस पोएट्री बैटल चुनौती को अस्वीकार कर दिया है।');
   };
 
+  // 🔴 Challenger Cancels Invitation (Refund +10 Pts, Net -5 Pts fee!)
+  const handleCancelMySentChallenge = (challengeId) => {
+    if (requireAuth && !requireAuth()) return;
+
+    setPendingChallenges(prev => prev.filter(c => c.id !== challengeId));
+
+    // Refund +10 Pts to Challenger
+    if (onRewardPoints) onRewardPoints(10, 'काव्य चुनौती रद्द करने पर (+10 Pts Refund)');
+    setCustomAlertMsg('आपकी काव्य चुनौती सफलतापूर्वक रद्द कर दी गई है! 10 पॉइंट्स आपके वॉलेट में वापस जमा कर दिए गए हैं (केवल 5 पॉइंट्स प्रोसेसिंग शुल्क काटा गया)।');
+  };
+
+  // 🔴 Create Challenge: Store in Pending Challenges (Do NOT publish immediately!)
   const handleCreateChallenge = (challengeData) => {
     if (!challengeData) return;
 
@@ -154,30 +183,26 @@ export const PoetryBattlesView = ({
       return;
     }
 
-    const newBattle = {
-      id: challengeData.id || `pb-${Date.now()}`,
+    const opponentName = typeof challengeData.opponent === 'string' ? challengeData.opponent : (challengeData.opponent?.name || 'प्रतिद्वंद्वी कवि');
+
+    const newPendingChallenge = {
+      id: challengeData.id || `ch-${Date.now()}`,
       topic: challengeData.topic || 'काव्य महासंग्राम',
-      user1: {
-        id: 'me',
-        name: myName,
-        avatar: myAvatar,
-        poem: challengeData.myPoem?.content || challengeData.myPoem?.title || 'काव्य रचना',
-        votes: 1
-      },
-      user2: {
-        id: 'opp',
-        name: typeof challengeData.opponent === 'string' ? challengeData.opponent : (challengeData.opponent?.name || 'प्रतिद्वंद्वी कवि'),
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
-        poem: 'प्रतिद्वंद्वी कवि की प्रतिक्रिया शीघ्र आ रही है...',
-        votes: 0
-      },
-      endsIn: '3 घंटे'
+      challengerName: myName,
+      challengerAvatar: myAvatar,
+      opponentName: opponentName,
+      challengerPoem: challengeData.myPoem?.content || challengeData.myPoem?.title || 'काव्य रचना',
+      createdAt: 'अभी-अभी',
+      status: 'PENDING'
     };
 
-    setBattles(prev => [newBattle, ...prev]);
+    // Store in pendingChallenges (NOT live battle!)
+    setPendingChallenges(prev => [newPendingChallenge, ...prev]);
 
     // Deduct 15 points from Challenger upon sending challenge (-15 Pts)
     if (onRewardPoints) onRewardPoints(-15, 'काव्य चुनौती भेजने पर (-15 Pts)');
+
+    setCustomAlertMsg(`चुनौती '${opponentName}' को सफलतापूर्वक भेज दी गई है! जैसे ही वे इसे स्वीकार करेंगे, आपका संग्राम लाइव हो जाएगा। (-15 Pts)`);
   };
 
   return (
@@ -208,13 +233,13 @@ export const PoetryBattlesView = ({
         </button>
       </div>
 
-      {/* 🔴 Pending Challenge Invitation Inbox */}
+      {/* 🔴 1. Received Challenges Inbox (आपको प्राप्त चुनौतियाँ) */}
       {pendingChallenges && pendingChallenges.length > 0 && (
         <div className="bg-amber-500/10 border-2 border-amber-500/40 rounded-3xl p-5 space-y-4 animate-in fade-in duration-300">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2">
               <Bell className="w-4 h-4 text-amber-500 animate-bounce" />
-              <span>आपको प्राप्त बैटल चुनौतियाँ (Pending Challenge Invitations)</span>
+              <span>आपको प्राप्त बैटल चुनौतियाँ (Received Challenge Invitations)</span>
             </h3>
             <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px]">
               🔴 {pendingChallenges.length} नई चुनौती
@@ -227,7 +252,7 @@ export const PoetryBattlesView = ({
                 <div className="flex items-center gap-3">
                   <img src={ch.challengerAvatar} alt={ch.challengerName} className="w-10 h-10 rounded-full object-cover ring-2 ring-amber-500" />
                   <div>
-                    <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100">{ch.challengerName} ने चुनौती भेजी है!</h4>
+                    <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100">{ch.challengerName} ने आपको चुनौती भेजी है!</h4>
                     <span className="text-[10px] text-slate-400">विषय: <strong>{ch.topic}</strong> • {ch.createdAt}</span>
                   </div>
                 </div>
@@ -240,7 +265,7 @@ export const PoetryBattlesView = ({
                       className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      <span>स्वीकार करें (Accept)</span>
+                      <span>स्वीकार करें (Accept -15 Pts)</span>
                     </button>
                     <button
                       onClick={() => handleDeclineChallenge(ch.id)}
@@ -282,13 +307,57 @@ export const PoetryBattlesView = ({
                       className="px-5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow flex items-center gap-1.5"
                     >
                       <Swords className="w-4 h-4" />
-                      <span>मुकाबला शुरू करें (Publish Battle)</span>
+                      <span>मुकाबला शुरू करें (-15 Pts)</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
           ))}
+        </div>
+      )}
+      {/* 🟡 2. Sent Challenges Tracker (आपकी भेजी गई चुनौतियाँ - प्रतीक्षारत) */}
+      {pendingChallenges && pendingChallenges.some(ch => ch.challengerName?.includes(currentUser?.name || userProfile?.name || 'आप')) && (
+        <div className="bg-rose-500/10 border-2 border-rose-500/30 rounded-3xl p-5 space-y-4 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-rose-500 animate-spin" />
+              <span>आपकी भेजी गई चुनौतियाँ (Sent Invitations - Awaiting Acceptance)</span>
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white font-black text-[10px]">
+              प्रतीक्षारत (Pending)
+            </span>
+          </div>
+
+          {pendingChallenges
+            .filter(ch => ch.challengerName?.includes(currentUser?.name || userProfile?.name || 'आप'))
+            .map((ch) => (
+              <div key={ch.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100">
+                      प्रतिद्वंद्वी: <strong>{ch.opponentName}</strong>
+                    </h4>
+                    <span className="text-[10px] text-slate-500 block">
+                      विषय: {ch.topic} • स्थिति: <strong>कवि की स्वीकृति की प्रतीक्षा है...</strong>
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => handleCancelMySentChallenge(ch.id)}
+                    aria-label="चुनौती रद्द करें"
+                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow active:scale-95 transition"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>चुनौती रद्द करें (+10 Pts Refund)</span>
+                  </button>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 font-tiro text-xs text-slate-800 dark:text-slate-200 italic border border-slate-200 dark:border-slate-700">
+                  "{ch.challengerPoem}"
+                </div>
+              </div>
+            ))}
         </div>
       )}
 
