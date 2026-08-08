@@ -20,8 +20,9 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const fixedAuthorName = userProfile?.name || 'साहित्य साधक';
   const fixedAuthorUsername = (userProfile?.username || '@writer').replace(/^[@#]/, '');
 
-  const [title, setTitle] = useState('स्वतंत्रता के स्वर');
-  const [content, setContent] = useState('विहंस रही आज स्वतंत्र क्षितिज पर,\nसत्य-अहिंसा की अमर अमरता।\nकोटि-कोटि कंठों से गूँजे,\nभारत माँ की पावन ममता।');
+  // Initial empty state so user MUST type title & content before downloading/posting!
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   const [selectedThemeId, setSelectedThemeId] = useState('parchment');
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
@@ -99,11 +100,11 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.lineWidth = 4;
       ctx.strokeRect(54, 54, 972, 1242);
 
-      // 3. Render Poem Title
+      // 3. Render Poem Title (or Placeholder guide text if empty)
       ctx.textAlign = 'center';
-      ctx.fillStyle = titleColor;
+      ctx.fillStyle = title.trim() ? titleColor : 'rgba(150, 150, 150, 0.6)';
       ctx.font = 'bold 56px serif';
-      ctx.fillText(title.trim() || 'कविता का शीर्षक', 540, 150);
+      ctx.fillText(title.trim() ? title.trim() : '★ शीर्षक (Title) ★', 540, 150);
 
       // Title Divider Decorative Line
       ctx.strokeStyle = borderColor;
@@ -113,20 +114,26 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.lineTo(740, 180);
       ctx.stroke();
 
-      // 4. Render Poem Lines
+      // 4. Render Poem Lines (or Placeholder guide text if empty)
       ctx.textAlign = 'center';
-      ctx.fillStyle = textColor;
-      ctx.font = '44px serif';
       
-      let startY = 270;
-      const lineHeight = 72;
+      if (lines.filter(l => l.trim().length > 0).length === 0) {
+        ctx.fillStyle = 'rgba(160, 160, 160, 0.6)';
+        ctx.font = 'italic 40px serif';
+        ctx.fillText('✦ यहाँ अपनी कविता की पंक्तियाँ लिखें... ✦', 540, 320);
+      } else {
+        ctx.fillStyle = textColor;
+        ctx.font = '44px serif';
+        let startY = 270;
+        const lineHeight = 72;
 
-      lines.forEach((lineText) => {
-        if (lineText.trim()) {
-          ctx.fillText(`✦ ${lineText} ✦`, 540, startY);
-        }
-        startY += lineHeight;
-      });
+        lines.forEach((lineText) => {
+          if (lineText.trim()) {
+            ctx.fillText(`✦ ${lineText} ✦`, 540, startY);
+          }
+          startY += lineHeight;
+        });
+      }
 
       // 5. Footer Signature Line
       const footerY = 1240;
@@ -417,8 +424,9 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             </div>
 
             {isFormInvalid && (
-              <p className="text-[10px] sm:text-xs text-orange-600 dark:text-orange-400 font-bold text-center">
-                * डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना आवश्यक है।
+              <p className="text-xs text-rose-600 dark:text-rose-400 font-extrabold text-center bg-rose-50 dark:bg-rose-950/50 p-3 rounded-2xl border border-rose-300 dark:border-rose-800 flex items-center justify-center gap-1.5 shadow-sm">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>* इमेज़ डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना अनिवार्य है। (दर्ज न करने तक कोई कॉइन/पॉइंट्स नहीं कटेंगे)</span>
               </p>
             )}
 
