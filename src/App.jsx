@@ -265,9 +265,15 @@ function AppContent() {
       fetchPostsFromDB().then(dbPosts => {
         if (dbPosts && dbPosts.length > 0) {
           let likedIds = new Set();
+          let savedLikeCounts = {};
+          let savedCommentsMap = {};
           try {
             const storedLikes = localStorage.getItem('bolteekalam_user_liked_posts');
             if (storedLikes) likedIds = new Set(JSON.parse(storedLikes));
+            const storedCounts = localStorage.getItem('bolteekalam_post_like_counts_v1');
+            if (storedCounts) savedLikeCounts = JSON.parse(storedCounts);
+            const storedComments = localStorage.getItem('bolteekalam_saved_comments_v1');
+            if (storedComments) savedCommentsMap = JSON.parse(storedComments);
           } catch (e) {}
 
           setPosts(prev => {
@@ -276,7 +282,10 @@ function AppContent() {
 
             prev.forEach(p => {
               if (p && p.id) {
-                prevMap.set(String(p.id), p);
+                const pIdStr = String(p.id);
+                const cleanId = pIdStr.replace(/^post-/, '');
+                prevMap.set(pIdStr, p);
+                prevMap.set(cleanId, p);
                 const fp = `${(p.title || '').trim().toLowerCase()}::${(p.content || '').trim().slice(0, 40).toLowerCase()}`;
                 if (fp) prevFingerprintMap.set(fp, p);
               }
@@ -285,21 +294,36 @@ function AppContent() {
             const dbIds = new Set(dbPosts.map(p => String(p.id)));
 
             const mergedDbPosts = dbPosts.map(p => {
-              const pId = String(p.id);
+              const pIdStr = String(p.id);
+              const cleanId = pIdStr.replace(/^post-/, '');
               const fp = `${(p.title || '').trim().toLowerCase()}::${(p.content || '').trim().slice(0, 40).toLowerCase()}`;
-              const prevPost = prevMap.get(pId) || prevFingerprintMap.get(fp);
+              const prevPost = prevMap.get(pIdStr) || prevMap.get(cleanId) || prevFingerprintMap.get(fp);
 
-              const isLiked = likedIds.has(pId) || (prevPost && prevPost.isLiked);
-              const comments = (p.comments && p.comments.length > 0) ? p.comments : (prevPost?.comments || []);
+              const isLiked = likedIds.has(pIdStr) || likedIds.has(cleanId) || (prevPost && prevPost.isLiked);
+              
+              const localComments = savedCommentsMap[pIdStr] || savedCommentsMap[cleanId] || [];
+              const prevComments = prevPost?.comments || [];
+              const dbComments = p.comments || [];
+
+              const commentSeen = new Set();
+              const combinedComments = [...localComments, ...prevComments, ...dbComments].filter(c => {
+                if (!c) return false;
+                const key = c.id || c.content;
+                if (commentSeen.has(key)) return false;
+                commentSeen.add(key);
+                return true;
+              });
+
               const posterImg = p.imageUrl || p.image || prevPost?.imageUrl || prevPost?.image || null;
+              const maxLikes = Math.max(p.likes || 0, prevPost?.likes || 0, savedLikeCounts[pIdStr] || 0, savedLikeCounts[cleanId] || 0);
 
               return {
                 ...p,
                 imageUrl: posterImg,
                 image: posterImg,
                 isLiked: !!isLiked,
-                likes: Math.max(p.likes || 0, prevPost?.likes || 0),
-                comments
+                likes: maxLikes,
+                comments: combinedComments
               };
             });
 
@@ -307,12 +331,17 @@ function AppContent() {
 
             const unsyncedLocalPosts = prev.filter(p => {
               if (!p || !p.id) return false;
-              const pId = String(p.id);
+              const pIdStr = String(p.id);
+              const cleanId = pIdStr.replace(/^post-/, '');
               const fp = `${(p.title || '').trim().toLowerCase()}::${(p.content || '').trim().slice(0, 40).toLowerCase()}`;
-              return !dbIds.has(pId) && !mergedDbFingerprints.has(fp);
+              return !dbIds.has(pIdStr) && !dbIds.has(cleanId) && !mergedDbFingerprints.has(fp);
             });
 
-            return [...unsyncedLocalPosts, ...mergedDbPosts];
+            const finalPosts = [...unsyncedLocalPosts, ...mergedDbPosts];
+            try {
+              localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(finalPosts));
+            } catch (e) {}
+            return finalPosts;
           });
         }
       });
@@ -655,6 +684,19 @@ function AppContent() {
   };
 
   const handleAddCommentToPost = (postId, commentObj) => {
+    // Save to persistent localStorage comments map
+    try {
+      const storedCommentsMap = localStorage.getItem('bolteekalam_saved_comments_v1');
+      let commentsMap = storedCommentsMap ? JSON.parse(storedCommentsMap) : {};
+      const pIdStr = String(postId);
+      const cleanId = pIdStr.replace(/^post-/, '');
+      const existing = commentsMap[pIdStr] || commentsMap[cleanId] || [];
+      const updatedList = [commentObj, ...existing];
+      commentsMap[pIdStr] = updatedList;
+      commentsMap[cleanId] = updatedList;
+      localStorage.setItem('bolteekalam_saved_comments_v1', JSON.stringify(commentsMap));
+    } catch (e) {}
+
     setPosts(prevPosts => {
       const updatedPosts = prevPosts.map(p => {
         if (p.id === postId || String(p.id) === String(postId)) {
