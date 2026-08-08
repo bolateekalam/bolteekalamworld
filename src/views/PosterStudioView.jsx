@@ -29,8 +29,9 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const fixedAuthorName = userProfile?.name || 'साहित्य साधक';
   const fixedAuthorUsername = (userProfile?.username || '@writer').replace(/^[@#]/, '');
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  // Default sample poem prefilled so live preview is instantly stunning!
+  const [title, setTitle] = useState('स्वतंत्रता के स्वर');
+  const [content, setContent] = useState('विहंस रही आज स्वतंत्र क्षितिज पर,\nसत्य-अहिंसा की अमर अमरता।\nकोटि-कोटि कंठों से गूँजे,\nभारत माँ की पावन ममता।');
 
   const [selectedThemeId, setSelectedThemeId] = useState('parchment');
   const [selectedLayoutId, setSelectedLayoutId] = useState('side');
@@ -85,7 +86,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
     setUploadedPhotoUrl(null);
   };
 
-  // Render 4:5 Poster Canvas with ZERO OVERLAPPING GUARANTEE
+  // Render 4:5 Poster Canvas with High Resolution & Crisp Typography
   const drawPosterCanvas = () => {
     return new Promise((resolve) => {
       const canvas = canvasRef.current || document.createElement('canvas');
@@ -95,342 +96,65 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
       const { bg1, bg2, border: borderColor, title: titleColor, text: textColor, brand: brandColor } = currentTheme;
 
-      // 1. TRUE 24px Rounded Outer Corner Mask
+      // Outer Background Canvas
       ctx.save();
-      ctx.beginPath();
-      const r = 24;
-      ctx.moveTo(r, 0);
-      ctx.arcTo(1080, 0, 1080, 1350, r);
-      ctx.arcTo(1080, 1350, 0, 1350, r);
-      ctx.arcTo(0, 1350, 0, 0, r);
-      ctx.arcTo(0, 0, 1080, 0, r);
-      ctx.closePath();
-      ctx.clip();
-
-      // Background Gradient
-      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
-      bgGrad.addColorStop(0, bg1);
-      bgGrad.addColorStop(1, bg2);
-      ctx.fillStyle = bgGrad;
+      const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
+      gradient.addColorStop(0, bg1);
+      gradient.addColorStop(1, bg2);
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1080, 1350);
 
-      // Sleek 24px Rounded Outer Crimson/Gold Border
+      // Decorative Outer Borders
       ctx.strokeStyle = borderColor;
-      ctx.lineWidth = 10;
-      ctx.stroke();
-      ctx.restore();
+      ctx.lineWidth = 14;
+      ctx.strokeRect(36, 36, 1008, 1278);
 
-      // 2. Top Header Branding (bolateeworld.in)
-      ctx.fillStyle = brandColor;
-      ctx.font = 'bold 22px sans-serif';
-      ctx.fillText('बोलती कलम | bolateeworld.in', 75, 80);
+      ctx.lineWidth = 3;
+      ctx.strokeRect(52, 52, 976, 1246);
 
-      ctx.strokeStyle = brandColor;
-      ctx.lineWidth = 1.5;
+      // Render Title
+      ctx.textAlign = 'center';
+      ctx.fillStyle = titleColor;
+      ctx.font = 'bold 54px serif';
+      ctx.fillText(title.trim() || 'कविता का शीर्षक', 540, 150);
+
+      // Title Divider Decorative Line
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.moveTo(75, 100);
-      ctx.lineTo(1005, 100);
+      ctx.moveTo(340, 180);
+      ctx.lineTo(740, 180);
       ctx.stroke();
 
-      // Helper for pixel-accurate text wrapping on Canvas (Words + Long String Char Wrap)
-      const wrapCanvasText = (ctx, text, maxW) => {
-        if (!text) return [''];
-        const words = text.split(' ');
-        const wrappedLines = [];
-        let currentLine = '';
+      // Render Poem Lines
+      ctx.textAlign = 'center';
+      ctx.fillStyle = textColor;
+      ctx.font = '40px serif';
+      
+      let startY = 270;
+      const lineHeight = 65;
 
-        for (let i = 0; i < words.length; i++) {
-          const word = words[i];
-          const testLine = currentLine ? `${currentLine} ${word}` : word;
-          const testWidth = ctx.measureText(testLine).width;
-
-          if (testWidth <= maxW) {
-            currentLine = testLine;
-          } else {
-            if (currentLine) {
-              wrappedLines.push(currentLine);
-              currentLine = word;
-            } else {
-              // Single word itself is longer than maxW (e.g. continuous unbroken string)
-              let subWord = '';
-              for (let char of word) {
-                if (ctx.measureText(subWord + char).width <= maxW) {
-                  subWord += char;
-                } else {
-                  wrappedLines.push(subWord);
-                  subWord = char;
-                }
-              }
-              currentLine = subWord;
-            }
-          }
+      lines.forEach((lineText) => {
+        if (lineText.trim()) {
+          ctx.fillText(`✦ ${lineText} ✦`, 540, startY);
         }
-        if (currentLine) wrappedLines.push(currentLine);
-        return wrappedLines;
-      };
+        startY += lineHeight;
+      });
 
-      // Function to Draw Poem Lines & Author Footer
-      const renderTextAndFooter = (startY = 255, maxTextW = 930, maxLinesY = 1140) => {
-        let fontSize = 34;
-        let lineHeight = 54;
-        let fontWeight = 'bold';
+      // Footer Author Signature Section
+      const footerY = 1240;
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.fillStyle = brandColor;
+      ctx.fillText(`✍️ ${fixedAuthorName}`, 90, footerY);
 
-        if (validLinesCount <= 6) {
-          fontSize = selectedLayoutId === 'side' ? 32 : 40;
-          lineHeight = selectedLayoutId === 'side' ? 52 : 64;
-          fontWeight = 'bold';
-        } else if (validLinesCount <= 10) {
-          fontSize = selectedLayoutId === 'side' ? 26 : 32;
-          lineHeight = selectedLayoutId === 'side' ? 44 : 52;
-          fontWeight = 'bold';
-        } else {
-          fontSize = selectedLayoutId === 'side' ? 22 : 26;
-          lineHeight = selectedLayoutId === 'side' ? 36 : 40;
-          fontWeight = 'normal';
-        }
+      ctx.textAlign = 'right';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.fillStyle = textColor;
+      ctx.fillText(`bolateeworld.in`, 990, footerY);
 
-        // Title Wrapping & Drawing
-        ctx.fillStyle = titleColor;
-        ctx.font = selectedLayoutId === 'topCenter' ? 'bold 38px serif' : 'bold 42px serif';
-        const displayTitle = title.trim() ? title : '★ शीर्षक (Title)';
-        
-        // Wrap title to maxTextW so title never overlaps photo either
-        const wrappedTitleLines = wrapCanvasText(ctx, displayTitle, maxTextW);
-
-        if (selectedLayoutId === 'topCenter') {
-          for (let tLine of wrappedTitleLines) {
-            const tWidth = ctx.measureText(tLine).width;
-            ctx.fillText(tLine, (1080 - tWidth) / 2, startY);
-            startY += 55;
-          }
-          startY += 10;
-        } else {
-          let titleY = 170;
-          for (let tLine of wrappedTitleLines.slice(0, 2)) {
-            ctx.fillText(tLine, 75, titleY);
-            titleY += 50;
-          }
-        }
-
-        // Poem Lines Wrapping & Drawing
-        ctx.fillStyle = textColor;
-        ctx.font = `${fontWeight} ${fontSize}px serif`;
-
-        let currentY = startY;
-        const renderLinesList = validLinesCount > 0 ? lines : ['★ यहाँ अपनी कविता की पंक्तियाँ लिखें...'];
-
-        for (let i = 0; i < renderLinesList.length; i++) {
-          const rawLine = renderLinesList[i];
-          if (currentY > maxLinesY) break;
-
-          if (rawLine === '') {
-            currentY += Math.round(lineHeight * 0.5);
-          } else {
-            // Precision Canvas Wrapping per line (Guarantees zero overlap with photo!)
-            const wrappedSubLines = wrapCanvasText(ctx, rawLine, maxTextW);
-
-            for (let subLine of wrappedSubLines) {
-              if (currentY > maxLinesY) break;
-
-              if (selectedLayoutId === 'topCenter') {
-                const lWidth = ctx.measureText(subLine).width;
-                ctx.fillText(subLine, (1080 - lWidth) / 2, currentY);
-              } else {
-                ctx.fillText(subLine, 75, currentY);
-              }
-              currentY += lineHeight;
-            }
-          }
-        }
-
-        // Footer Author Info & Website Brand URL (Guaranteed No Overlapping!)
-        ctx.strokeStyle = 'rgba(100, 116, 139, 0.3)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(75, 1190);
-        ctx.lineTo(1005, 1190);
-        ctx.stroke();
-
-        ctx.fillStyle = titleColor;
-        ctx.font = 'bold 28px sans-serif';
-        ctx.fillText(`● ${fixedAuthorName}`, 75, 1240);
-
-        ctx.fillStyle = textColor;
-        ctx.font = '22px sans-serif';
-        ctx.fillText(`@${fixedAuthorUsername}`, 75, 1275);
-
-        ctx.fillStyle = brandColor;
-        ctx.font = 'bold 24px sans-serif';
-        const siteText = 'www.bolateeworld.in';
-        const siteWidth = ctx.measureText(siteText).width;
-        ctx.fillText(siteText, 1005 - siteWidth, 1250);
-
-        resolve(canvas);
-      };
-
-      // Photo Layout Modes Logic
-      if (uploadedPhotoUrl && selectedLayoutId !== 'fullText') {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-
-        img.onload = () => {
-          ctx.save();
-
-          if (selectedLayoutId === 'side') {
-            const photoX = 635;
-            const photoY = 220;
-            const photoW = 370;
-            const photoH = 880;
-
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.clip();
-
-            const aspect = img.width / img.height;
-            let drawW = photoW;
-            let drawH = photoW / aspect;
-            if (drawH < photoH) {
-              drawH = photoH;
-              drawW = photoH * aspect;
-            }
-            ctx.drawImage(img, photoX - (drawW - photoW) / 2, photoY - (drawH - photoH) / 2, drawW, drawH);
-            ctx.restore();
-
-            ctx.strokeStyle = borderColor;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.stroke();
-
-            // maxTextW = 520px (75 + 520 = 595px, leaves 40px safe margin before photo at 635px!)
-            renderTextAndFooter(255, 520, 1140);
-
-          } else if (selectedLayoutId === 'topRight') {
-            const photoX = 650;
-            const photoY = 175;
-            const photoW = 355;
-            const photoH = 420;
-
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.clip();
-
-            const aspect = img.width / img.height;
-            let drawW = photoW;
-            let drawH = photoW / aspect;
-            if (drawH < photoH) {
-              drawH = photoH;
-              drawW = photoH * aspect;
-            }
-            ctx.drawImage(img, photoX - (drawW - photoW) / 2, photoY - (drawH - photoH) / 2, drawW, drawH);
-            ctx.restore();
-
-            ctx.strokeStyle = borderColor;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.stroke();
-
-            renderTextAndFooter(255, 520, 1140);
-
-          } else if (selectedLayoutId === 'bottomRight') {
-            const photoX = 650;
-            const photoY = 730;
-            const photoW = 355;
-            const photoH = 420;
-
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.clip();
-
-            const aspect = img.width / img.height;
-            let drawW = photoW;
-            let drawH = photoW / aspect;
-            if (drawH < photoH) {
-              drawH = photoH;
-              drawW = photoH * aspect;
-            }
-            ctx.drawImage(img, photoX - (drawW - photoW) / 2, photoY - (drawH - photoH) / 2, drawW, drawH);
-            ctx.restore();
-
-            ctx.strokeStyle = borderColor;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.stroke();
-
-            renderTextAndFooter(255, 520, 1140);
-
-          } else if (selectedLayoutId === 'topCenter') {
-            const photoX = 390;
-            const photoY = 140;
-            const photoW = 300;
-            const photoH = 340;
-
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.clip();
-
-            const aspect = img.width / img.height;
-            let drawW = photoW;
-            let drawH = photoW / aspect;
-            if (drawH < photoH) {
-              drawH = photoH;
-              drawW = photoH * aspect;
-            }
-            ctx.drawImage(img, photoX - (drawW - photoW) / 2, photoY - (drawH - photoH) / 2, drawW, drawH);
-            ctx.restore();
-
-            ctx.strokeStyle = borderColor;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(photoX, photoY, photoW, photoH, 20);
-            } else {
-              ctx.rect(photoX, photoY, photoW, photoH);
-            }
-            ctx.stroke();
-
-            renderTextAndFooter(580, 930, 1140);
-          }
-        };
-
-        img.onerror = () => {
-          renderTextAndFooter(255, 930, 1140);
-        };
-
-        img.src = uploadedPhotoUrl;
-      } else {
-        renderTextAndFooter(255, 930, 1140);
-      }
+      ctx.restore();
+      resolve(canvas);
     });
   };
 
@@ -481,7 +205,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
     setPosting(true);
     try {
       const canvas = await drawPosterCanvas();
-      // Compress to lightweight HD JPEG (0.88 quality ~80KB) so localStorage NEVER exceeds quota limits!
       const compressedUrl = canvas.toDataURL('image/jpeg', 0.88);
 
       if (onPublishPosterPost) {
@@ -501,28 +224,28 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
       
-      {/* Studio Header Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-rose-950 via-rose-900 to-amber-950 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+      {/* Premium Studio Header Banner */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-orange-600 via-rose-700 to-amber-600 text-white shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
         <div className="space-y-1.5 z-10">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full bg-amber-400 text-rose-950 font-extrabold text-xs uppercase flex items-center gap-1 shadow">
+            <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-amber-200 font-extrabold text-xs uppercase flex items-center gap-1.5 border border-white/30 shadow">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>बोलती कलम Studio</span>
+              <span>बोलती कलम पोस्टर Studio</span>
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold font-rozha text-amber-200">
+          <h2 className="text-2xl sm:text-4xl font-black font-rozha text-amber-100 drop-shadow">
             कवि इमेज़ पोस्टर Studio
           </h2>
-          <p className="text-xs sm:text-sm text-rose-100 max-w-xl font-tiro">
-            अपनी कविता और तस्वीर को एक सुंदर HD इमेज़ पोस्टर में बदलें। (डाउनलोड: 25 Pts | सीधी पोस्ट: 15 Pts)
+          <p className="text-xs sm:text-sm text-amber-100/90 max-w-xl font-tiro leading-relaxed">
+            अपनी कविता और रचना को एक सुंदर HD इमेज़ पोस्टर में बदलें और 1-क्लिक में डाउनलोड करें।
           </p>
         </div>
 
         {/* Current Points Counter Badge */}
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-amber-400/50 text-amber-300 text-center shrink-0 z-10">
-          <span className="text-[10px] text-slate-400 uppercase font-bold block">आपके कुल पॉइंट्स</span>
-          <span className="text-2xl font-extrabold text-amber-400">{userPoints} Pts</span>
-          <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">
+        <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/30 text-amber-200 text-center shrink-0 z-10 shadow-lg">
+          <span className="text-[10px] text-amber-100 uppercase font-bold block">आपके कुल रिवॉर्ड पॉइंट्स</span>
+          <span className="text-3xl font-black text-amber-300 drop-shadow">{userPoints} Pts</span>
+          <span className="text-[10px] text-emerald-300 font-bold block mt-0.5">
             {HAS_25_POINTS ? '✓ 25 Pts उपलब्ध हैं' : `⚠️ 25 Pts आवश्यक (आपके पास ${userPoints})`}
           </span>
         </div>
@@ -532,17 +255,22 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Form Controls (5 cols) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
-            <Palette className="w-5 h-5 text-rose-600" />
-            <span>पोस्टर कस्टमाइज़ेशन</span>
-          </h3>
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Palette className="w-5 h-5 text-orange-600" />
+              <span>पोस्टर कस्टमाइज़ेशन</span>
+            </h3>
+            <span className="text-[10px] bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-2 py-0.5 rounded-full">
+              HD Studio
+            </span>
+          </div>
 
           {/* Title Input */}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-              <span>कविता का शीर्षक (Title) <span className="text-rose-600">*</span></span>
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+              <span>कविता का शीर्षक (Title) <span className="text-orange-600">*</span></span>
               <span className="text-[10px] text-slate-400 font-normal">आवश्यक</span>
             </label>
             <input
@@ -550,15 +278,15 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="अपनी कविता का शीर्षक लिखें..."
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-rose-500 font-bold"
+              className="w-full px-4 py-2.5 text-xs rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-bold shadow-inner"
             />
           </div>
 
           {/* Poem Content Input with Line Count Limit */}
-          <div className="space-y-1">
-            <div className="flex justify-between items-center text-xs font-bold">
-              <label className="text-slate-700 dark:text-slate-300">
-                कविता की पंक्तियाँ (Poem Content) <span className="text-rose-600">*</span>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center text-xs font-extrabold">
+              <label className="text-slate-800 dark:text-slate-200">
+                कविता की पंक्तियाँ (Poem Content) <span className="text-orange-600">*</span>
               </label>
               <span className={`text-[10px] ${isTextTooLong ? 'text-rose-600 font-extrabold' : 'text-slate-500'}`}>
                 {validLinesCount}/14 पंक्तियाँ
@@ -570,7 +298,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="यहाँ अपनी कविता लिखें..."
-              className="w-full p-3 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-rose-500 font-tiro leading-relaxed"
+              className="w-full p-4 text-xs rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-tiro leading-relaxed shadow-inner"
             />
 
             {isTextTooLong && (
@@ -582,23 +310,23 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           </div>
 
           {/* Fixed Non-Editable Poet Info */}
-          <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1">
-            <span className="text-[10px] text-slate-500 font-bold uppercase block">कवि पहचान (Fixed Account Info)</span>
+          <div className="p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/30 space-y-1">
+            <span className="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase block">कवि पहचान (Fixed Account Info)</span>
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-900 dark:text-slate-100">{fixedAuthorName}</span>
+              <span className="font-extrabold text-slate-900 dark:text-slate-100">{fixedAuthorName}</span>
               <span className="text-slate-500 font-medium">@{fixedAuthorUsername}</span>
             </div>
           </div>
 
-          {/* Theme Dropdown (5 Themes) */}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+          {/* Theme Dropdown */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
               थीम व बैकग्राउंड स्टाइल चुनें (5 Themes)
             </label>
             <select
               value={selectedThemeId}
               onChange={(e) => setSelectedThemeId(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-bold cursor-pointer focus:ring-2 focus:ring-rose-500"
+              className="w-full px-4 py-2.5 text-xs rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-bold cursor-pointer focus:ring-2 focus:ring-orange-500"
             >
               {THEMES.map(t => (
                 <option key={t.id} value={t.id}>{t.name}</option>
@@ -606,15 +334,15 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             </select>
           </div>
 
-          {/* Layout Dropdown (5 Layouts) */}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+          {/* Layout Dropdown */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
               इमेज़ व टेक्स्ट लेआउट स्टाइल चुनें (5 Styles)
             </label>
             <select
               value={selectedLayoutId}
               onChange={(e) => setSelectedLayoutId(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-bold cursor-pointer focus:ring-2 focus:ring-rose-500"
+              className="w-full px-4 py-2.5 text-xs rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-bold cursor-pointer focus:ring-2 focus:ring-orange-500"
             >
               {LAYOUTS.map(l => (
                 <option key={l.id} value={l.id}>{l.name}</option>
@@ -622,10 +350,10 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             </select>
           </div>
 
-          {/* Custom Photo Upload (Optional) */}
-          <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
+          {/* Custom Photo Upload */}
+          <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
                 अपनी इमेज़/फोटो जोड़ें (Optional)
               </label>
               {uploadedPhotoUrl && (
@@ -639,37 +367,31 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               )}
             </div>
 
-            <label className="w-full py-2.5 px-3 rounded-xl border-2 border-dashed border-rose-500/40 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-100/50 transition">
-              <Upload className="w-4 h-4 text-rose-600" />
+            <label className="w-full py-3 px-4 rounded-2xl border-2 border-dashed border-orange-500/40 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-100/50 transition">
+              <Upload className="w-4 h-4 text-orange-600" />
               <span>{uploadedPhotoUrl ? 'दूसरी फोटो बदलें' : 'अपनी फोटो अपलोड करें'}</span>
               <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </label>
-
-            {!uploadedPhotoUrl && (
-              <p className="text-[10px] text-slate-500 italic">
-                * फोटो न अपलोड करने पर पोस्ट केवल कविता (Full Text) मोड में बिना फोटो के डाउनलोड/पोस्ट होगी।
-              </p>
-            )}
           </div>
 
         </div>
 
         {/* Right Live Preview Canvas Container (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-lg flex flex-col items-center justify-center space-y-4">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col items-center justify-center space-y-5">
           
           {/* Header Bar */}
-          <div className="flex items-center justify-between w-full border-b border-slate-200 dark:border-slate-800 pb-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span className="flex items-center gap-1.5">
-              <ImageIcon className="w-4 h-4 text-rose-600" />
-              <span>तुरंत लाइव पोस्टर प्रिव्यू (Live Preview)</span>
+          <div className="flex items-center justify-between w-full border-b border-slate-200 dark:border-slate-800 pb-3 text-xs font-extrabold text-slate-800 dark:text-slate-200">
+            <span className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-orange-600" />
+              <span>तुरंत लाइव पोस्टर प्रिव्यू (Live HD Preview)</span>
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 font-extrabold uppercase">
-              HD PNG
+            <span className="text-[10px] px-2.5 py-1 rounded-full bg-orange-500 text-white font-black uppercase shadow-sm">
+              HD PNG 4:5
             </span>
           </div>
 
           {/* Live Canvas Element (Directly Rendered First!) */}
-          <div className="relative w-full max-w-[420px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-rose-600/40">
+          <div className="relative w-full max-w-[420px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-orange-500/40 ring-4 ring-orange-500/20">
             <canvas 
               ref={canvasRef} 
               className="w-full h-full object-contain"
@@ -677,14 +399,14 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           </div>
 
           {/* Action Download & Direct Post Buttons Directly Below Live Preview */}
-          <div className="w-full max-w-[420px] space-y-2.5 pt-1">
+          <div className="w-full max-w-[420px] space-y-3 pt-1">
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Download Option */}
               <button
                 onClick={handleGenerateAndDownload}
                 disabled={downloading || !HAS_25_POINTS || isTextTooLong || isFormInvalid}
-                className="py-3 px-3 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-extrabold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="py-3.5 px-4 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-black rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {HAS_25_POINTS ? (
                   <>
@@ -693,7 +415,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4 text-amber-300" />
+                    <Lock className="w-4 h-4 text-amber-200" />
                     <span>25 Pts आवश्यक</span>
                   </>
                 )}
@@ -703,16 +425,16 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
               <button
                 onClick={handlePublishDirectly}
                 disabled={posting || !HAS_15_POINTS || isTextTooLong || isFormInvalid}
-                className="py-3 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {HAS_15_POINTS ? (
                   <>
-                    <Send className="w-4 h-4 text-slate-950" />
+                    <Send className="w-4 h-4 text-white" />
                     <span>{posting ? 'पोस्ट हो रहा...' : 'मंच पर पोस्ट करें (-15 Pts)'}</span>
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4 text-rose-950" />
+                    <Lock className="w-4 h-4 text-emerald-200" />
                     <span>15 Pts आवश्यक</span>
                   </>
                 )}
@@ -720,13 +442,13 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             </div>
 
             {isFormInvalid && (
-              <p className="text-[10px] text-amber-600 font-bold text-center">
+              <p className="text-[10px] text-orange-600 dark:text-orange-400 font-bold text-center">
                 * डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना आवश्यक है।
               </p>
             )}
 
             {!isFormInvalid && (
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-medium">
                 * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
               </p>
             )}
