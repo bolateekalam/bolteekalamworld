@@ -258,6 +258,45 @@ function AppContent() {
       { id: 5, type: 'credit', amount: 100, reason: '₹10 रीचार्ज पैक (100 Points Credit)', time: '2 दिन पहले' }
     ];
   });
+  const authorProfileMap = React.useMemo(() => {
+    const map = {};
+
+    map['sanjayrai'] = { name: 'संजय राय (संस्थापक)', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300' };
+    map['sanjayrai_founder'] = { name: 'संजय राय (संस्थापक)', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300' };
+    map['akash_cofounder'] = { name: 'आकाश कुमार सिंह', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300' };
+
+    (posts || []).forEach(p => {
+      const emailKey = p.author?.email ? p.author.email.toLowerCase().trim() : null;
+      const userKey = p.author?.username ? p.author.username.toLowerCase().replace(/^[@#]/, '').trim() : null;
+      const nameKey = p.author?.name ? p.author.name.toLowerCase().trim() : null;
+
+      const profileData = {
+        name: p.author?.name || p.authorName,
+        avatar: p.author?.avatar || p.authorAvatar || p.avatar
+      };
+
+      if (profileData.avatar && !profileData.avatar.includes('placeholder')) {
+        if (emailKey) map[emailKey] = profileData;
+        if (userKey) map[userKey] = profileData;
+        if (nameKey) map[nameKey] = profileData;
+      }
+    });
+
+    const activeEmail = (userProfile?.email || currentUser?.email || '').toLowerCase().trim();
+    const activeUser = (userProfile?.username || currentUser?.username || '').toLowerCase().replace(/^[@#]/, '').trim();
+    const activeName = (userProfile?.name || currentUser?.name || '').toLowerCase().trim();
+
+    const activeProfileData = {
+      name: userProfile?.name || currentUser?.name || 'साहित्य साधक',
+      avatar: userProfile?.avatar || currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'
+    };
+
+    if (activeEmail) map[activeEmail] = activeProfileData;
+    if (activeUser) map[activeUser] = activeProfileData;
+    if (activeName) map[activeName] = activeProfileData;
+
+    return map;
+  }, [posts, userProfile, currentUser]);
 
   // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket
   useEffect(() => {
@@ -1386,6 +1425,7 @@ function AppContent() {
               requireAuth={requireAuth}
               setActiveView={handleNavigateView}
               activeFestivalTheme={activeFestivalTheme}
+              authorProfileMap={authorProfileMap}
             />
           )}
 

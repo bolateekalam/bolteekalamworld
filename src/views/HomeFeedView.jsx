@@ -20,7 +20,8 @@ export const HomeFeedView = ({
   onOpenMembershipCard,
   userProfile,
   requireAuth,
-  activeFestivalTheme
+  activeFestivalTheme,
+  authorProfileMap
 }) => {
   const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -34,46 +35,28 @@ export const HomeFeedView = ({
   return (
     <div className="space-y-6">
 
-
-
       {/* 📸 New Feature: Poet Image Poster Studio Banner */}
       <div 
-        onClick={() => {
-          if (setActiveView) {
-            setActiveView('posterStudio');
-          } else {
-            window.location.href = '/studio';
-          }
-        }}
-        className="p-5 rounded-3xl bg-gradient-to-r from-purple-950 via-purple-900 to-slate-900 border-2 border-purple-500/40 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 relative overflow-hidden cursor-pointer hover:border-amber-400/60 hover:shadow-2xl transition group"
+        onClick={() => setActiveView && setActiveView('canvas')}
+        className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-600 via-rose-600 to-purple-700 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-95 transition group"
       >
-        <div className="space-y-1.5 z-10 max-w-xl">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-rose-950 font-extrabold text-[10px] uppercase shadow">
-              ✨ नया ख़ास फ़ीचर
+            <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-extrabold text-[10px] uppercase tracking-wider">
+              NEW FEATURE
             </span>
+            <span className="text-xs font-bold text-amber-200">डिजिटल कवि पोस्टर मेकर</span>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold font-rozha text-purple-200 group-hover:text-amber-300 transition">
-            कवि इमेज़ पोस्टर Studio — अपनी कविता + इमेज़ से सुंदर पोस्टर बनाएँ!
+          <h3 className="text-sm sm:text-base font-bold font-rozha text-amber-100 group-hover:underline">
+            📸 अपनी कविता को सुंदर फोटो पोस्टर में बदलकर शेयर करें
           </h3>
-          <p className="text-xs text-purple-200 font-tiro">
-            अपनी कविता को अपनी फोटो या इमेज़ के साथ सुंदर पोस्टर में बदलें और सीधे शेयर या मंच पर पोस्ट करें!
+          <p className="text-[11px] text-rose-100 hidden sm:block">
+            फोटो स्टूडियो कैनवास का उपयोग करें और अपनी रचना का 1-क्लिक शेयर कार्ड बनाएं।
           </p>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (setActiveView) {
-              setActiveView('posterStudio');
-            } else {
-              window.location.href = '/studio';
-            }
-          }}
-          className="z-10 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-2 shadow-lg active:scale-95 transition"
-        >
-          <Sparkles className="w-4 h-4 text-rose-950" />
-          <span>🎨 कवि पोस्टर Studio खोलें</span>
+        <button className="px-4 py-2 bg-white text-rose-900 rounded-2xl text-xs font-extrabold shadow-md hover:bg-amber-100 transition shrink-0">
+          पोस्टर बनाएं →
         </button>
       </div>
 

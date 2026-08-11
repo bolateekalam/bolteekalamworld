@@ -9,7 +9,23 @@ import CommentSection from './CommentSection';
 import ReportModal from './ReportModal';
 import PoemCardShareModal from './PoemCardShareModal';
 
-export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, onToggleArchivePost, onOpenAuthorProfile, onOpenPoetryChallenge, onLikePost, onAddComment, onFollowAuthor, isAuthorView, requireAuth, userProfile, currentUser }) => {
+export const PostCard = ({ 
+  post, 
+  onOpenCertificate, 
+  onEditPost, 
+  onDeletePost, 
+  onToggleArchivePost, 
+  onOpenAuthorProfile, 
+  onOpenPoetryChallenge, 
+  onLikePost, 
+  onAddComment, 
+  onFollowAuthor, 
+  isAuthorView, 
+  requireAuth, 
+  userProfile, 
+  currentUser,
+  authorProfileMap
+}) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
@@ -30,9 +46,23 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
     (userProfile?.name && post.author?.name && post.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase())
   );
 
-  const displayAuthorAvatar = (isUserOwnPost && (userProfile?.avatar || currentUser?.avatar)) 
-    ? (userProfile?.avatar || currentUser?.avatar) 
-    : (post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
+  const authorKeyEmail = post.author?.email ? post.author.email.toLowerCase().trim() : null;
+  const authorKeyUsername = post.author?.username ? post.author.username.toLowerCase().replace(/^[@#]/, '').trim() : null;
+  const authorKeyName = post.author?.name ? post.author.name.toLowerCase().trim() : null;
+
+  const matchedAuthorData = (authorProfileMap && (
+    (authorKeyEmail && authorProfileMap[authorKeyEmail]) ||
+    (authorKeyUsername && authorProfileMap[authorKeyUsername]) ||
+    (authorKeyName && authorProfileMap[authorKeyName])
+  ));
+
+  const displayAuthorAvatar = isUserOwnPost 
+    ? (userProfile?.avatar || currentUser?.avatar || post.author?.avatar)
+    : (matchedAuthorData?.avatar || post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
+
+  const displayAuthorName = isUserOwnPost
+    ? (userProfile?.name || currentUser?.name || post.author?.name)
+    : (matchedAuthorData?.name || post.author?.name || 'साहित्य साधक');
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -99,9 +129,6 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
   return (
     <article className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
       
-      {/* Top Gold Accent Line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-600 via-amber-500 to-rose-700 opacity-80" />
-
       {/* Editorial Pick Ribbon */}
       {post.isEditorialPick && (
         <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-slate-950 font-bold text-[10px] uppercase tracking-wider px-3 py-1 rounded-bl-2xl flex items-center gap-1 shadow-md z-10">
@@ -120,7 +147,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           <div className="relative shrink-0">
             <img 
               src={displayAuthorAvatar} 
-              alt={post.author?.name || 'लेखक'} 
+              alt={displayAuthorName} 
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-2 ring-rose-500/30 group-hover/author:ring-rose-500 transition"
             />
             {post.author?.badge && (
@@ -133,7 +160,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 group-hover/author:text-rose-600 cursor-pointer truncate transition">
-                {isUserOwnPost && userProfile?.name ? userProfile.name : (post.author?.name || 'साहित्य साधक')}
+                {displayAuthorName}
               </h3>
               {post.author?.badge && (
                 <span className="text-[9px] sm:text-[10px] px-2 py-0.2 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold shrink-0">
@@ -143,210 +170,179 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
             </div>
 
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 truncate font-medium">
-              <span className="group-hover/author:text-rose-500">
-                @{(isUserOwnPost && userProfile?.username ? userProfile.username : (post.author?.username || 'writer')).replace(/^[@#]/, '')}
-              </span>
+              <span>{post.author?.username || '@writer'}</span>
               <span>•</span>
-              <span>{(!post.createdAt || post.createdAt.includes('मिनट') || post.createdAt.includes('घंटे') || post.createdAt.includes('अभी')) ? new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : post.createdAt}</span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                <span>{post.createdAt}</span>
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right Actions: Author Edit/Delete or Follow Button */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {isUserOwnPost ? (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => onEditPost && onEditPost(post)}
-                aria-label="रचना संपादित करें"
-                className="px-2.5 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 text-xs font-bold flex items-center gap-1 transition"
-                title="रचना संपादित करें"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">संपादित करें</span>
-              </button>
-
-              <button
-                onClick={() => onToggleArchivePost && onToggleArchivePost(post.id)}
-                aria-label="आर्काइव करें"
-                className="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 transition"
-                title="आर्काइव करें"
-              >
-                <Archive className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                onClick={handleDeleteClick}
-                aria-label="रचना हमेशा के लिए डिलीट करें"
-                className="p-1.5 rounded-full bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition"
-                title="डिलीट करें"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
+        {/* Action Controls Header */}
+        <div className="flex items-center gap-1 shrink-0">
+          {!isUserOwnPost && (
             <button
               onClick={handleFollowToggle}
-              aria-label={isFollowing ? "कवि को अनफ़ॉलो करें" : "कवि को फ़ॉलो करें"}
-              className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 transition active:scale-95 ${
-                isFollowing
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
-                  : 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100'
+              className={`px-3 py-1 rounded-full text-xs font-bold transition flex items-center gap-1 shadow-sm ${
+                isFollowing 
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200' 
+                  : 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/80 hover:bg-rose-100'
               }`}
             >
               {isFollowing ? (
                 <>
                   <UserCheck className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{t('follow.following')}</span>
+                  <span>{t('actions.following')}</span>
                 </>
               ) : (
                 <>
                   <UserPlus className="w-3.5 h-3.5" />
-                  <span>{t('follow.follow')}</span>
+                  <span>{t('actions.follow')}</span>
                 </>
               )}
+            </button>
+          )}
+
+          {!isUserOwnPost && onOpenPoetryChallenge && (
+            <button
+              onClick={() => onOpenPoetryChallenge(post.author)}
+              className="p-1.5 rounded-full text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition"
+              title="काव्य दंगल चुनौती भेजें"
+            >
+              <Swords className="w-4 h-4" />
+            </button>
+          )}
+
+          {isUserOwnPost && onEditPost && (
+            <button
+              onClick={() => onEditPost(post)}
+              className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              title="रचना एडिट करें"
+            >
+              <Edit3 className="w-4 h-4" />
+            </button>
+          )}
+
+          {isUserOwnPost && onDeletePost && (
+            <button
+              onClick={handleDeleteClick}
+              className="p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
+              title="रचना डिलीट करें"
+            >
+              <Trash2 className="w-4 h-4" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Post Title */}
-      <h2 className="text-base sm:text-xl font-rozha text-rose-900 dark:text-rose-100 mb-2 leading-snug">
+      {/* Main Post Title */}
+      <h2 className="text-base sm:text-lg font-bold font-rozha text-rose-900 dark:text-rose-300 mb-2 leading-snug">
         {post.title}
       </h2>
 
-      {/* Category Tag & Reading Stats Bar */}
-      <div className="flex items-center gap-2 sm:gap-4 text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 font-medium mb-3 flex-wrap">
-        <span className="px-2.5 py-0.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 font-bold text-rose-600 dark:text-rose-400 border border-rose-200/40 dark:border-rose-900/40">
-          {post.category}
+      {/* Meta Bar */}
+      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium flex-wrap">
+        <span className="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
+          {post.category || 'कविता'}
         </span>
         <span className="flex items-center gap-1">
-          <Clock className="w-3.5 h-3.5 text-rose-500" />
-          <span>{post.readingTime}</span>
+          <Clock className="w-3.5 h-3.5" />
+          <span>{post.readingTime || '2 मिनट'}</span>
         </span>
-
-        {/* Audio Recite Player Button */}
-        <button
-          onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-          aria-label={isPlayingAudio ? 'कविता पाठ रोकें' : 'कविता पाठ सुनें'}
-          className={`ml-auto flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
-            isPlayingAudio 
-              ? 'bg-rose-600 text-white animate-pulse shadow-md' 
-              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30'
-          }`}
-        >
-          {isPlayingAudio ? <Pause className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-          <span>{isPlayingAudio ? 'पाठ हो रहा है...' : 'कविता सुनें'}</span>
-        </button>
+        {post.views > 0 && (
+          <span className="flex items-center gap-1">
+            <Eye className="w-3.5 h-3.5" />
+            <span>{post.views} पाठकों ने पढ़ा</span>
+          </span>
+        )}
       </div>
 
-      {/* Audio Wave Visualizer Simulation Bar */}
-      {isPlayingAudio && (
-        <div className="mb-4 p-3 rounded-2xl bg-slate-900 text-white flex items-center gap-3 animate-in fade-in">
-          <Music className="w-4 h-4 text-amber-400 animate-spin" />
-          <div className="flex-1 flex items-center gap-1 h-4">
-            {[40, 80, 60, 100, 70, 90, 50, 80, 100, 60, 40, 80, 90].map((h, idx) => (
-              <div key={idx} style={{ height: `${h}%` }} className="flex-1 bg-amber-400 rounded-full animate-pulse" />
-            ))}
-          </div>
-          <span className="text-[10px] font-mono text-amber-300">01:24</span>
-        </div>
-      )}
+      {/* Post Text Content Box */}
+      <div className="relative p-4 sm:p-5 rounded-2xl bg-amber-50/40 dark:bg-slate-800/40 border border-amber-200/50 dark:border-slate-800 mb-4">
+        <Quote className="absolute top-3 right-3 w-8 h-8 text-amber-500/10 dark:text-slate-700/20 pointer-events-none" />
+        <p className="text-sm sm:text-base font-tiro text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">
+          {post.content}
+        </p>
+      </div>
 
-      {/* Attached Full Poster Canvas Image (e.g. Generated from Poster Studio) */}
+      {/* Post Image Attachment (if any) */}
       {(post.imageUrl || post.image) && (
-        <div className="mb-4 rounded-3xl overflow-hidden shadow-xl border-2 border-rose-500/30 max-w-lg mx-auto bg-slate-950">
+        <div className="mb-4 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
           <img 
             src={post.imageUrl || post.image} 
-            alt={post.title}
-            className="w-full h-auto object-contain max-h-[650px] rounded-3xl" 
+            alt={post.title} 
+            className="w-full max-h-96 object-cover hover:scale-105 transition-transform duration-500" 
           />
         </div>
       )}
 
-      {/* Composition Body (Royal Parchment Styling) - Rendered ONLY if NOT a poster image post */}
-      {post.content && !(post.imageUrl || post.image) && (
-        <div className="relative p-4 sm:p-5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/40 border border-amber-200/50 dark:border-slate-800 mb-4 select-text">
-          <Quote className="w-6 h-6 text-amber-500/30 absolute top-2 right-2 rotate-180 pointer-events-none" />
-          <div className="font-tiro text-sm sm:text-base md:text-lg text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">
-            {post.content}
-          </div>
-        </div>
-      )}
-
-      {/* Hashtags */}
+      {/* Hashtags Row */}
       {post.tags && post.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex items-center gap-1.5 flex-wrap mb-4">
           {post.tags.map((tag, idx) => (
-            <span key={idx} className="text-xs text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-medium">
-              #{tag}
+            <span key={idx} className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer">
+              #{tag.replace(/^#/, '')}
             </span>
           ))}
         </div>
       )}
 
-      {/* Action Toolbar */}
-      <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-        <div className="flex items-center gap-2 sm:gap-4">
-          
-          {/* Like Button */}
+      {/* Bottom Engagement Action Bar */}
+      <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold">
+        <div className="flex items-center gap-4 sm:gap-6">
           <button
             onClick={handleLikeToggle}
-            aria-label={`रचना पसंद करें (${likesCount} लाइक्स)`}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition active:scale-95 ${
-              isLiked
-                ? 'text-rose-600 bg-rose-50 dark:bg-rose-950/60'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            className={`flex items-center gap-1.5 transition active:scale-95 ${
+              isLiked ? 'text-rose-600 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-rose-600'
             }`}
           >
-            <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-600' : ''}`} />
+            <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-600 stroke-rose-600' : ''}`} />
             <span>{likesCount} पसंद</span>
           </button>
 
-          {/* Comment Button */}
           <button
             onClick={handleCommentToggle}
-            aria-label={`टिप्पणियाँ देखें (${post.comments?.length || 0})`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95"
+            className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-emerald-600 transition"
           >
-            <MessageCircle className="w-4 h-4 text-emerald-500" />
-            <span>{post.comments?.length || 0} टिप्पणियाँ</span>
+            <MessageCircle className="w-4 h-4" />
+            <span>{(post.comments?.length || 0)} टिप्पणियाँ</span>
           </button>
 
-          {/* Share Button */}
           <button
             onClick={handleShareToggle}
-            aria-label="रचना शेयर करें"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95"
+            className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-amber-600 transition"
           >
-            <Share2 className="w-4 h-4 text-sky-500" />
-            <span className="hidden sm:inline">शेयर</span>
+            <Share2 className="w-4 h-4" />
+            <span>शेयर</span>
           </button>
+        </div>
 
-          {/* Bookmark Button */}
+        <div className="flex items-center gap-2">
           <button
             onClick={handleBookmarkToggle}
-            aria-label={isBookmarked ? "सेव की गई लिस्ट से हटाएँ" : "रचना सेव करें"}
-            className={`p-1.5 rounded-full transition active:scale-95 ${
-              isBookmarked ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100'
+            className={`p-2 rounded-xl transition ${
+              isBookmarked 
+                ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40' 
+                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
             }`}
+            title="बुकमार्क करें"
           >
             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-amber-500' : ''}`} />
           </button>
 
+          {!isUserOwnPost && (
+            <button
+              onClick={() => setShowReportModal(true)}
+              aria-label="रचना की रिपोर्ट करें"
+              className="p-1.5 rounded-full text-slate-400 hover:text-rose-500 transition"
+              title="रिपोर्ट करें"
+            >
+              <Flag className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-
-        {/* Flag/Report Option for non-authors */}
-        {!isUserOwnPost && (
-          <button
-            onClick={() => setShowReportModal(true)}
-            aria-label="रचना की रिपोर्ट करें"
-            className="p-1.5 rounded-full text-slate-400 hover:text-rose-500 transition"
-            title="रिपोर्ट करें"
-          >
-            <Flag className="w-3.5 h-3.5" />
-          </button>
-        )}
       </div>
 
       {/* Expandable Comment Section */}
@@ -358,6 +354,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           requireAuth={requireAuth}
           currentUser={currentUser}
           userProfile={userProfile}
+          authorProfileMap={authorProfileMap}
         />
       )}
 

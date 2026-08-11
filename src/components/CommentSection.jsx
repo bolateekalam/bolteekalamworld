@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Heart, Reply, Pin, Flag, Trash2, Send } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const CommentSection = ({ comments = [], userProfile, onAddComment, onReportComment }) => {
+export const CommentSection = ({ comments = [], userProfile, onAddComment, onReportComment, authorProfileMap }) => {
   const { t } = useLanguage();
   const [commentList, setCommentList] = useState(comments);
   const [newCommentText, setNewCommentText] = useState('');
@@ -114,6 +114,16 @@ export const CommentSection = ({ comments = [], userProfile, onAddComment, onRep
       {/* Comment List */}
       <div className="space-y-3 pt-1">
         {commentList.map((c) => {
+          const cEmail = c.authorEmail ? c.authorEmail.toLowerCase().trim() : null;
+          const cUser = c.authorUsername ? c.authorUsername.toLowerCase().replace(/^[@#]/, '').trim() : null;
+          const cName = c.author ? c.author.toLowerCase().trim() : null;
+
+          const matchedCommenter = (authorProfileMap && (
+            (cEmail && authorProfileMap[cEmail]) ||
+            (cUser && authorProfileMap[cUser]) ||
+            (cName && authorProfileMap[cName])
+          ));
+
           const isUserOwnComment = Boolean(
             (userProfile?.email && c.authorEmail === userProfile.email) ||
             (userProfile?.username && c.authorUsername === userProfile.username) ||
@@ -122,8 +132,13 @@ export const CommentSection = ({ comments = [], userProfile, onAddComment, onRep
             (c.author && c.author.includes('आप'))
           );
 
-          const commentAvatar = isUserOwnComment ? (userProfile?.avatar || c.avatar) : c.avatar;
-          const commentAuthorName = isUserOwnComment ? (userProfile?.name || c.author) : c.author;
+          const commentAvatar = isUserOwnComment 
+            ? (userProfile?.avatar || c.avatar) 
+            : (matchedCommenter?.avatar || c.avatar);
+
+          const commentAuthorName = isUserOwnComment 
+            ? (userProfile?.name || c.author) 
+            : (matchedCommenter?.name || c.author);
 
           return (
             <div 
