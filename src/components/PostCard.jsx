@@ -357,6 +357,7 @@ export const PostCard = ({ post, onOpenCertificate, onEditPost, onDeletePost, on
           onAddComment={(commentObj) => onAddComment && onAddComment(post.id, commentObj)}
           requireAuth={requireAuth}
           currentUser={currentUser}
+          userProfile={userProfile}
         />
       )}
 

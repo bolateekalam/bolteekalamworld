@@ -925,11 +925,18 @@ function AppContent() {
   };
 
   const handleSaveProfileAndSyncDB = (updatedProfile) => {
+    const userEmail = updatedProfile.email || currentUser?.email || 'user';
+
+    if (updatedProfile.avatar) {
+      localStorage.setItem(`custom_avatar_${userEmail}`, updatedProfile.avatar);
+      localStorage.setItem('custom_avatar_global', updatedProfile.avatar);
+    }
+
     // 1. Update userProfile state & localStorage
     setUserProfile(updatedProfile);
     localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updatedProfile));
 
-    // 2. CRITICAL: Update currentUser state & active user session in localStorage
+    // 2. Update currentUser state & active user session in localStorage
     const updatedUserObj = {
       ...(currentUser || {}),
       name: updatedProfile.name || currentUser?.name,
@@ -937,18 +944,41 @@ function AppContent() {
       avatar: updatedProfile.avatar || currentUser?.avatar,
       city: updatedProfile.city || currentUser?.city,
       bio: updatedProfile.bio || currentUser?.bio,
-      email: updatedProfile.email || currentUser?.email
+      email: userEmail
     };
     setCurrentUser(updatedUserObj);
     localStorage.setItem('bolteekalam_active_user', JSON.stringify(updatedUserObj));
 
-    // 3. CRITICAL: Cascade new avatar & name across ALL published posts in posts state & localStorage
+    // 3. Universal Cascade Update across ALL published posts AND nested comments
     setPosts(prevPosts => {
       const updatedPosts = prevPosts.map(p => {
-        const isUserPost = (currentUser?.email && p.author?.email === currentUser.email) ||
+        const isUserPost = Boolean(
+          (userEmail && p.author?.email === userEmail) ||
           p.author?.id === 'user-me' ||
           (p.author?.name && updatedProfile.name && p.author.name.trim().toLowerCase() === updatedProfile.name.trim().toLowerCase()) ||
-          (p.author?.username && updatedProfile.username && p.author.username.trim().toLowerCase() === updatedProfile.username.trim().toLowerCase());
+          (p.author?.username && updatedProfile.username && p.author.username.trim().toLowerCase() === updatedProfile.username.trim().toLowerCase()) ||
+          (p.author?.name && p.author.name.includes('आप'))
+        );
+
+        const updatedComments = (p.comments || []).map(c => {
+          const isUserComment = Boolean(
+            (userEmail && c.authorEmail === userEmail) ||
+            (c.authorId === 'user-me') ||
+            (c.author && updatedProfile.name && c.author.trim().toLowerCase() === updatedProfile.name.trim().toLowerCase()) ||
+            (c.author && currentUser?.name && c.author.trim().toLowerCase() === currentUser.name.trim().toLowerCase()) ||
+            (c.author && c.author.includes('आप'))
+          );
+
+          if (isUserComment) {
+            return {
+              ...c,
+              author: updatedProfile.name || c.author,
+              authorEmail: userEmail,
+              avatar: updatedProfile.avatar || c.avatar
+            };
+          }
+          return c;
+        });
 
         if (isUserPost) {
           return {
@@ -962,13 +992,19 @@ function AppContent() {
               username: updatedProfile.username || p.author?.username,
               avatar: updatedProfile.avatar || p.author?.avatar,
               city: updatedProfile.city || p.author?.city
-            }
+            },
+            comments: updatedComments
           };
         }
-        return p;
+
+        return {
+          ...p,
+          comments: updatedComments
+        };
       });
 
       try {
+        localStorage.setItem('bolteekalam_user_created_posts', JSON.stringify(updatedPosts.filter(p => p.author?.id === 'user-me' || p.author?.email === userEmail)));
         localStorage.setItem('bolteekalam_global_shared_posts', JSON.stringify(updatedPosts));
         localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(updatedPosts));
       } catch (e) {}
@@ -976,14 +1012,14 @@ function AppContent() {
       return updatedPosts;
     });
 
-    if (currentUser?.email) {
+    if (userEmail) {
       if (updatedProfile.phone) {
-        localStorage.setItem(`user_phone_${currentUser.email}`, updatedProfile.phone);
+        localStorage.setItem(`user_phone_${userEmail}`, updatedProfile.phone);
       }
       if (updatedProfile.birthday) {
-        localStorage.setItem(`user_dob_${currentUser.email}`, updatedProfile.birthday);
+        localStorage.setItem(`user_dob_${userEmail}`, updatedProfile.birthday);
       }
-      updateUserProfileInDB(updatedProfile, currentUser.email || currentUser.id);
+      updateUserProfileInDB(updatedProfile, userEmail);
     }
   };
 

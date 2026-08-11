@@ -16,6 +16,9 @@ export const CommentSection = ({ comments = [], userProfile, onAddComment, onRep
     const added = {
       id: `c-${Date.now()}`,
       author: userProfile?.name || 'साहित्य साधक',
+      authorEmail: userProfile?.email || '',
+      authorUsername: userProfile?.username || '',
+      authorId: userProfile?.email || 'user-me',
       avatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
       content: newCommentText.trim(),
       createdAt: 'अभी-अभी',
@@ -66,8 +69,8 @@ export const CommentSection = ({ comments = [], userProfile, onAddComment, onRep
             ...(c.replies || []),
             {
               id: `r-${Date.now()}`,
-              author: 'आप (User)',
-              avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+              author: userProfile?.name || 'आप (User)',
+              avatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
               content: replyText,
               createdAt: 'अभी',
               likes: 0
@@ -110,121 +113,134 @@ export const CommentSection = ({ comments = [], userProfile, onAddComment, onRep
 
       {/* Comment List */}
       <div className="space-y-3 pt-1">
-        {commentList.map((c) => (
-          <div 
-            key={c.id}
-            className={`p-3 rounded-2xl transition ${
-              c.isPinned 
-                ? 'bg-amber-500/10 border border-amber-500/20' 
-                : 'bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60'
-            }`}
-          >
-            {c.isPinned && (
-              <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 mb-1.5">
-                <Pin className="w-3 h-3 fill-amber-500" />
-                <span>पिन की गई टिप्पणी</span>
-              </div>
-            )}
+        {commentList.map((c) => {
+          const isUserOwnComment = Boolean(
+            (userProfile?.email && c.authorEmail === userProfile.email) ||
+            (userProfile?.username && c.authorUsername === userProfile.username) ||
+            (c.authorId === 'user-me') ||
+            (userProfile?.name && c.author && c.author.trim().toLowerCase() === userProfile.name.trim().toLowerCase()) ||
+            (c.author && c.author.includes('आप'))
+          );
 
-            <div className="flex items-start gap-2.5">
-              <img 
-                src={c.avatar} 
-                alt={c.author} 
-                className="w-7 h-7 rounded-full object-cover shrink-0" 
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    {c.author}
-                  </span>
-                  <span className="text-[10px] text-slate-400">{c.createdAt}</span>
+          const commentAvatar = isUserOwnComment ? (userProfile?.avatar || c.avatar) : c.avatar;
+          const commentAuthorName = isUserOwnComment ? (userProfile?.name || c.author) : c.author;
+
+          return (
+            <div 
+              key={c.id}
+              className={`p-3 rounded-2xl transition ${
+                c.isPinned 
+                  ? 'bg-amber-500/10 border border-amber-500/20' 
+                  : 'bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60'
+              }`}
+            >
+              {c.isPinned && (
+                <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 mb-1.5">
+                  <Pin className="w-3 h-3 fill-amber-500" />
+                  <span>पिन की गई टिप्पणी</span>
                 </div>
+              )}
 
-                <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 font-tiro leading-relaxed">
-                  {c.content}
-                </p>
+              <div className="flex items-start gap-2.5">
+                <img 
+                  src={commentAvatar} 
+                  alt={commentAuthorName} 
+                  className="w-7 h-7 rounded-full object-cover shrink-0" 
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      {commentAuthorName}
+                    </span>
+                    <span className="text-[10px] text-slate-400">{c.createdAt}</span>
+                  </div>
 
-                {/* Comment Action Toolbar */}
-                <div className="flex items-center gap-4 mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-                  <button
-                    onClick={() => handleLikeComment(c.id)}
-                    className={`flex items-center gap-1 hover:text-rose-600 transition ${c.isLiked ? 'text-rose-600 font-bold' : ''}`}
-                  >
-                    <Heart className={`w-3.5 h-3.5 ${c.isLiked ? 'fill-rose-600' : ''}`} />
-                    <span>{c.likes}</span>
-                  </button>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 font-tiro leading-relaxed">
+                    {c.content}
+                  </p>
 
-                  <button
-                    onClick={() => setReplyingToId(replyingToId === c.id ? null : c.id)}
-                    className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200 transition"
-                  >
-                    <Reply className="w-3.5 h-3.5" />
-                    <span>{t('comments.reply')}</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleTogglePin(c.id)}
-                    className="hover:text-amber-500 transition"
-                    title={t('comments.pin')}
-                  >
-                    <Pin className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={() => onReportComment && onReportComment(c)}
-                    className="hover:text-rose-500 transition"
-                    title={t('comments.report')}
-                  >
-                    <Flag className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteComment(c.id)}
-                    className="hover:text-rose-600 transition ml-auto"
-                    title={t('comments.delete')}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Nested Reply Input */}
-                {replyingToId === c.id && (
-                  <div className="flex gap-2 mt-2.5">
-                    <input
-                      type="text"
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="जवाब दर्ज करें..."
-                      className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-rose-500"
-                    />
+                  {/* Comment Action Toolbar */}
+                  <div className="flex items-center gap-4 mt-2 text-[11px] text-slate-500 dark:text-slate-400">
                     <button
-                      onClick={() => handleSendReply(c.id)}
-                      className="px-3 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-bold"
+                      onClick={() => handleLikeComment(c.id)}
+                      className={`flex items-center gap-1 hover:text-rose-600 transition ${c.isLiked ? 'text-rose-600 font-bold' : ''}`}
                     >
-                      जवाब दें
+                      <Heart className={`w-3.5 h-3.5 ${c.isLiked ? 'fill-rose-600' : ''}`} />
+                      <span>{c.likes}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setReplyingToId(replyingToId === c.id ? null : c.id)}
+                      className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200 transition"
+                    >
+                      <Reply className="w-3.5 h-3.5" />
+                      <span>{t('comments.reply')}</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleTogglePin(c.id)}
+                      className="hover:text-amber-500 transition"
+                      title={t('comments.pin')}
+                    >
+                      <Pin className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      onClick={() => onReportComment && onReportComment(c)}
+                      className="hover:text-rose-500 transition"
+                      title={t('comments.report')}
+                    >
+                      <Flag className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteComment(c.id)}
+                      className="hover:text-rose-600 transition ml-auto"
+                      title={t('comments.delete')}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                )}
 
-                {/* Nested Replies Display */}
-                {c.replies && c.replies.length > 0 && (
-                  <div className="mt-2.5 space-y-2 pl-4 border-l-2 border-slate-200 dark:border-slate-700">
-                    {c.replies.map(r => (
-                      <div key={r.id} className="text-xs">
-                        <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                          <span>{r.author}</span>
-                          <span className="text-[9px] text-slate-400 font-normal">{r.createdAt}</span>
+                  {/* Nested Reply Input */}
+                  {replyingToId === c.id && (
+                    <div className="flex gap-2 mt-2.5">
+                      <input
+                        type="text"
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="जवाब दर्ज करें..."
+                        className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-rose-500"
+                      />
+                      <button
+                        onClick={() => handleSendReply(c.id)}
+                        className="px-3 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-bold"
+                      >
+                        जवाब दें
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Nested Replies Display */}
+                  {c.replies && c.replies.length > 0 && (
+                    <div className="mt-2.5 space-y-2 pl-4 border-l-2 border-slate-200 dark:border-slate-700">
+                      {c.replies.map(r => (
+                        <div key={r.id} className="text-xs">
+                          <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                            <span>{r.author}</span>
+                            <span className="text-[9px] text-slate-400 font-normal">{r.createdAt}</span>
+                          </div>
+                          <p className="text-slate-600 dark:text-slate-300 font-tiro mt-0.5">{r.content}</p>
                         </div>
-                        <p className="text-slate-600 dark:text-slate-300 font-tiro mt-0.5">{r.content}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
 
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
