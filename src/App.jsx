@@ -23,6 +23,8 @@ import { LanguageProvider } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
 import { fetchPostsFromDB, createPostInDB, deletePostFromDB, archivePostInDB, updateUserProfileInDB, fetchWeeklyChallengeFromDB, toggleLikeInDB, savePostToIndexedDB, uploadImageToSupabaseStorage } from './lib/dataService';
 
+import { updatePageSEO } from './utils/seo';
+
 import HomeFeedView from './views/HomeFeedView';
 import DailyChallengeView from './views/DailyChallengeView';
 import PoetryBattlesView from './views/PoetryBattlesView';
@@ -500,7 +502,7 @@ function AppContent() {
     } catch (e) {
       window.location.hash = `${cleanUsername}`;
     }
-    document.title = `${author.name || 'लेखक'} (@${cleanUsername}) — बोलती कलम | bolteekalamvoice.in`;
+    document.title = `${author.name || 'लेखक'} (@${cleanUsername}) — बोलती कलम | bolateeworld.in`;
     setSelectedAuthor(author);
     setShowPublicProfileModal(true);
   };

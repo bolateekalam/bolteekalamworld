@@ -1,0 +1,9 @@
+# Googlebot & General Web Crawlers
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+
+# Sitemap Location for Search Engines
+Sitemap: https://www.bolateeworld.in/sitemap.xml
+Host: https://www.bolateeworld.in
