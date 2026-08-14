@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, ShieldCheck, CheckCircle2, Sparkles } from 'lucide-react';
+import { Award, ShieldCheck, CheckCircle2, Sparkles, Image as ImageIcon, Flame, Feather, Flag, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import DailyChallenge from '../components/DailyChallenge';
 import PostCard from '../components/PostCard';
@@ -35,28 +35,57 @@ export const HomeFeedView = ({
   return (
     <div className="space-y-6">
 
-      {/* 📸 New Feature: Poet Image Poster Studio Banner */}
+      {/* 🇮🇳 15th August Independence Day Patriotic Special Banner (100% Fail-Safe Gradient) */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-rose-900 to-emerald-800 text-white shadow-2xl p-6 border border-amber-400/30">
+        <div className="absolute -right-8 -bottom-8 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-2 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-extrabold shadow-md">
+              <Flag className="w-3.5 h-3.5 fill-slate-950" />
+              <span>80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold font-rozha text-amber-100 leading-tight">
+              समस्त देशवासियों को 80वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-tiro">
+              स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें और 15 अगस्त विशेष पोस्टर डिज़ाइन करें।
+            </p>
+          </div>
+
+          <button
+            onClick={() => setActiveView && setActiveView('posterStudio')}
+            className="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xl flex items-center gap-2 transition transform active:scale-95 shrink-0"
+          >
+            <ImageIcon className="w-4 h-4 text-slate-950" />
+            <span>15 अगस्त पोस्टर बनाएं</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* 📸 Poet Digital Poster Maker Banner */}
       <div 
-        onClick={() => setActiveView && setActiveView('canvas')}
-        className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-600 via-rose-600 to-purple-700 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-95 transition group"
+        onClick={() => setActiveView && setActiveView('posterStudio')}
+        className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-purple-900 via-indigo-900 to-rose-900 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-95 transition group border border-purple-500/20"
       >
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-extrabold text-[10px] uppercase tracking-wider">
-              NEW FEATURE
+            <span className="px-2 py-0.5 rounded-md bg-rose-500 text-white font-extrabold text-[10px] uppercase tracking-wider shadow">
+              POSTER STUDIO
             </span>
-            <span className="text-xs font-bold text-amber-200">डिजिटल कवि पोस्टर मेकर</span>
+            <span className="text-xs font-bold text-purple-200">डिजिटल कवि पोस्टर मेकर</span>
           </div>
-          <h3 className="text-sm sm:text-base font-bold font-rozha text-amber-100 group-hover:underline">
+          <h3 className="text-sm sm:text-base font-bold font-rozha text-purple-100 group-hover:underline">
             📸 अपनी कविता को सुंदर फोटो पोस्टर में बदलकर शेयर करें
           </h3>
-          <p className="text-[11px] text-rose-100 hidden sm:block">
-            फोटो स्टूडियो कैनवास का उपयोग करें और अपनी रचना का 1-क्लिक शेयर कार्ड बनाएं।
+          <p className="text-[11px] text-purple-200 hidden sm:block">
+            फोटो स्टूडियो कैनवास का उपयोग करें और अपनी रचना का 1-क्लिक शेयर पोस्टर कार्ड बनाएं।
           </p>
         </div>
 
-        <button className="px-4 py-2 bg-white text-rose-900 rounded-2xl text-xs font-extrabold shadow-md hover:bg-amber-100 transition shrink-0">
-          पोस्टर बनाएं →
+        <button className="px-4 py-2 bg-white text-purple-950 rounded-2xl text-xs font-extrabold shadow-md hover:bg-purple-100 transition shrink-0 flex items-center gap-1.5">
+          <ImageIcon className="w-3.5 h-3.5 text-purple-700" />
+          <span>पोस्टर स्टूडियो खोलें →</span>
         </button>
       </div>
 
@@ -78,7 +107,7 @@ export const HomeFeedView = ({
               : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 border border-slate-200 dark:border-slate-800'
           }`}
         >
-          सभी रचनाएँ ({posts.length})
+          सभी रचनाएँ ({publicActivePosts.length})
         </button>
 
         {mockCategories.map((cat) => (
@@ -106,11 +135,9 @@ export const HomeFeedView = ({
             onEditPost={onEditPost}
             onDeletePost={onDeletePost}
             onOpenAuthorProfile={onOpenAuthorProfile}
-            onOpenPoetryChallenge={onOpenPoetryChallenge}
             onLikePost={onLikePost}
             onAddComment={onAddComment}
             onFollowAuthor={onFollowAuthor}
-            userProfile={userProfile}
             requireAuth={requireAuth}
           />
         ))}

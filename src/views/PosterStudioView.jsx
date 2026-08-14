@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 
 const THEMES = [
+  { id: 'independence', name: '🇮🇳 15 अगस्त स्वतंत्रता दिवस विशेषांक', colorBg: 'bg-gradient-to-br from-orange-500 via-white to-emerald-600 text-slate-900 border-amber-500', bg1: '#fffdf5', bg2: '#fef9c3', border: '#ff9933', title: '#991b1b', text: '#0f172a', brand: '#15803d' },
   { id: 'parchment', name: '📜 पार्चमेंट रॉयल', colorBg: 'bg-amber-100 text-amber-900 border-amber-400', bg1: '#fffdf9', bg2: '#fef3c7', border: '#be123c', title: '#881337', text: '#1e293b', brand: '#be123c' },
   { id: 'purple', name: '💜 हिन्दवी पर्पल', colorBg: 'bg-purple-900 text-amber-300 border-amber-400', bg1: '#581c87', bg2: '#3b0764', border: '#f59e0b', title: '#ffffff', text: '#f3e8ff', brand: '#fbbf24' },
   { id: 'ivory', name: '🤍 क्लासिक आइवरी', colorBg: 'bg-slate-100 text-slate-900 border-slate-400', bg1: '#fffdfa', bg2: '#f5f5f4', border: '#09090b', title: '#09090b', text: '#27272a', brand: '#e11d48' },
