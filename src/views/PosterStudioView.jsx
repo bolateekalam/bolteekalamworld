@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sparkles, Download, Image as ImageIcon, Upload, Check, 
-  Palette, Send, Eye,
-  LayoutGrid, BookOpen, User, RefreshCw
+  Sparkles, Download, Upload, Check, 
+  Palette, Send, Eye, X,
+  LayoutGrid, BookOpen, Trash2
 } from 'lucide-react';
 
 const LAYOUT_ANGLES = [
@@ -49,13 +49,15 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const activeAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
   const authorCity = userProfile?.city || 'प्रयागराज';
 
-  // 1. Initial State MUST BE EMPTY by default
+  // 1. Initial State Empty
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selectedAngle, setSelectedAngle] = useState('topHeader');
   const [selectedThemeId, setSelectedThemeId] = useState('parchment');
   const [customPhotoUrl, setCustomPhotoUrl] = useState(null);
 
+  // Preview Modal State (Preview ONLY opens when user clicks "पोस्टर प्रिव्यू देखें")
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [posting, setPosting] = useState(false);
 
@@ -104,7 +106,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1080, 1350);
 
-      // Process text
       const isTitleEmpty = !title.trim();
       const isContentEmpty = !content.trim();
 
@@ -114,8 +115,8 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       if (isContentEmpty) {
         linesToDraw = [
           '✦ यहाँ अपनी कविता की पंक्तियाँ लिखें ✦',
-          'जैसे ही आप बाएँ फ़ॉर्म में टाइप करेंगे,',
-          'लाइव इमेज़ पोस्टर तुरंत तैयार हो जाएगा।'
+          'फ़ॉर्म भरने के बाद प्रिव्यू देखें बटन दबाएँ,',
+          'आपका HD इमेज़ पोस्टर तुरंत तैयार हो जाएगा।'
         ];
       } else {
         linesToDraw = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -338,8 +339,21 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   };
 
   useEffect(() => {
-    drawPosterCanvas();
-  }, [title, content, selectedAngle, selectedThemeId, effectivePhotoUrl]);
+    if (showPreviewModal) {
+      drawPosterCanvas();
+    }
+  }, [title, content, selectedAngle, selectedThemeId, effectivePhotoUrl, showPreviewModal]);
+
+  const handleOpenPreview = async () => {
+    if (!title.trim() || !content.trim()) {
+      alert('कृपया इमेज़ पोस्टर का प्रिव्यू देखने से पहले शीर्षक और अपनी कविता की पंक्तियाँ दर्ज करें।');
+      return;
+    }
+    setShowPreviewModal(true);
+    setTimeout(() => {
+      drawPosterCanvas();
+    }, 100);
+  };
 
   // Download Handler (-25 Points)
   const handleGenerateAndDownload = async () => {
@@ -370,6 +384,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         onRewardPoints(-25, 'कवि पोस्टर डाउनलोड करने पर');
       }
 
+      setShowPreviewModal(false);
     } catch (e) {
       console.error('Poster download error:', e);
     } finally {
@@ -404,6 +419,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         });
       }
 
+      setShowPreviewModal(false);
     } catch (e) {
       console.error('Poster publish error:', e);
     } finally {
@@ -412,7 +428,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
+    <div className="w-full max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
       
       {/* Studio Banner */}
       <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-rose-700 via-rose-800 to-amber-700 text-white shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
@@ -427,7 +443,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             कवि इमेज़ पोस्टर Studio
           </h2>
           <p className="text-xs sm:text-sm text-amber-100/90 max-w-xl font-tiro leading-relaxed">
-            अपनी कविता दर्ज करें और 4 आकर्षक डिज़ाइन शैलियों (Layout Styles) में अपना HD कवि पोस्टर बनाएँ।
+            अपनी कविता दर्ज करें और 4 आकर्षक डिज़ाइन शैलियों में अपना HD कवि पोस्टर बनाएँ।
           </p>
         </div>
 
@@ -440,202 +456,227 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         </div>
       </div>
 
-      {/* Main Grid: Responsive 1-Column on Mobile/Tablet, 2-Column on XL screens */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      {/* Main Form Container */}
+      <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-8 shadow-xl space-y-6">
         
-        {/* LEFT COLUMN: Controls & Form Inputs */}
-        <div className="xl:col-span-7 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-xl space-y-6">
-          
-          {/* Form Header with Responsive Flex Wrap */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Palette className="w-5 h-5 text-rose-600 shrink-0" />
-              <span>पोस्टर कस्टमाइज़ेशन फ़ॉर्म</span>
-            </h3>
+        {/* Form Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
+          <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Palette className="w-5 h-5 text-rose-600 shrink-0" />
+            <span>पोस्टर कस्टमाइज़ेशन फ़ॉर्म</span>
+          </h3>
 
-            {/* Optional Famous Poem Preset Selector */}
-            <div className="flex items-center gap-2 w-full sm:w-auto max-w-full">
-              <BookOpen className="w-4 h-4 text-amber-500 shrink-0" />
-              <select
-                onChange={handleSelectPreset}
-                defaultValue=""
-                className="w-full sm:w-auto max-w-[240px] truncate px-3 py-1.5 bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold focus:outline-none cursor-pointer"
-              >
-                <option value="" disabled>प्रसिद्ध कविता (Optional)...</option>
-                {CLASSIC_PRESETS.map((p, idx) => (
-                  <option key={idx} value={idx}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* 1. SELECT LAYOUT ANGLE */}
-          <div className="space-y-2">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <LayoutGrid className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>1. डिज़ाइन शैली चुनें (Select Layout Style)</span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {LAYOUT_ANGLES.map(angle => (
-                <button
-                  key={angle.id}
-                  type="button"
-                  onClick={() => setSelectedAngle(angle.id)}
-                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                    selectedAngle === angle.id
-                      ? 'bg-rose-500/10 border-rose-500 text-rose-700 dark:text-rose-300 font-bold shadow-md ring-2 ring-rose-500/30'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
-                  }`}
-                >
-                  <div className="text-xs font-extrabold flex items-center justify-between">
-                    <span className="truncate pr-1">{angle.name}</span>
-                    {selectedAngle === angle.id && <Check className="w-4 h-4 text-rose-600 shrink-0" />}
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium leading-tight">{angle.desc}</p>
-                </button>
+          {/* Optional Famous Poem Preset Selector */}
+          <div className="flex items-center gap-2 w-full sm:w-auto max-w-full">
+            <BookOpen className="w-4 h-4 text-amber-500 shrink-0" />
+            <select
+              onChange={handleSelectPreset}
+              defaultValue=""
+              className="w-full sm:w-auto max-w-[240px] truncate px-3 py-1.5 bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold focus:outline-none cursor-pointer"
+            >
+              <option value="" disabled>प्रसिद्ध कविता (Optional)...</option>
+              {CLASSIC_PRESETS.map((p, idx) => (
+                <option key={idx} value={idx}>{p.name}</option>
               ))}
-            </div>
+            </select>
           </div>
-
-          {/* 2. SELECT COLOR THEME PALETTE */}
-          <div className="space-y-2">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <Palette className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>2. रंग एवं थीम पैलेट (Theme Palette)</span>
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {THEMES.map(t => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setSelectedThemeId(t.id)}
-                  className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between min-w-0 ${
-                    selectedThemeId === t.id
-                      ? 'border-rose-500 ring-2 ring-rose-500/40 shadow-sm'
-                      : 'border-slate-200 dark:border-slate-700'
-                  }`}
-                  style={{ backgroundColor: t.bg2, color: t.title }}
-                >
-                  <span className="truncate pr-1">{t.name}</span>
-                  {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0" />}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. TITLE INPUT */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-              <span>अपनी कविता का शीर्षक (Title)</span>
-              {title.trim() && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ दर्ज हुआ</span>}
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="उदा. मेरी नई कविता या सावन का ख़त..."
-              className="w-full px-4 py-3 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-extrabold focus:ring-2 focus:ring-rose-500"
-            />
-          </div>
-
-          {/* 4. POEM CONTENT TEXTAREA */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-              <span>काव्य पंक्तियाँ (Poem Lines)</span>
-              {content.trim() && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ दर्ज हुआ</span>}
-            </label>
-            <textarea
-              rows={5}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="यहाँ अपनी कविता की पंक्तियाँ दर्ज करें..."
-              className="w-full p-4 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-tiro leading-relaxed focus:ring-2 focus:ring-rose-500"
-            />
-          </div>
-
-          {/* 5. AUTHOR PHOTO & PROFILE IDENTIFICATION */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
-              <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">कवि प्रोफाइल पहचान</span>
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 truncate">✍️ {fixedAuthorName} (@{fixedAuthorUsername})</span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <img src={effectivePhotoUrl} alt="Author Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-rose-500 shadow-sm shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{fixedAuthorName}</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{authorCity}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <label className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1 shadow-xs">
-                  <Upload className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                  <span>दूसरी फोटो बदलें</span>
-                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                </label>
-
-                {customPhotoUrl && (
-                  <button
-                    onClick={() => setCustomPhotoUrl(null)}
-                    type="button"
-                    className="px-2.5 py-1.5 bg-rose-500/10 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-500/20"
-                  >
-                    प्रोफाइल फोटो रीसेट करें
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        {/* RIGHT COLUMN: Real-Time Interactive Live Preview */}
-        <div className="xl:col-span-5 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-xl space-y-4 xl:sticky xl:top-20">
-          
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Eye className="w-5 h-5 text-rose-600 shrink-0" />
-              <span>लाइव इमेज़ प्रिव्यू (Live Preview)</span>
-            </h3>
-            <span className="text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full shrink-0">
-              1080 × 1350 HD
-            </span>
+        {/* 1. SELECT LAYOUT ANGLE */}
+        <div className="space-y-2">
+          <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+            <LayoutGrid className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>1. डिज़ाइन शैली चुनें (Select Layout Style)</span>
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {LAYOUT_ANGLES.map(angle => (
+              <button
+                key={angle.id}
+                type="button"
+                onClick={() => setSelectedAngle(angle.id)}
+                className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                  selectedAngle === angle.id
+                    ? 'bg-rose-500/10 border-rose-500 text-rose-700 dark:text-rose-300 font-bold shadow-md ring-2 ring-rose-500/30'
+                    : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                }`}
+              >
+                <div className="text-xs font-extrabold flex items-center justify-between">
+                  <span className="truncate pr-1">{angle.name}</span>
+                  {selectedAngle === angle.id && <Check className="w-4 h-4 text-rose-600 shrink-0" />}
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium leading-tight">{angle.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. SELECT COLOR THEME PALETTE */}
+        <div className="space-y-2">
+          <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+            <Palette className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>2. रंग एवं थीम पैलेट (Theme Palette)</span>
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {THEMES.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setSelectedThemeId(t.id)}
+                className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between min-w-0 ${
+                  selectedThemeId === t.id
+                    ? 'border-rose-500 ring-2 ring-rose-500/40 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-700'
+                }`}
+                style={{ backgroundColor: t.bg2, color: t.title }}
+              >
+                <span className="truncate pr-1">{t.name}</span>
+                {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. TITLE INPUT */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+            <span>अपनी कविता का शीर्षक (Title) <span className="text-rose-600">*</span></span>
+            {title.trim() && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ दर्ज हुआ</span>}
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="उदा. मेरी नई कविता या सावन का ख़त..."
+            className="w-full px-4 py-3.5 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-extrabold focus:ring-2 focus:ring-rose-500"
+          />
+        </div>
+
+        {/* 4. POEM CONTENT TEXTAREA */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+            <span>काव्य पंक्तियाँ (Poem Lines) <span className="text-rose-600">*</span></span>
+            {content.trim() && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ दर्ज हुआ</span>}
+          </label>
+          <textarea
+            rows={6}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="यहाँ अपनी कविता की पंक्तियाँ दर्ज करें..."
+            className="w-full p-4 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-tiro leading-relaxed focus:ring-2 focus:ring-rose-500"
+          />
+        </div>
+
+        {/* 5. AUTHOR PHOTO & PROFILE IDENTIFICATION */}
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
+            <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">कवि प्रोफाइल पहचान</span>
+            <span className="text-xs font-bold text-rose-600 dark:text-rose-400 truncate">✍️ {fixedAuthorName} (@{fixedAuthorUsername})</span>
           </div>
 
-          {/* Interactive Live Canvas Holder with Proper Proportional Max Width */}
-          <div className="w-full max-w-[420px] mx-auto flex justify-center items-center bg-slate-950/5 dark:bg-slate-950/60 p-2 sm:p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
-            <canvas 
-              ref={canvasRef} 
-              className="w-full h-auto aspect-[4/5] object-contain rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all duration-200"
-            />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <img src={effectivePhotoUrl} alt="Author Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-rose-500 shadow-sm shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{fixedAuthorName}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{authorCity}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1 shadow-xs">
+                <Upload className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <span>दूसरी फोटो बदलें</span>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+
+              {customPhotoUrl && (
+                <button
+                  onClick={() => setCustomPhotoUrl(null)}
+                  type="button"
+                  className="px-2.5 py-1.5 bg-rose-500/10 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-500/20"
+                >
+                  प्रोफाइल फोटो रीसेट करें
+                </button>
+              )}
+            </div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-2 pt-2">
-            <button
-              onClick={handleGenerateAndDownload}
-              disabled={downloading}
-              className="w-full py-3.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50 text-center leading-snug"
-            >
-              <Download className="w-4 h-4 shrink-0" />
-              <span className="truncate">{downloading ? 'पोस्टर जनरेट हो रहा है...' : 'HD इमेज़ पोस्टर डाउनलोड करें (-25 Pts)'}</span>
-            </button>
-
-            <button
-              onClick={handlePublishDirectly}
-              disabled={posting}
-              className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm rounded-2xl shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50 text-center leading-snug"
-            >
-              <Send className="w-4 h-4 shrink-0" />
-              <span className="truncate">{posting ? 'प्रकाशित हो रहा है...' : 'सीधे मंच (Feed) पर पोस्ट करें (-15 Pts)'}</span>
-            </button>
-          </div>
-
+        {/* MAIN CTA BUTTON: Open HD Poster Preview */}
+        <div className="pt-2">
+          <button
+            onClick={handleOpenPreview}
+            type="button"
+            className="w-full py-4 bg-gradient-to-r from-rose-600 via-rose-700 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white font-black text-sm sm:text-base rounded-2xl shadow-xl shadow-rose-900/20 flex items-center justify-center gap-2 transition transform active:scale-98 cursor-pointer"
+          >
+            <Eye className="w-5 h-5 shrink-0" />
+            <span>✨ तैयार HD पोस्टर का प्रिव्यू देखें (Preview Poster)</span>
+          </button>
         </div>
 
       </div>
+
+      {/* FULL-SCREEN / SLIDE-UP HD POSTER PREVIEW MODAL */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 my-auto relative">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-rose-600 shrink-0" />
+                <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
+                  आपका तैयार HD कवि पोस्टर
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowPreviewModal(false)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* HD Canvas Render Box */}
+            <div className="w-full flex justify-center items-center bg-slate-950/10 dark:bg-slate-950/60 p-2 sm:p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
+              <canvas 
+                ref={canvasRef} 
+                className="w-full h-auto aspect-[4/5] max-h-[520px] object-contain rounded-xl shadow-xl border border-slate-300 dark:border-slate-700"
+              />
+            </div>
+
+            {/* Modal Actions: Download & Post */}
+            <div className="space-y-2.5 pt-2">
+              <button
+                onClick={handleGenerateAndDownload}
+                disabled={downloading}
+                className="w-full py-3.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50 text-center"
+              >
+                <Download className="w-4 h-4 shrink-0" />
+                <span>{downloading ? 'पोस्टर डाउनलोड हो रहा है...' : '📥 HD इमेज़ पोस्टर डाउनलोड करें (-25 Pts)'}</span>
+              </button>
+
+              <button
+                onClick={handlePublishDirectly}
+                disabled={posting}
+                className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm rounded-2xl shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50 text-center"
+              >
+                <Send className="w-4 h-4 shrink-0" />
+                <span>{posting ? 'प्रकाशित हो रहा है...' : '🚀 सीधे मंच (Feed) पर पोस्ट करें (-15 Pts)'}</span>
+              </button>
+
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                type="button"
+                className="w-full py-2.5 text-slate-600 dark:text-slate-400 font-bold text-xs hover:underline text-center"
+              >
+                ✏️ कस्टमाइज़ेशन फ़ॉर्म संपादित करें
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

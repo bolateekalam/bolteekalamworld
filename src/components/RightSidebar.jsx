@@ -44,33 +44,6 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
 
   return (
     <aside className="w-80 shrink-0 hidden lg:block space-y-5">
-      
-      {/* 1. 🇮🇳 Jai Hind - 15 August Independence Day Card */}
-      <div className="bg-gradient-to-br from-orange-500 via-amber-500 to-emerald-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden text-center space-y-3">
-        <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
-        
-        <div className="space-y-1 relative z-10">
-          <p className="text-[10px] font-black uppercase tracking-widest text-amber-200">
-            डिजिटल कवि कार्ड ✍️
-          </p>
-          <h2 className="text-xl font-black font-rozha tracking-tight">
-            साहित्यिक पोस्टर Studio
-          </h2>
-          <p className="text-xs font-bold text-amber-100 italic">
-            अपनी कविता का HD पोस्टर बनाएं
-          </p>
-        </div>
-
-        {/* Badge */}
-        <div className="pt-2 relative z-10">
-          <button
-            onClick={() => setActiveView && setActiveView('posterStudio')}
-            className="inline-block px-4 py-1.5 bg-white text-rose-900 hover:bg-amber-100 rounded-full text-xs font-black shadow transition active:scale-95 cursor-pointer"
-          >
-            ✨ पोस्टर बनाएं
-          </button>
-        </div>
-      </div>
 
 
 
