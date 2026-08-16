@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Download, Image as ImageIcon, Upload, Check, 
-  Palette, Feather, Trash2, Send, Eye,
-  LayoutGrid, UserCheck, BookOpen, RefreshCw
+  Palette, Send, Eye,
+  LayoutGrid, BookOpen, User, RefreshCw
 } from 'lucide-react';
 
 const LAYOUT_ANGLES = [
-  { id: 'topHeader', name: '📐 शैली 1: क्लासिक हेडर', desc: 'शीर्ष पर शीर्षक पट्टा, सेंटर में काव्य पंक्तियाँ व नीचे कवि प्रोफाइल' },
-  { id: 'bottomCard', name: '📐 शैली 2: कवि कार्ड', desc: 'सेंटर में सुंदर पंक्तियाँ और नीचे कवि का आधिकारिक पहचान कार्ड' },
+  { id: 'topHeader', name: '📐 शैली 1: क्लासिक हेडर', desc: 'शीर्ष पर शीर्षक पट्टा, बीच में कविता व नीचे कवि प्रोफाइल' },
+  { id: 'bottomCard', name: '📐 शैली 2: कवि कार्ड', desc: 'सेंटर में पंक्तियाँ और नीचे कवि का आधिकारिक पहचान कार्ड' },
   { id: 'royalFrame', name: '📐 शैली 3: रॉयल विंटेज', desc: 'पारंपरिक डबल बॉर्डर, कॉर्नर डिजाइन व शाही मुहर' },
   { id: 'modernDark', name: '📐 शैली 4: डार्क नाइट्स', desc: 'गहरे वेलवेट बैकग्राउंड पर ट्रांसलूसेंट कार्ड डिज़ाइन' }
 ];
@@ -49,7 +49,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   const activeAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
   const authorCity = userProfile?.city || 'प्रयागराज';
 
-  // 1. Initial State MUST BE EMPTY (as requested by user!)
+  // 1. Initial State MUST BE EMPTY by default
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selectedAngle, setSelectedAngle] = useState('topHeader');
@@ -96,7 +96,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
       const { bg1, bg2, border: borderColor, title: titleColor, text: textColor, brand: brandColor } = currentTheme;
 
-      // 1. Fill Background
+      // Fill Background
       ctx.save();
       const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
       gradient.addColorStop(0, bg1);
@@ -115,7 +115,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         linesToDraw = [
           '✦ यहाँ अपनी कविता की पंक्तियाँ लिखें ✦',
           'जैसे ही आप बाएँ फ़ॉर्म में टाइप करेंगे,',
-          'लाइव पोस्टर तुरंत यहाँ तैयार हो जाएगा।'
+          'लाइव इमेज़ पोस्टर तुरंत तैयार हो जाएगा।'
         ];
       } else {
         linesToDraw = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -440,27 +440,28 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         </div>
       </div>
 
-      {/* Main Grid: Left Controls, Right Live Interactive Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Main Grid: Responsive 1-Column on Mobile/Tablet, 2-Column on XL screens */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         
         {/* LEFT COLUMN: Controls & Form Inputs */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+        <div className="xl:col-span-7 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-xl space-y-6">
           
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Palette className="w-5 h-5 text-rose-600" />
+          {/* Form Header with Responsive Flex Wrap */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Palette className="w-5 h-5 text-rose-600 shrink-0" />
               <span>पोस्टर कस्टमाइज़ेशन फ़ॉर्म</span>
             </h3>
 
             {/* Optional Famous Poem Preset Selector */}
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-amber-500" />
+            <div className="flex items-center gap-2 w-full sm:w-auto max-w-full">
+              <BookOpen className="w-4 h-4 text-amber-500 shrink-0" />
               <select
                 onChange={handleSelectPreset}
                 defaultValue=""
-                className="px-2.5 py-1 bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold focus:outline-none cursor-pointer"
+                className="w-full sm:w-auto max-w-[240px] truncate px-3 py-1.5 bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold focus:outline-none cursor-pointer"
               >
-                <option value="" disabled>प्रसिद्ध कविता चुनकर देखें (Optional)</option>
+                <option value="" disabled>प्रसिद्ध कविता (Optional)...</option>
                 {CLASSIC_PRESETS.map((p, idx) => (
                   <option key={idx} value={idx}>{p.name}</option>
                 ))}
@@ -471,7 +472,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           {/* 1. SELECT LAYOUT ANGLE */}
           <div className="space-y-2">
             <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <LayoutGrid className="w-4 h-4 text-rose-600" />
+              <LayoutGrid className="w-4 h-4 text-rose-600 shrink-0" />
               <span>1. डिज़ाइन शैली चुनें (Select Layout Style)</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -487,10 +488,10 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
                   }`}
                 >
                   <div className="text-xs font-extrabold flex items-center justify-between">
-                    <span>{angle.name}</span>
-                    {selectedAngle === angle.id && <Check className="w-4 h-4 text-rose-600" />}
+                    <span className="truncate pr-1">{angle.name}</span>
+                    {selectedAngle === angle.id && <Check className="w-4 h-4 text-rose-600 shrink-0" />}
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">{angle.desc}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium leading-tight">{angle.desc}</p>
                 </button>
               ))}
             </div>
@@ -499,7 +500,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
           {/* 2. SELECT COLOR THEME PALETTE */}
           <div className="space-y-2">
             <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <Palette className="w-4 h-4 text-rose-600" />
+              <Palette className="w-4 h-4 text-rose-600 shrink-0" />
               <span>2. रंग एवं थीम पैलेट (Theme Palette)</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -508,14 +509,14 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
                   key={t.id}
                   type="button"
                   onClick={() => setSelectedThemeId(t.id)}
-                  className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                  className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between min-w-0 ${
                     selectedThemeId === t.id
                       ? 'border-rose-500 ring-2 ring-rose-500/40 shadow-sm'
                       : 'border-slate-200 dark:border-slate-700'
                   }`}
                   style={{ backgroundColor: t.bg2, color: t.title }}
                 >
-                  <span>{t.name}</span>
+                  <span className="truncate pr-1">{t.name}</span>
                   {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0" />}
                 </button>
               ))}
@@ -554,23 +555,23 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
           {/* 5. AUTHOR PHOTO & PROFILE IDENTIFICATION */}
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
               <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">कवि प्रोफाइल पहचान</span>
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400">✍️ {fixedAuthorName} (@{fixedAuthorUsername})</span>
+              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 truncate">✍️ {fixedAuthorName} (@{fixedAuthorUsername})</span>
             </div>
 
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <img src={effectivePhotoUrl} alt="Author Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-rose-500 shadow-sm" />
-                <div>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{fixedAuthorName}</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">{authorCity}</p>
+                <img src={effectivePhotoUrl} alt="Author Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-rose-500 shadow-sm shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{fixedAuthorName}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{authorCity}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <label className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1 shadow-xs">
-                  <Upload className="w-3.5 h-3.5 text-rose-600" />
+                  <Upload className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                   <span>दूसरी फोटो बदलें</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
@@ -591,23 +592,23 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         </div>
 
         {/* RIGHT COLUMN: Real-Time Interactive Live Preview */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-4 lg:sticky lg:top-20">
+        <div className="xl:col-span-5 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-xl space-y-4 xl:sticky xl:top-20">
           
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Eye className="w-5 h-5 text-rose-600" />
+              <Eye className="w-5 h-5 text-rose-600 shrink-0" />
               <span>लाइव इमेज़ प्रिव्यू (Live Preview)</span>
             </h3>
-            <span className="text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full">
+            <span className="text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full shrink-0">
               1080 × 1350 HD
             </span>
           </div>
 
-          {/* Interactive Live Canvas Holder */}
-          <div className="w-full flex justify-center items-center bg-slate-950/5 dark:bg-slate-950/60 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
+          {/* Interactive Live Canvas Holder with Proper Proportional Max Width */}
+          <div className="w-full max-w-[420px] mx-auto flex justify-center items-center bg-slate-950/5 dark:bg-slate-950/60 p-2 sm:p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
             <canvas 
               ref={canvasRef} 
-              className="w-full h-auto max-h-[480px] object-contain rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all duration-200"
+              className="w-full h-auto aspect-[4/5] object-contain rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all duration-200"
             />
           </div>
 
@@ -616,19 +617,19 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
             <button
               onClick={handleGenerateAndDownload}
               disabled={downloading}
-              className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50 text-center leading-snug"
             >
-              <Download className="w-4 h-4" />
-              <span>{downloading ? 'पोस्टर जनरेट हो रहा है...' : 'HD इमेज़ पोस्टर डाउनलोड करें (-25 Pts)'}</span>
+              <Download className="w-4 h-4 shrink-0" />
+              <span className="truncate">{downloading ? 'पोस्टर जनरेट हो रहा है...' : 'HD इमेज़ पोस्टर डाउनलोड करें (-25 Pts)'}</span>
             </button>
 
             <button
               onClick={handlePublishDirectly}
               disabled={posting}
-              className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-2xl shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm rounded-2xl shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50 text-center leading-snug"
             >
-              <Send className="w-4 h-4" />
-              <span>{posting ? 'प्रकाशित हो रहा है...' : 'सीधे मंच (Feed) पर पोस्ट करें (-15 Pts)'}</span>
+              <Send className="w-4 h-4 shrink-0" />
+              <span className="truncate">{posting ? 'प्रकाशित हो रहा है...' : 'सीधे मंच (Feed) पर पोस्ट करें (-15 Pts)'}</span>
             </button>
           </div>
 
