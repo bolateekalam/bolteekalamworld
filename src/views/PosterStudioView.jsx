@@ -96,7 +96,59 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1080, 1350);
 
-      // 2. Royal Double Border
+      // 2. 15th August Special Patriotic Theme Elements
+      if (selectedThemeId === 'independence') {
+        // Tiranga Tri-Color Top Header Stripes
+        const headerY = 54;
+        const stripeH = 32;
+        
+        // Saffron
+        ctx.fillStyle = '#FF9933';
+        ctx.fillRect(54, headerY, 972, stripeH);
+        
+        // White
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(54, headerY + stripeH, 972, stripeH);
+        
+        // Green
+        ctx.fillStyle = '#138808';
+        ctx.fillRect(54, headerY + (stripeH * 2), 972, stripeH);
+
+        // Ashoka Chakra (24 Spokes) in Navy Blue on White Stripe
+        const chakraX = 540;
+        const chakraY = headerY + stripeH + (stripeH / 2);
+        const chakraRadius = 13;
+
+        ctx.strokeStyle = '#000080';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(chakraX, chakraY, chakraRadius, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        ctx.fillStyle = '#000080';
+        ctx.beginPath();
+        ctx.arc(chakraX, chakraY, 2.5, 0, 2 * Math.PI);
+        ctx.fill();
+
+        for (let i = 0; i < 24; i++) {
+          const angle = (i * 15 * Math.PI) / 180;
+          ctx.beginPath();
+          ctx.moveTo(chakraX, chakraY);
+          ctx.lineTo(
+            chakraX + chakraRadius * Math.cos(angle),
+            chakraY + chakraRadius * Math.sin(angle)
+          );
+          ctx.stroke();
+        }
+
+        // Patriotic Banner Ribbon
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#991b1b';
+        ctx.font = 'bold 26px sans-serif';
+        ctx.fillText('🇮🇳 15 अगस्त स्वतंत्रता दिवस विशेषांक 🇮🇳', 540, 185);
+      }
+
+      // 3. Royal Double Border
       ctx.strokeStyle = borderColor;
       ctx.lineWidth = 16;
       ctx.strokeRect(36, 36, 1008, 1278);
@@ -104,32 +156,33 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.lineWidth = 4;
       ctx.strokeRect(54, 54, 972, 1242);
 
-      // 3. Render Poem Title (or Placeholder guide text if empty)
+      // 4. Render Poem Title
+      const titleY = selectedThemeId === 'independence' ? 245 : 150;
       ctx.textAlign = 'center';
       ctx.fillStyle = title.trim() ? titleColor : 'rgba(150, 150, 150, 0.6)';
       ctx.font = 'bold 56px serif';
-      ctx.fillText(title.trim() ? title.trim() : '★ शीर्षक (Title) ★', 540, 150);
+      ctx.fillText(title.trim() ? title.trim() : '★ शीर्षक (Title) ★', 540, titleY);
 
       // Title Divider Decorative Line
       ctx.strokeStyle = borderColor;
       ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.moveTo(340, 180);
-      ctx.lineTo(740, 180);
+      ctx.moveTo(340, titleY + 30);
+      ctx.lineTo(740, titleY + 30);
       ctx.stroke();
 
-      // 4. Render Poem Lines (or Placeholder guide text if empty)
+      // 5. Render Poem Lines
       ctx.textAlign = 'center';
-      
+      let startY = titleY + 110;
+      const lineHeight = 70;
+
       if (lines.filter(l => l.trim().length > 0).length === 0) {
         ctx.fillStyle = 'rgba(160, 160, 160, 0.6)';
         ctx.font = 'italic 40px serif';
-        ctx.fillText('✦ यहाँ अपनी कविता की पंक्तियाँ लिखें... ✦', 540, 320);
+        ctx.fillText('✦ यहाँ अपनी कविता की पंक्तियाँ लिखें... ✦', 540, startY + 50);
       } else {
         ctx.fillStyle = textColor;
         ctx.font = '44px serif';
-        let startY = 270;
-        const lineHeight = 72;
 
         lines.forEach((lineText) => {
           if (lineText.trim()) {
@@ -139,20 +192,63 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         });
       }
 
-      // 5. Footer Signature Line
-      const footerY = 1240;
-      ctx.textAlign = 'left';
-      ctx.font = 'bold 36px sans-serif';
-      ctx.fillStyle = brandColor;
-      ctx.fillText(`✍️ ${fixedAuthorName}`, 90, footerY);
+      // Helper function to render footer & optional uploaded photo
+      const finishDrawingWithPhoto = (photoImg) => {
+        const footerY = 1240;
 
-      ctx.textAlign = 'right';
-      ctx.font = 'bold 32px sans-serif';
-      ctx.fillStyle = textColor;
-      ctx.fillText(`bolateeworld.in`, 990, footerY);
+        // If uploaded photo exists, draw it in a framed box near author name
+        if (photoImg) {
+          ctx.save();
+          const pSize = 130;
+          const pX = 85;
+          const pY = 1070;
 
-      ctx.restore();
-      resolve(canvas);
+          // Circular Mask
+          ctx.beginPath();
+          ctx.arc(pX + pSize / 2, pY + pSize / 2, pSize / 2, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(photoImg, pX, pY, pSize, pSize);
+          ctx.restore();
+
+          // Border Ring around photo
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.arc(pX + pSize / 2, pY + pSize / 2, pSize / 2, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Author Signature shifted right of photo
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 36px sans-serif';
+          ctx.fillStyle = brandColor;
+          ctx.fillText(`✍️ ${fixedAuthorName}`, 235, footerY);
+        } else {
+          // Standard Author Signature Line
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 36px sans-serif';
+          ctx.fillStyle = brandColor;
+          ctx.fillText(`✍️ ${fixedAuthorName}`, 90, footerY);
+        }
+
+        ctx.textAlign = 'right';
+        ctx.font = 'bold 32px sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.fillText(`bolateeworld.in`, 990, footerY);
+
+        ctx.restore();
+        resolve(canvas);
+      };
+
+      // Load uploaded photo if present
+      if (uploadedPhotoUrl) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => finishDrawingWithPhoto(img);
+        img.onerror = () => finishDrawingWithPhoto(null);
+        img.src = uploadedPhotoUrl;
+      } else {
+        finishDrawingWithPhoto(null);
+      }
     });
   };
 

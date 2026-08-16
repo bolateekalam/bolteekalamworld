@@ -1078,23 +1078,30 @@ function AppContent() {
 
     handleRewardPoints(10, 'नई साहित्य रचना पोस्ट करने पर');
 
+    // 1. Process / Upload Image to Supabase Storage CDN first if available
+    let cdnImageUrl = newPost.imageUrl || newPost.image || null;
+    if (cdnImageUrl && cdnImageUrl.startsWith('data:image')) {
+      try {
+        cdnImageUrl = await uploadImageToSupabaseStorage(cdnImageUrl, `poster_${Date.now()}`);
+      } catch (e) {
+        console.warn('Storage upload error fallback:', e);
+      }
+    }
+
+    // 2. Save Post into DB with image URL attached
     const createdDBPost = await createPostInDB({
       id: newPost.id,
       title: newPost.title,
       category: newPost.category,
       content: newPost.content,
+      imageUrl: cdnImageUrl,
+      image: cdnImageUrl,
       tags: newPost.tags,
       authorName,
       authorUsername,
       authorAvatar,
       authorEmail
     }, authorEmail);
-
-    // Upload Image to Supabase Cloud Storage Bucket CDN if possible
-    let cdnImageUrl = newPost.imageUrl || newPost.image || null;
-    if (cdnImageUrl && cdnImageUrl.startsWith('data:image')) {
-      cdnImageUrl = await uploadImageToSupabaseStorage(cdnImageUrl, `poster_${Date.now()}`);
-    }
 
     const postToSave = {
       ...newPost,

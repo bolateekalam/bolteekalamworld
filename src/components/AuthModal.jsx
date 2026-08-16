@@ -37,8 +37,8 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
 
   if (!isOpen) return null;
 
-  // 1. Existing User Login Handler
-  const handleLoginSubmit = (e) => {
+  // 1. Existing User Login Handler (Supabase Auth + Fallback)
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
     setSuccessMsg('');
@@ -73,7 +73,42 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       }
     }
 
-    // Normal Verified User Login
+    // Try Supabase Auth Sign In
+    try {
+      const emailToAuth = cleanInput.includes('@') ? cleanInput : `${cleanInput}@bolteekalam.com`;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: emailToAuth,
+        password: loginPassword || '123456'
+      });
+
+      if (!error && data && data.user) {
+        const authedUser = {
+          id: data.user.id,
+          name: data.user.user_metadata?.name || cleanInput.split('@')[0],
+          username: data.user.user_metadata?.username || `@${cleanInput.split('@')[0]}`,
+          email: data.user.email,
+          phone: data.user.phone || '+91 9812345678',
+          avatar: data.user.user_metadata?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+          role: 'user',
+          city: 'प्रयागराज',
+          isVerified: true,
+          points: 100
+        };
+        setSuccessMsg('सफलतापूर्वक लॉगिन हो गया!');
+        setTimeout(() => {
+          onLoginSuccess(authedUser);
+          onClose();
+        }, 500);
+        return;
+      } else if (error && error.message && error.message.includes('Invalid login credentials')) {
+        setAuthError('गलत ईमेल या पासवर्ड! कृपया अपना सही पासवर्ड दर्ज करें या नया खाता बनाएँ।');
+        return;
+      }
+    } catch (err) {
+      console.warn('Supabase Signin notice:', err);
+    }
+
+    // Normal Verified User Login Fallback
     const normalUser = {
       name: loginEmail.includes('@') ? loginEmail.split('@')[0] : loginEmail,
       username: `@${loginEmail.includes('@') ? loginEmail.split('@')[0] : loginEmail}`,
@@ -167,7 +202,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
   };
 
   // 4. Initiate New Account Registration & Generate Email OTP (Step 1)
-  const handleInitiateSignup = (e) => {
+  const handleInitiateSignup = async (e) => {
     e.preventDefault();
     setAuthError('');
     setSuccessMsg('');
@@ -187,10 +222,29 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       return;
     }
 
+    // Try Supabase Auth Sign Up
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanUsername = `@${name.trim().toLowerCase().replace(/\s+/g, '_')}`;
+      await supabase.auth.signUp({
+        email: cleanEmail,
+        password: password,
+        options: {
+          data: {
+            name: name.trim(),
+            username: cleanUsername
+          }
+        }
+      });
+    } catch (err) {
+      console.warn('Supabase Signup warning:', err);
+    }
+
     const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedOtp(mockOtp);
+    setOtpInput(mockOtp); // Pre-fill for instant smooth experience
     setStep(2);
-    setSuccessMsg(`📧 6-अंकों का वेरिफिकेशन कोड आपकी ईमेल आईडी (${email}) पर भेज दिया गया है। कृपया अपना ईमेल इनबॉक्स/स्पैम फ़ोल्डर जाँचें और 6-अंकों का कोड दर्ज करें।`);
+    setSuccessMsg(`🎉 आपका सत्यापन कोड (${mockOtp}) जनरेट हो गया है! नीचे ऑटो-फ़िल कोड दबाएँ या ओटीपी दर्ज करें।`);
   };
 
   // 5. Verify OTP & Finalize Account Creation (Step 2)
@@ -199,7 +253,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     setAuthError('');
 
     const cleanInput = otpInput.trim();
-    if (!cleanInput || cleanInput.length < 4) {
+    if (!cleanInput) {
       setAuthError('कृपया सही 6-अंकों का ओटीपी दर्ज करें।');
       return;
     }
@@ -207,7 +261,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     const newUser = {
       name: name.trim(),
       username: `@${name.trim().toLowerCase().replace(/\s+/g, '_')}`,
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       phone: phone ? `+91 ${phone.trim()}` : '+91 9812345678',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
       role: 'user',
@@ -216,7 +270,12 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       points: 100
     };
 
-    setSuccessMsg('ओटीपी सत्यापित! आपका नया खाता सफलतापूर्वक चालू हो गया है।');
+    // Save persistent credentials for login
+    try {
+      localStorage.setItem(`user_pwd_${email.trim().toLowerCase()}`, password);
+    } catch (e) {}
+
+    setSuccessMsg('ओटीपी सत्यापित! आपका नया खाता सफलतापूर्वक चालू हो गया है। (+100 वेलकम पॉइंट्स जोड़ दिए गए हैं)');
     setTimeout(() => {
       onLoginSuccess(newUser);
       onClose();
@@ -440,14 +499,24 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         {/* STEP 2: ENTER OTP & FINALIZE NEW ACCOUNT */}
         {activeTab === 'signup' && step === 2 && (
           <form onSubmit={handleVerifyOtpAndCreate} className="space-y-4 relative z-10">
-            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs font-semibold text-amber-700 dark:text-amber-300">
-              <p>📩 हमने आपकी ईमेल <strong>{email}</strong> पर 6-अंकों का ओटीपी (OTP) भेज दिया है।</p>
+            <div className="p-3.5 bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs space-y-2">
+              <p className="text-slate-700 dark:text-slate-300 font-medium">📩 आपकी ईमेल <strong>{email}</strong> के लिए सत्यापन कोड (OTP):</p>
+              <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-rose-500/30 shadow-sm">
+                <span className="text-base font-extrabold tracking-widest text-rose-600 dark:text-rose-400 font-mono">{generatedOtp}</span>
+                <button
+                  type="button"
+                  onClick={() => setOtpInput(generatedOtp)}
+                  className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition active:scale-95 cursor-pointer"
+                >
+                  ऑटो-फ़िल OTP
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
                 <KeyRound className="w-3.5 h-3.5 text-rose-500" />
-                <span>6-अंकों का ओटीपीदर्ज करें (6-Digit OTP)</span>
+                <span>6-अंकों का ओटीपी दर्ज करें (6-Digit OTP)</span>
               </label>
               <input
                 type="text"

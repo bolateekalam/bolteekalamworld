@@ -126,6 +126,16 @@ export const PostCard = ({
     return null;
   };
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Line splitting for poem preview
+  const contentLines = post.content ? post.content.split('\n') : [];
+  const needsExpansion = contentLines.length > 4 || (post.content && post.content.length > 180);
+  
+  const displayedContent = (!isExpanded && needsExpansion)
+    ? contentLines.slice(0, 3).join('\n') + '...'
+    : post.content;
+
   return (
     <article className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
       
@@ -263,17 +273,39 @@ export const PostCard = ({
       <div className="relative p-4 sm:p-5 rounded-2xl bg-amber-50/40 dark:bg-slate-800/40 border border-amber-200/50 dark:border-slate-800 mb-4">
         <Quote className="absolute top-3 right-3 w-8 h-8 text-amber-500/10 dark:text-slate-700/20 pointer-events-none" />
         <p className="text-sm sm:text-base font-tiro text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line">
-          {post.content}
+          {displayedContent}
         </p>
+        
+        {/* See More (और देखें) / Show Less (कम दिखाएँ) Toggle */}
+        {needsExpansion && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
+          >
+            {isExpanded ? (
+              <>
+                <span>कम दिखाएँ (Show Less)</span>
+                <span className="text-[10px]">▲</span>
+              </>
+            ) : (
+              <>
+                <span>और देखें / पूरी कविता पढ़ें (See More)</span>
+                <span className="text-[10px]">▼</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
-      {/* Post Image Attachment (if any) */}
+      {/* Post Image Attachment (Full Aspect Ratio - 100% visible, no top/bottom cut-off) */}
       {(post.imageUrl || post.image) && (
-        <div className="mb-4 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+        <div className="mb-4 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-950/5 dark:bg-slate-950/50 flex justify-center items-center p-1">
           <img 
             src={post.imageUrl || post.image} 
-            alt={post.title} 
-            className="w-full max-h-96 object-cover hover:scale-105 transition-transform duration-500" 
+            alt={post.title || 'काव्य पोस्टर'} 
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            className="w-full h-auto max-h-[750px] object-contain rounded-xl transition-all duration-300 hover:scale-[1.01] cursor-pointer" 
+            onClick={() => window.open(post.imageUrl || post.image, '_blank')}
           />
         </div>
       )}

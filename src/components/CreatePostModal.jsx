@@ -9,9 +9,44 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile })
   const [category, setCategory] = useState('कविता (Poetry)');
   const [content, setContent] = useState('');
   const [tagsInput, setTagsInput] = useState('हिंदीसाहित्य, काव्य');
+  const [imageUrl, setImageUrl] = useState('');
   const [showChhandHelper, setShowChhandHelper] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const rawDataUrl = event.target.result;
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          setImageUrl(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = () => setImageUrl(rawDataUrl);
+        img.src = rawDataUrl;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,6 +76,8 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile })
       title: title.trim(),
       category,
       content: content.trim(),
+      imageUrl: imageUrl || null,
+      image: imageUrl || null,
       tags: tags.length > 0 ? tags : ['हिंदीसाहित्य'],
       likes: 0,
       isLiked: false,
@@ -57,6 +94,7 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile })
     // Reset Form
     setTitle('');
     setContent('');
+    setImageUrl('');
     setTagsInput('हिंदीसाहित्य, काव्य');
     onClose();
   };
@@ -181,17 +219,30 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile })
             </div>
           </div>
 
-          {/* Content Body */}
-          <div>
-            <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मुख्य रचना (Poem / Content Body): *</label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={6}
-              placeholder="यहाँ अपनी पूरी कविता, ग़ज़ल या कहानी लिखें..."
-              className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 font-tiro text-xs leading-relaxed border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-rose-600"
-              required
-            />
+          {/* Image / Poster Attachment */}
+          <div className="space-y-1">
+            <label className="font-bold block text-slate-700 dark:text-slate-300">इमेज़ / पोस्टर संलग्न करें (Image Attachment - Optional):</label>
+            <div className="flex items-center gap-3">
+              <label className="flex-1 py-2.5 px-4 rounded-xl border border-dashed border-rose-400 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-100/50 transition">
+                <Image className="w-4 h-4 text-rose-600" />
+                <span>{imageUrl ? 'दूसरी फोटो बदलें' : 'फोटो / पोस्टर अपलोड करें'}</span>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+              {imageUrl && (
+                <button
+                  type="button"
+                  onClick={() => setImageUrl('')}
+                  className="px-3 py-2 text-xs font-bold text-rose-600 hover:underline"
+                >
+                  फोटो हटाएँ
+                </button>
+              )}
+            </div>
+            {imageUrl && (
+              <div className="mt-2 rounded-xl overflow-hidden max-h-40 border border-slate-200 dark:border-slate-800">
+                <img src={imageUrl} alt="Attached Preview" className="w-full h-40 object-contain bg-slate-900/10" />
+              </div>
+            )}
           </div>
 
           {/* Publish Action Button */}
