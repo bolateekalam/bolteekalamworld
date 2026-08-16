@@ -62,8 +62,8 @@ export const Navbar = ({
               <h1 className="font-rozha text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-none">
                 बोलती कलम
               </h1>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-gradient-to-r from-orange-500 via-emerald-600 to-green-700 text-white rounded-full uppercase tracking-wider shadow flex items-center gap-1">
-                <span>15 अगस्त स्पेशल</span>
+              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-gradient-to-r from-rose-500 via-rose-600 to-amber-600 text-white rounded-full uppercase tracking-wider shadow flex items-center gap-1">
+                <span>राष्ट्रीय मंच</span>
               </span>
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-tiro">
@@ -82,7 +82,7 @@ export const Navbar = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="15 अगस्त पर खोजें, कविता पढ़ें..."
+              placeholder="अपनी पसंदीदा कविता या कवि खोजें..."
               aria-label="रचना, कवि या श्रेणी खोजें"
               className="w-full pl-9 pr-24 py-2 text-xs rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all"
             />

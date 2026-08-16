@@ -22,7 +22,7 @@ export const PanchangWidget = () => {
     { date: todayDateStr, name: 'सावन सोमवार व्रत एवं काव्य संध्या', day: 'आज' },
     { date: getNextDateStr(1), name: 'नाग पंचमी एवं विशेष काव्य गोष्ठी', day: 'कल' },
     { date: getNextDateStr(2), name: 'वरलक्ष्मी व्रत एवं गज़ल महफ़िल', day: 'परसों' },
-    { date: getNextDateStr(11), name: '80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳', day: 'आगामी' }
+    { date: getNextDateStr(3), name: 'रक्षाबंधन पर्व एवं काव्य गोष्ठी 🎀', day: 'आगामी' }
   ];
 
   return (

@@ -40,24 +40,24 @@ export const HomeFeedView = ({
         <div className="absolute -right-8 -bottom-8 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-extrabold shadow-md">
-              <Flag className="w-3.5 h-3.5 fill-slate-950" />
-              <span>80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500 text-white text-xs font-extrabold shadow-md">
+              <Sparkles className="w-3.5 h-3.5 fill-white" />
+              <span>राष्ट्रीय डिजिटल साहित्यिक मंच ✍️</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold font-rozha text-amber-100 leading-tight">
-              समस्त देशवासियों को 80वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!
+              बोलती कलम में आपका स्वागत है!
             </h2>
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-tiro">
-              स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें और 15 अगस्त विशेष पोस्टर डिज़ाइन करें।
+              अपनी कविताएँ, ग़ज़लें, विचार साझा करें, दैनिक काव्य चुनौतियों में भाग लें और सुंदर कवि पोस्टर डिज़ाइन करें।
             </p>
           </div>
 
           <button
             onClick={() => setActiveView && setActiveView('posterStudio')}
-            className="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xl flex items-center gap-2 transition transform active:scale-95 shrink-0"
+            className="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xl flex items-center gap-2 transition transform active:scale-95 shrink-0 cursor-pointer"
           >
             <ImageIcon className="w-4 h-4 text-slate-950" />
-            <span>15 अगस्त पोस्टर बनाएं</span>
+            <span>साहित्यिक पोस्टर बनाएं</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

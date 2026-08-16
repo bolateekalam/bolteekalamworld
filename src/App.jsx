@@ -137,10 +137,10 @@ function AppContent() {
 
   // Dynamic Festive Banner Global State
   const [patrioticBanner, setPatrioticBanner] = useState({
-    tag: '80वाँ स्वतंत्रता दिवस & रक्षाबंधन विशेषांक 🇮🇳',
-    title: 'समस्त देशवासियों को 80वें स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ!',
-    description: '80वें स्वतंत्रता दिवस एवं रक्षाबंधन के पावन अवसर पर अपनी देशभक्ति व भ्रातृ-स्नेह रचनाएँ साझा करें।',
-    bgImage: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800'
+    tag: 'राष्ट्रीय डिजिटल साहित्यिक मंच ✍️',
+    title: 'बोलती कलम में आपका स्वागत है!',
+    description: 'अपनी कविताएँ, ग़ज़लें, विचार साझा करें और डिजिटल साहित्यिक समुदाय से जुड़ें।',
+    bgImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=800'
   });
 
   // User Profile State (Persisted in localStorage across refreshes)
@@ -487,7 +487,7 @@ function AppContent() {
         document.title = 'कवि इमेज़ पोस्टर Studio — बोलती कलम | bolateeworld.in';
       } else if (viewId === 'festival') {
         history.pushState(null, '', '/festival');
-        document.title = '15 अगस्त स्वतंत्रता दिवस विशेषांक — बोलती कलम | bolateeworld.in';
+        document.title = 'साहित्यिक पर्व विशेषांक — बोलती कलम | bolateeworld.in';
       }
     } catch (e) {}
   };

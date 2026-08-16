@@ -50,22 +50,25 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
         <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
         
         <div className="space-y-1 relative z-10">
-          <p className="text-xs font-black uppercase tracking-widest text-amber-200">
-            जय हिन्द
+          <p className="text-[10px] font-black uppercase tracking-widest text-amber-200">
+            डिजिटल कवि कार्ड ✍️
           </p>
-          <h2 className="text-2xl font-black font-rozha tracking-tight">
-            15 अगस्त स्वतंत्रता दिवस
+          <h2 className="text-xl font-black font-rozha tracking-tight">
+            साहित्यिक पोस्टर Studio
           </h2>
           <p className="text-xs font-bold text-amber-100 italic">
-            भारत माता की जय!
+            अपनी कविता का HD पोस्टर बनाएं
           </p>
         </div>
 
         {/* Badge */}
         <div className="pt-2 relative z-10">
-          <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-black border border-white/30 shadow">
-            🇮🇳 80वाँ स्वतंत्रता दिवस पर्व
-          </span>
+          <button
+            onClick={() => setActiveView && setActiveView('posterStudio')}
+            className="inline-block px-4 py-1.5 bg-white text-rose-900 hover:bg-amber-100 rounded-full text-xs font-black shadow transition active:scale-95 cursor-pointer"
+          >
+            ✨ पोस्टर बनाएं
+          </button>
         </div>
       </div>
 

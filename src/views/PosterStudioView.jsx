@@ -1,16 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Download, Image as ImageIcon, Upload, Check, 
-  AlertCircle, Lock, Award, RefreshCw, Palette, Type, Feather, Trash2, Send, X, Eye
+  AlertCircle, Award, Palette, Type, Feather, Trash2, Send, Eye,
+  LayoutGrid, RefreshCw, UserCheck, MapPin
 } from 'lucide-react';
 
+const LAYOUT_ANGLES = [
+  { id: 'topHeader', name: '📐 एंगल 1: क्लासिक टॉप हेडर', desc: 'ऊपर आकर्षक शीर्षक पट्टा, बीच में कविता और नीचे कवि प्रोफाइल' },
+  { id: 'bottomCard', name: '📐 एंगल 2: बॉटम कवि कार्ड', desc: 'सेंटर में कविता पंक्तियाँ और नीचे आधिकारिक कवि पहचान कार्ड' },
+  { id: 'royalFrame', name: '📐 एंगल 3: रॉयल विंटेज फ्रेम', desc: 'पारंपरिक डबल बॉर्डर, कॉर्नर डिजाइन और रॉयल मुहर' },
+  { id: 'modernDark', name: '📐 एंगल 4: आधुनिक डार्क ग्लास', desc: 'गहरे डार्क बैकग्राउंड पर ट्रांसलूसेंट ग्लास कार्ड डिजाइन' }
+];
+
 const THEMES = [
-  { id: 'independence', name: '🇮🇳 15 अगस्त स्वतंत्रता दिवस विशेषांक', colorBg: 'bg-gradient-to-br from-orange-500 via-white to-emerald-600 text-slate-900 border-amber-500', bg1: '#fffdf5', bg2: '#fef9c3', border: '#ff9933', title: '#991b1b', text: '#0f172a', brand: '#15803d' },
-  { id: 'parchment', name: '📜 पार्चमेंट रॉयल', colorBg: 'bg-amber-100 text-amber-900 border-amber-400', bg1: '#fffdf9', bg2: '#fef3c7', border: '#be123c', title: '#881337', text: '#1e293b', brand: '#be123c' },
-  { id: 'purple', name: '💜 हिन्दवी पर्पल', colorBg: 'bg-purple-900 text-amber-300 border-amber-400', bg1: '#581c87', bg2: '#3b0764', border: '#f59e0b', title: '#ffffff', text: '#f3e8ff', brand: '#fbbf24' },
-  { id: 'ivory', name: '🤍 क्लासिक आइवरी', colorBg: 'bg-slate-100 text-slate-900 border-slate-400', bg1: '#fffdfa', bg2: '#f5f5f4', border: '#09090b', title: '#09090b', text: '#27272a', brand: '#e11d48' },
-  { id: 'dark', name: '🖤 डार्क वेलवेट', colorBg: 'bg-slate-950 text-rose-400 border-rose-600', bg1: '#0f172a', bg2: '#020617', border: '#e11d48', title: '#fbbf24', text: '#f8fafc', brand: '#e11d48' },
-  { id: 'sage', name: '🌿 विंटेज सेज', colorBg: 'bg-emerald-100 text-emerald-900 border-emerald-500', bg1: '#f0fdf4', bg2: '#dcfce7', border: '#15803d', title: '#14532d', text: '#166534', brand: '#15803d' }
+  { id: 'parchment', name: '📜 पार्चमेंट रॉयल', bg1: '#fffdf9', bg2: '#fef3c7', border: '#be123c', title: '#881337', text: '#1e293b', brand: '#be123c', cardBg: 'rgba(254, 243, 199, 0.6)' },
+  { id: 'purple', name: '💜 हिन्दवी पर्पल', bg1: '#3b0764', bg2: '#581c87', border: '#f59e0b', title: '#ffffff', text: '#f3e8ff', brand: '#fbbf24', cardBg: 'rgba(58, 7, 100, 0.7)' },
+  { id: 'ivory', name: '🤍 क्लासिक आइवरी', bg1: '#fffdfa', bg2: '#f5f5f4', border: '#09090b', title: '#09090b', text: '#27272a', brand: '#e11d48', cardBg: 'rgba(245, 245, 244, 0.7)' },
+  { id: 'dark', name: '🖤 डार्क वेलवेट', bg1: '#0f172a', bg2: '#020617', border: '#e11d48', title: '#fbbf24', text: '#f8fafc', brand: '#e11d48', cardBg: 'rgba(15, 23, 42, 0.8)' },
+  { id: 'sage', name: '🌿 विंटेज सेज', bg1: '#f0fdf4', bg2: '#dcfce7', border: '#15803d', title: '#14532d', text: '#166534', brand: '#15803d', cardBg: 'rgba(220, 252, 231, 0.7)' },
+  { id: 'rose', name: '🌅 सनसेट रोज़', bg1: '#fff1f2', bg2: '#ffe4e6', border: '#e11d48', title: '#9f1239', text: '#4c0519', brand: '#be123c', cardBg: 'rgba(255, 228, 230, 0.7)' }
+];
+
+const SAMPLE_POEMS = [
+  {
+    title: 'चलो फिर से मुस्कुराएँ',
+    content: 'उदासियों की चादर को उतार फेंको आज,\nचलो फिर से खुशियों के साज़ छेड़ते हैं।\nजिंदगी का हर पल अनमोल है दोस्तों,\nआओ मिलकर उम्मीदों के चिराग़ जलाते हैं।'
+  },
+  {
+    title: 'कलम की आवाज़',
+    content: 'स्याही में घुलती हैं दिल की तरंगें,\nकागज़ पर उतरती हैं अधूरी उमंगें।\nशब्द जब बनते हैं भावना का दर्पण,\nतब निखरता है काव्य का सच्चा अर्पण।'
+  }
 ];
 
 export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterPost, requireAuth, setActiveView }) => {
@@ -20,47 +39,19 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
   const fixedAuthorName = userProfile?.name || 'साहित्य साधक';
   const fixedAuthorUsername = (userProfile?.username || '@writer').replace(/^[@#]/, '');
+  const authorAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
+  const authorCity = userProfile?.city || 'प्रयागराज';
 
-  // Initial empty state so user MUST type title & content before previewing/downloading/posting!
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-
+  const [title, setTitle] = useState(SAMPLE_POEMS[0].title);
+  const [content, setContent] = useState(SAMPLE_POEMS[0].content);
+  const [selectedAngle, setSelectedAngle] = useState('topHeader');
   const [selectedThemeId, setSelectedThemeId] = useState('parchment');
-  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(authorAvatar);
+
   const [downloading, setDownloading] = useState(false);
   const [posting, setPosting] = useState(false);
 
-  // Live Preview Modal Popup State
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-
   const canvasRef = useRef(null);
-
-  const processLinesWithWordLimit = (rawText, maxWordsPerLine = 8) => {
-    const rawLines = rawText.split('\n').map(l => l.replace(/^["'“”«»-]+|["'“”«»-]+$/g, '').trim());
-    const finalLines = [];
-
-    for (let l of rawLines) {
-      if (l === '') {
-        finalLines.push('');
-        continue;
-      }
-
-      const words = l.split(/\s+/);
-      if (words.length <= maxWordsPerLine) {
-        finalLines.push(l);
-      } else {
-        for (let i = 0; i < words.length; i += maxWordsPerLine) {
-          finalLines.push(words.slice(i, i + maxWordsPerLine).join(' '));
-        }
-      }
-    }
-    return finalLines;
-  };
-
-  const lines = processLinesWithWordLimit(content, 8);
-  const validLinesCount = lines.filter(l => l.length > 0).length;
-  const isTextTooLong = validLinesCount > 14 || content.length > 380;
-  const isFormInvalid = !title.trim() || !content.trim();
 
   const currentTheme = THEMES.find(t => t.id === selectedThemeId) || THEMES[0];
 
@@ -75,10 +66,13 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
     }
   };
 
-  const handleClearPhoto = () => {
-    setUploadedPhotoUrl(null);
+  const handleFillSample = () => {
+    const randomPoem = SAMPLE_POEMS[Math.floor(Math.random() * SAMPLE_POEMS.length)];
+    setTitle(randomPoem.title);
+    setContent(randomPoem.content);
   };
 
+  // Canvas Renderer Engine with 4 Angle Layout Engines
   const drawPosterCanvas = () => {
     return new Promise((resolve) => {
       const canvas = canvasRef.current || document.createElement('canvas');
@@ -88,7 +82,7 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
 
       const { bg1, bg2, border: borderColor, title: titleColor, text: textColor, brand: brandColor } = currentTheme;
 
-      // 1. Background Fill
+      // 1. Fill Background
       ctx.save();
       const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
       gradient.addColorStop(0, bg1);
@@ -96,172 +90,236 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1080, 1350);
 
-      // 2. 15th August Special Patriotic Theme Elements
-      if (selectedThemeId === 'independence') {
-        // Tiranga Tri-Color Top Header Stripes
-        const headerY = 54;
-        const stripeH = 32;
-        
-        // Saffron
-        ctx.fillStyle = '#FF9933';
-        ctx.fillRect(54, headerY, 972, stripeH);
-        
-        // White
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(54, headerY + stripeH, 972, stripeH);
-        
-        // Green
-        ctx.fillStyle = '#138808';
-        ctx.fillRect(54, headerY + (stripeH * 2), 972, stripeH);
+      // Process lines
+      const rawLines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      const linesToDraw = rawLines.length > 0 ? rawLines : ['यहाँ अपनी काव्य पंक्तियाँ लिखें...'];
 
-        // Ashoka Chakra (24 Spokes) in Navy Blue on White Stripe
-        const chakraX = 540;
-        const chakraY = headerY + stripeH + (stripeH / 2);
-        const chakraRadius = 13;
-
-        ctx.strokeStyle = '#000080';
-        ctx.lineWidth = 2;
+      // Function to render photo
+      const renderPhotoCircle = (x, y, radius, imgObj) => {
+        if (!imgObj) return;
+        ctx.save();
         ctx.beginPath();
-        ctx.arc(chakraX, chakraY, chakraRadius, 0, 2 * Math.PI);
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(imgObj, x - radius, y - radius, radius * 2, radius * 2);
+        ctx.restore();
+
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.stroke();
+      };
 
-        ctx.fillStyle = '#000080';
-        ctx.beginPath();
-        ctx.arc(chakraX, chakraY, 2.5, 0, 2 * Math.PI);
-        ctx.fill();
+      const finishCanvas = (userImgObj) => {
+        // Render according to selected Angle Layout
+        if (selectedAngle === 'topHeader') {
+          // ANGLE 1: CLASSIC TOP HEADER
+          ctx.fillStyle = brandColor;
+          ctx.fillRect(54, 54, 972, 130);
 
-        for (let i = 0; i < 24; i++) {
-          const angle = (i * 15 * Math.PI) / 180;
-          ctx.beginPath();
-          ctx.moveTo(chakraX, chakraY);
-          ctx.lineTo(
-            chakraX + chakraRadius * Math.cos(angle),
-            chakraY + chakraRadius * Math.sin(angle)
-          );
-          ctx.stroke();
-        }
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 50px serif';
+          ctx.fillText(title.trim() || '★ शीर्षक ★', 540, 138);
 
-        // Patriotic Banner Ribbon
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#991b1b';
-        ctx.font = 'bold 26px sans-serif';
-        ctx.fillText('🇮🇳 15 अगस्त स्वतंत्रता दिवस विशेषांक 🇮🇳', 540, 185);
-      }
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 8;
+          ctx.strokeRect(54, 54, 972, 1242);
 
-      // 3. Royal Double Border
-      ctx.strokeStyle = borderColor;
-      ctx.lineWidth = 16;
-      ctx.strokeRect(36, 36, 1008, 1278);
+          ctx.textAlign = 'center';
+          ctx.fillStyle = textColor;
+          ctx.font = '44px serif';
 
-      ctx.lineWidth = 4;
-      ctx.strokeRect(54, 54, 972, 1242);
+          let poemY = 320;
+          linesToDraw.forEach(l => {
+            ctx.fillText(`✦  ${l}  ✦`, 540, poemY);
+            poemY += 75;
+          });
 
-      // 4. Render Poem Title
-      const titleY = selectedThemeId === 'independence' ? 245 : 150;
-      ctx.textAlign = 'center';
-      ctx.fillStyle = title.trim() ? titleColor : 'rgba(150, 150, 150, 0.6)';
-      ctx.font = 'bold 56px serif';
-      ctx.fillText(title.trim() ? title.trim() : '★ शीर्षक (Title) ★', 540, titleY);
-
-      // Title Divider Decorative Line
-      ctx.strokeStyle = borderColor;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(340, titleY + 30);
-      ctx.lineTo(740, titleY + 30);
-      ctx.stroke();
-
-      // 5. Render Poem Lines
-      ctx.textAlign = 'center';
-      let startY = titleY + 110;
-      const lineHeight = 70;
-
-      if (lines.filter(l => l.trim().length > 0).length === 0) {
-        ctx.fillStyle = 'rgba(160, 160, 160, 0.6)';
-        ctx.font = 'italic 40px serif';
-        ctx.fillText('✦ यहाँ अपनी कविता की पंक्तियाँ लिखें... ✦', 540, startY + 50);
-      } else {
-        ctx.fillStyle = textColor;
-        ctx.font = '44px serif';
-
-        lines.forEach((lineText) => {
-          if (lineText.trim()) {
-            ctx.fillText(`✦ ${lineText} ✦`, 540, startY);
+          const footerY = 1180;
+          if (userImgObj) {
+            renderPhotoCircle(150, footerY, 65, userImgObj);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = titleColor;
+            ctx.font = 'bold 40px sans-serif';
+            ctx.fillText(`✍️ ${fixedAuthorName}`, 240, footerY - 10);
+            ctx.fillStyle = textColor;
+            ctx.font = '30px sans-serif';
+            ctx.fillText(`@${fixedAuthorUsername} • ${authorCity}`, 240, footerY + 30);
+          } else {
+            ctx.textAlign = 'center';
+            ctx.fillStyle = titleColor;
+            ctx.font = 'bold 44px sans-serif';
+            ctx.fillText(`✍️ ${fixedAuthorName} (@${fixedAuthorUsername})`, 540, footerY);
           }
-          startY += lineHeight;
-        });
-      }
 
-      // Helper function to render footer & optional uploaded photo
-      const finishDrawingWithPhoto = (photoImg) => {
-        const footerY = 1240;
+          ctx.textAlign = 'center';
+          ctx.fillStyle = brandColor;
+          ctx.font = 'bold 28px sans-serif';
+          ctx.fillText('bolateeworld.in — राष्ट्रीय डिजिटल साहित्यिक मंच', 540, 1260);
 
-        // If uploaded photo exists, draw it in a framed box near author name
-        if (photoImg) {
-          ctx.save();
-          const pSize = 130;
-          const pX = 85;
-          const pY = 1070;
+        } else if (selectedAngle === 'bottomCard') {
+          // ANGLE 2: BOTTOM AUTHOR CARD
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 12;
+          ctx.strokeRect(40, 40, 1000, 1270);
 
-          // Circular Mask
+          ctx.textAlign = 'center';
+          ctx.fillStyle = titleColor;
+          ctx.font = 'bold 58px serif';
+          ctx.fillText(title.trim() || '★ काव्य रचना ★', 540, 160);
+
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 3;
           ctx.beginPath();
-          ctx.arc(pX + pSize / 2, pY + pSize / 2, pSize / 2, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(photoImg, pX, pY, pSize, pSize);
-          ctx.restore();
+          ctx.moveTo(300, 200);
+          ctx.lineTo(780, 200);
+          ctx.stroke();
 
-          // Border Ring around photo
+          ctx.textAlign = 'center';
+          ctx.fillStyle = textColor;
+          ctx.font = '46px serif';
+          let poemY = 320;
+          linesToDraw.forEach(l => {
+            ctx.fillText(`" ${l} "`, 540, poemY);
+            poemY += 75;
+          });
+
+          const cardY = 1040;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.fillRect(80, cardY, 920, 200);
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 3;
+          ctx.strokeRect(80, cardY, 920, 200);
+
+          if (userImgObj) {
+            renderPhotoCircle(170, cardY + 100, 70, userImgObj);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = titleColor;
+            ctx.font = 'bold 42px sans-serif';
+            ctx.fillText(fixedAuthorName, 270, cardY + 80);
+            ctx.fillStyle = textColor;
+            ctx.font = '28px sans-serif';
+            ctx.fillText(`@${fixedAuthorUsername} • बोलती कलम प्रमाणित कवि`, 270, cardY + 125);
+          } else {
+            ctx.textAlign = 'center';
+            ctx.fillStyle = titleColor;
+            ctx.font = 'bold 44px sans-serif';
+            ctx.fillText(`✍️ ${fixedAuthorName}`, 540, cardY + 90);
+            ctx.fillStyle = textColor;
+            ctx.font = '28px sans-serif';
+            ctx.fillText(`@${fixedAuthorUsername} • bolateeworld.in`, 540, cardY + 135);
+          }
+
+        } else if (selectedAngle === 'royalFrame') {
+          // ANGLE 3: ROYAL PARCHMENT FRAME
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 14;
+          ctx.strokeRect(36, 36, 1008, 1278);
+
+          ctx.lineWidth = 4;
+          ctx.strokeRect(56, 56, 968, 1238);
+
+          ctx.fillStyle = borderColor;
+          ctx.fillRect(56, 56, 40, 40);
+          ctx.fillRect(984, 56, 40, 40);
+          ctx.fillRect(56, 1254, 40, 40);
+          ctx.fillRect(984, 1254, 40, 40);
+
+          ctx.textAlign = 'center';
+          ctx.fillStyle = titleColor;
+          ctx.font = 'bold 60px serif';
+          ctx.fillText(`❖ ${title.trim() || 'रचना'} ❖`, 540, 180);
+
+          ctx.textAlign = 'center';
+          ctx.fillStyle = textColor;
+          ctx.font = '46px serif';
+          let poemY = 330;
+          linesToDraw.forEach(l => {
+            ctx.fillText(`✦ ${l} ✦`, 540, poemY);
+            poemY += 80;
+          });
+
+          const footerY = 1180;
+          if (userImgObj) {
+            renderPhotoCircle(880, footerY, 65, userImgObj);
+          }
+
+          ctx.textAlign = 'left';
+          ctx.fillStyle = brandColor;
+          ctx.font = 'bold 44px serif';
+          ctx.fillText(`✍️ ${fixedAuthorName}`, 90, footerY - 10);
+          ctx.fillStyle = textColor;
+          ctx.font = '28px sans-serif';
+          ctx.fillText(`@${fixedAuthorUsername} | bolateeworld.in`, 90, footerY + 30);
+
+        } else {
+          // ANGLE 4: MODERN DARK GLASS
           ctx.strokeStyle = borderColor;
           ctx.lineWidth = 6;
-          ctx.beginPath();
-          ctx.arc(pX + pSize / 2, pY + pSize / 2, pSize / 2, 0, Math.PI * 2);
-          ctx.stroke();
+          ctx.strokeRect(40, 40, 1000, 1270);
 
-          // Author Signature shifted right of photo
-          ctx.textAlign = 'left';
-          ctx.font = 'bold 36px sans-serif';
-          ctx.fillStyle = brandColor;
-          ctx.fillText(`✍️ ${fixedAuthorName}`, 235, footerY);
-        } else {
-          // Standard Author Signature Line
-          ctx.textAlign = 'left';
-          ctx.font = 'bold 36px sans-serif';
-          ctx.fillStyle = brandColor;
-          ctx.fillText(`✍️ ${fixedAuthorName}`, 90, footerY);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+          ctx.fillRect(70, 70, 940, 1210);
+
+          ctx.textAlign = 'center';
+          ctx.fillStyle = titleColor;
+          ctx.font = 'bold 56px sans-serif';
+          ctx.fillText(title.trim() || 'कविता संग्रह', 540, 170);
+
+          ctx.textAlign = 'center';
+          ctx.fillStyle = textColor;
+          ctx.font = '44px sans-serif';
+          let poemY = 320;
+          linesToDraw.forEach(l => {
+            ctx.fillText(l, 540, poemY);
+            poemY += 75;
+          });
+
+          const footerY = 1160;
+          if (userImgObj) {
+            renderPhotoCircle(200, footerY, 60, userImgObj);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = titleColor;
+            ctx.font = 'bold 40px sans-serif';
+            ctx.fillText(fixedAuthorName, 280, footerY);
+            ctx.fillStyle = textColor;
+            ctx.font = '26px sans-serif';
+            ctx.fillText(`@${fixedAuthorUsername} • bolateeworld.in`, 280, footerY + 35);
+          } else {
+            ctx.textAlign = 'center';
+            ctx.fillStyle = titleColor;
+            ctx.font = 'bold 40px sans-serif';
+            ctx.fillText(`✍️ ${fixedAuthorName} (@${fixedAuthorUsername})`, 540, footerY);
+          }
         }
-
-        ctx.textAlign = 'right';
-        ctx.font = 'bold 32px sans-serif';
-        ctx.fillStyle = textColor;
-        ctx.fillText(`bolateeworld.in`, 990, footerY);
 
         ctx.restore();
         resolve(canvas);
       };
 
-      // Load uploaded photo if present
       if (uploadedPhotoUrl) {
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.onload = () => finishDrawingWithPhoto(img);
-        img.onerror = () => finishDrawingWithPhoto(null);
+        img.onload = () => finishCanvas(img);
+        img.onerror = () => finishCanvas(null);
         img.src = uploadedPhotoUrl;
       } else {
-        finishDrawingWithPhoto(null);
+        finishCanvas(null);
       }
     });
   };
 
   useEffect(() => {
     drawPosterCanvas();
-  }, [title, content, selectedThemeId, uploadedPhotoUrl, showPreviewModal]);
+  }, [title, content, selectedAngle, selectedThemeId, uploadedPhotoUrl]);
 
-  // Option 1: Download PNG (-25 Points)
   const handleGenerateAndDownload = async () => {
     if (requireAuth && !requireAuth()) return;
 
     if (!HAS_25_POINTS) {
-      alert(`आपके पास केवल ${userPoints} रिवॉर्ड पॉइंट्स हैं। इमेज़ डाउनलोड करने के लिए 25 पॉइंट्स आवश्यक हैं।`);
+      alert(`आपके पास केवल ${userPoints} रिवॉर्ड पॉइंट्स हैं। पोस्टर डाउनलोड करने के लिए 25 पॉइंट्स आवश्यक हैं।`);
       return;
     }
 
@@ -271,16 +329,14 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
       const pngUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = pngUrl;
-      link.download = `Bolateeworld_Poet_Poster_${title.replace(/\s+/g, '_')}_4x5.png`;
+      link.download = `Bolteekalam_Poster_${title.replace(/\s+/g, '_')}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       if (onRewardPoints) {
-        onRewardPoints(-25, 'कवि इमेज़ पोस्टर डाउनलोड करने पर');
+        onRewardPoints(-25, 'कवि पोस्टर डाउनलोड करने पर');
       }
-
-      setShowPreviewModal(false);
 
     } catch (e) {
       console.error('Poster download error:', e);
@@ -289,7 +345,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
     }
   };
 
-  // Option 2: Post Directly to Feed (-15 Points)
   const handlePublishDirectly = async () => {
     if (requireAuth && !requireAuth()) return;
 
@@ -311,7 +366,6 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         });
       }
 
-      setShowPreviewModal(false);
     } catch (e) {
       console.error('Poster publish error:', e);
     } finally {
@@ -320,26 +374,25 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
       
-      {/* Studio Header Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-orange-600 via-rose-700 to-amber-600 text-white shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+      {/* Studio Banner */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-rose-700 via-rose-800 to-amber-700 text-white shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
         <div className="space-y-1.5 z-10">
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-amber-200 font-extrabold text-xs uppercase flex items-center gap-1.5 border border-white/30 shadow">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>बोलती कलम पोस्टर Studio</span>
+              <span>बोलती कलम पोस्टर Studio 2.0</span>
             </span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black font-rozha text-amber-100 drop-shadow">
             कवि इमेज़ पोस्टर Studio
           </h2>
           <p className="text-xs sm:text-sm text-amber-100/90 max-w-xl font-tiro leading-relaxed">
-            अपनी कविता और रचना का शीर्षक व पंक्तियाँ दर्ज करें, फिर 'प्रिव्यू देखें' पर क्लिक करके अपना 4:5 HD इमेज़ पोस्टर डाउनलोड करें।
+            विभिन्न डिज़ाइन एंगल्स और थीम्स में अपनी कविता का खूबसूरत HD पोस्टर तैयार करें व डाउनलोड करें।
           </p>
         </div>
 
-        {/* Current Points Counter Badge */}
         <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/30 text-amber-200 text-center shrink-0 z-10 shadow-lg w-full md:w-auto">
           <span className="text-[10px] text-amber-100 uppercase font-bold block">आपके कुल रिवॉर्ड पॉइंट्स</span>
           <span className="text-3xl font-black text-amber-300 drop-shadow">{userPoints} Pts</span>
@@ -349,220 +402,188 @@ export const PosterStudioView = ({ userProfile, onRewardPoints, onPublishPosterP
         </div>
       </div>
 
-      {/* Main Form Customization Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 w-full">
+      {/* Main Grid: Left Controls, Right Live Interactive Preview */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Palette className="w-5 h-5 text-orange-600" />
-            <span>पोस्टर कस्टमाइज़ेशन फ़ॉर्म</span>
-          </h3>
-          <span className="text-xs bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-3 py-1 rounded-full">
-            100% HD Quality
-          </span>
-        </div>
+        {/* LEFT COLUMN: Controls & Form Inputs */}
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+          
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Palette className="w-5 h-5 text-rose-600" />
+              <span>पोस्टर कस्टमाइज़ेशन फ़ॉर्म</span>
+            </h3>
+            <button
+              onClick={handleFillSample}
+              type="button"
+              className="px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>नमूना कविता भरें</span>
+            </button>
+          </div>
 
-        {/* Title Input */}
-        <div className="space-y-2 w-full">
-          <label className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-            <span>कविता का शीर्षक (Title) <span className="text-orange-600">*</span></span>
-            <span className="text-xs text-slate-400 font-normal">आवश्यक</span>
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="अपनी कविता का शीर्षक लिखें..."
-            className="w-full px-4 py-3.5 text-sm sm:text-base rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-extrabold shadow-inner transition-all"
-          />
-        </div>
-
-        {/* Poem Content Input */}
-        <div className="space-y-2 w-full">
-          <div className="flex justify-between items-center text-xs sm:text-sm font-extrabold">
-            <label className="text-slate-800 dark:text-slate-200">
-              कविता की पंक्तियाँ (Poem Content) <span className="text-orange-600">*</span>
+          {/* 1. SELECT LAYOUT ANGLE */}
+          <div className="space-y-2">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <LayoutGrid className="w-4 h-4 text-rose-600" />
+              <span>1. डिज़ाइन एंगल / लेआउट चुनें (Choose Layout Angle)</span>
             </label>
-            <span className={`text-xs ${isTextTooLong ? 'text-rose-600 font-extrabold' : 'text-slate-500'}`}>
-              {validLinesCount}/14 पंक्तियाँ
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {LAYOUT_ANGLES.map(angle => (
+                <button
+                  key={angle.id}
+                  type="button"
+                  onClick={() => setSelectedAngle(angle.id)}
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                    selectedAngle === angle.id
+                      ? 'bg-rose-500/10 border-rose-500 text-rose-700 dark:text-rose-300 font-bold shadow-md ring-2 ring-rose-500/30'
+                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                  }`}
+                >
+                  <div className="text-xs font-extrabold flex items-center justify-between">
+                    <span>{angle.name}</span>
+                    {selectedAngle === angle.id && <Check className="w-4 h-4 text-rose-600" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">{angle.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. SELECT COLOR THEME PALETTE */}
+          <div className="space-y-2">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <Palette className="w-4 h-4 text-rose-600" />
+              <span>2. रंग एवं थीम पैलेट (Theme Palette)</span>
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {THEMES.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setSelectedThemeId(t.id)}
+                  className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                    selectedThemeId === t.id
+                      ? 'border-rose-500 ring-2 ring-rose-500/40 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-700'
+                  }`}
+                  style={{ backgroundColor: t.bg2, color: t.title }}
+                >
+                  <span>{t.name}</span>
+                  {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 3. TITLE INPUT */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+              कविता / रचना का शीर्षक (Title)
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="अपनी कविता का शीर्षक लिखें..."
+              className="w-full px-4 py-3 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-extrabold focus:ring-2 focus:ring-rose-500"
+            />
+          </div>
+
+          {/* 4. POEM CONTENT TEXTAREA */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+              काव्य पंक्तियाँ (Poem Lines)
+            </label>
+            <textarea
+              rows={5}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="यहाँ अपनी कविता की पंक्तियाँ लिखें..."
+              className="w-full p-4 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-tiro leading-relaxed focus:ring-2 focus:ring-rose-500"
+            />
+          </div>
+
+          {/* 5. AUTHOR PHOTO UPLOAD & CREATOR DETAILS */}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+            <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+              <span>कवि फ़ोटो एवं प्रोफाइल पहचान</span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">✍️ {fixedAuthorName}</span>
+            </label>
+
+            <div className="flex items-center gap-4 flex-wrap">
+              {uploadedPhotoUrl ? (
+                <div className="relative group">
+                  <img src={uploadedPhotoUrl} alt="Poet Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-rose-500 shadow-sm" />
+                  <button
+                    onClick={() => setUploadedPhotoUrl(null)}
+                    className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 shadow hover:scale-110 transition"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <label className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold cursor-pointer hover:bg-slate-100 flex items-center gap-1.5">
+                  <Upload className="w-3.5 h-3.5 text-rose-600" />
+                  <span>अपनी फ़ोटो अपलोड करें</span>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </label>
+              )}
+
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                शहर: <strong>{authorCity}</strong> | हैंडल: <strong>@{fixedAuthorUsername}</strong>
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: Real-Time Interactive Live Preview */}
+        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-4 lg:sticky lg:top-20">
+          
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Eye className="w-5 h-5 text-rose-600" />
+              <span>लाइव इमेज़ प्रिव्यू (Live Preview)</span>
+            </h3>
+            <span className="text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full">
+              1080 × 1350 HD
             </span>
           </div>
 
-          <textarea
-            rows={6}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="यहाँ अपनी कविता की पंक्तियाँ लिखें..."
-            className="w-full p-4 text-sm sm:text-base rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-tiro leading-relaxed shadow-inner transition-all"
-          />
-
-          {isTextTooLong && (
-            <p className="text-xs text-rose-600 font-bold flex items-center gap-1 mt-1">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>14 पंक्तियों से अधिक न लिखें ताकि अक्षर स्पष्ट रहें।</span>
-            </p>
-          )}
-        </div>
-
-        {/* Fixed Non-Editable Poet Info */}
-        <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 space-y-1">
-          <span className="text-xs text-orange-600 dark:text-orange-400 font-bold uppercase block">कवि पहचान (Fixed Account Info)</span>
-          <div className="flex items-center justify-between text-xs sm:text-sm">
-            <span className="font-extrabold text-slate-900 dark:text-slate-100">{fixedAuthorName}</span>
-            <span className="text-slate-500 font-medium">@{fixedAuthorUsername}</span>
-          </div>
-        </div>
-
-        {/* Visual Theme Selection Pills */}
-        <div className="space-y-2 w-full">
-          <label className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 block">
-            थीम व बैकग्राउंड स्टाइल चुनें:
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            {THEMES.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setSelectedThemeId(t.id)}
-                className={`p-3 rounded-2xl text-xs sm:text-sm font-extrabold border-2 transition-all flex items-center justify-center gap-2 ${t.colorBg} ${
-                  selectedThemeId === t.id ? 'ring-2 ring-orange-500 scale-[1.02] shadow-md' : 'opacity-80 hover:opacity-100'
-                }`}
-              >
-                <span className="truncate">{t.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Custom Photo Upload */}
-        <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800 w-full">
-          <div className="flex items-center justify-between">
-            <label className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200">
-              अपनी इमेज़/फोटो जोड़ें (Optional)
-            </label>
-            {uploadedPhotoUrl && (
-              <button 
-                onClick={handleClearPhoto}
-                className="text-xs text-rose-600 font-bold hover:underline flex items-center gap-1"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                फोटो हटाएँ
-              </button>
-            )}
+          {/* Interactive Live Canvas Holder */}
+          <div className="w-full flex justify-center items-center bg-slate-950/5 dark:bg-slate-950/60 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
+            <canvas 
+              ref={canvasRef} 
+              className="w-full h-auto max-h-[500px] object-contain rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all duration-200"
+            />
           </div>
 
-          <label className="w-full py-4 px-4 rounded-2xl border-2 border-dashed border-orange-500/40 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-100/50 transition">
-            <Upload className="w-4 h-4 text-orange-600" />
-            <span>{uploadedPhotoUrl ? 'दूसरी फोटो बदलें' : 'अपनी फोटो अपलोड करें'}</span>
-            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-          </label>
-        </div>
+          {/* Action Buttons */}
+          <div className="space-y-2 pt-2">
+            <button
+              onClick={handleGenerateAndDownload}
+              disabled={downloading}
+              className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <Download className="w-4 h-4" />
+              <span>{downloading ? 'पोस्टर जनरेट हो रहा है...' : 'HD इमेज़ पोस्टर डाउनलोड करें (-25 Pts)'}</span>
+            </button>
 
-        {/* 🚀 Main CTA Button to Trigger Modal Popup Preview */}
-        <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-          <button
-            onClick={() => {
-              if (isFormInvalid) {
-                alert('⚠️ प्रिव्यू देखने के लिए शीर्षक एवं कविता की पंक्तियाँ दर्ज करना आवश्यक है।');
-                return;
-              }
-              setShowPreviewModal(true);
-            }}
-            disabled={isFormInvalid}
-            className="w-full py-4 px-6 bg-gradient-to-r from-orange-600 via-rose-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Eye className="w-5 h-5 text-amber-200" />
-            <span>✨ HD इमेज़ पोस्टर प्रिव्यू देखें (Open Live Preview Modal)</span>
-          </button>
+            <button
+              onClick={handlePublishDirectly}
+              disabled={posting}
+              className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-2xl shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+              <span>{posting ? 'प्रकाशित हो रहा है...' : 'सीधे मंच (Feed) पर पोस्ट करें (-15 Pts)'}</span>
+            </button>
+          </div>
 
-          {isFormInvalid && (
-            <p className="text-xs text-rose-600 dark:text-rose-400 font-extrabold text-center bg-rose-50 dark:bg-rose-950/50 p-3 rounded-2xl border border-rose-300 dark:border-rose-800 flex items-center justify-center gap-1.5 shadow-sm">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>* प्रिव्यू, डाउनलोड या पोस्ट करने के लिए शीर्षक एवं पंक्तियाँ दर्ज करना अनिवार्य है। (कोई कॉइन/पॉइंट्स नहीं कटेंगे)</span>
-            </p>
-          )}
         </div>
 
       </div>
-
-      {/* 🖼️ LIVE PREVIEW MODAL POPUP WINDOW */}
-      {showPreviewModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl max-w-lg w-full relative space-y-5 text-center my-auto">
-            
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-orange-600" />
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
-                  लाइव HD पोस्टर प्रिव्यू
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowPreviewModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold transition"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Live HD Canvas Preview */}
-            <div className="relative w-full max-w-[420px] aspect-[4/5] mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-orange-500/50 ring-4 ring-orange-500/20 bg-slate-100 dark:bg-slate-950">
-              <canvas 
-                ref={canvasRef} 
-                className="w-full h-full object-contain"
-              />
-            </div>
-
-            {/* Action Buttons Inside Modal */}
-            <div className="space-y-3 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                {/* Download Option */}
-                <button
-                  onClick={handleGenerateAndDownload}
-                  disabled={downloading || !HAS_25_POINTS || isTextTooLong || isFormInvalid}
-                  className="w-full py-3.5 px-4 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {HAS_25_POINTS ? (
-                    <>
-                      <Download className="w-4.5 h-4.5" />
-                      <span>{downloading ? 'डाउनलोडिंग...' : 'इमेज़ डाउनलोड (-25 Pts)'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4.5 h-4.5 text-amber-200" />
-                      <span>25 Pts आवश्यक</span>
-                    </>
-                  )}
-                </button>
-
-                {/* Direct Post Option */}
-                <button
-                  onClick={handlePublishDirectly}
-                  disabled={posting || !HAS_15_POINTS || isTextTooLong || isFormInvalid}
-                  className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {HAS_15_POINTS ? (
-                    <>
-                      <Send className="w-4.5 h-4.5 text-white" />
-                      <span>{posting ? 'पोस्ट हो रहा...' : 'मंच पर पोस्ट करें (-15 Pts)'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4.5 h-4.5 text-emerald-200" />
-                      <span>15 Pts आवश्यक</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 text-center font-medium">
-                * इमेज़ डाउनलोड करने पर 25 Pts कटेंगे। सीधे मंच पर पोस्ट करने पर केवल 15 Pts कटेंगे।
-              </p>
-            </div>
-
-          </div>
-        </div>
-      )}
 
     </div>
   );

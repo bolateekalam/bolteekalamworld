@@ -92,11 +92,6 @@ export const detectCurrentAutoFestivalTheme = () => {
   const month = today.getMonth() + 1; // 1 to 12
   const date = today.getDate();
 
-  // 15 August Independence Day (Active Aug 1 - Aug 17)
-  if (month === 8 && date >= 1 && date <= 17) {
-    return FESTIVAL_THEMES.independenceDay;
-  }
-
   // Raksha Bandhan (Active Aug 18 - Aug 20)
   if (month === 8 && date >= 18 && date <= 20) {
     return FESTIVAL_THEMES.rakshabandhan;
