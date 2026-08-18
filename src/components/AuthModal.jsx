@@ -192,7 +192,15 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         });
       } catch (e) {}
 
-      // Google Account Profile check
+      // Single Account per Google Email Constraint & Database Check
+      const usersMap = (() => {
+        try {
+          return JSON.parse(localStorage.getItem('bolteekalam_registered_users_map') || '{}');
+        } catch (e) {
+          return {};
+        }
+      })();
+
       let existingProfile = null;
       try {
         const savedProf = localStorage.getItem('bolteekalam_user_profile');
@@ -204,9 +212,22 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         }
       } catch (e) {}
 
+      // Generate sequential user handle starting from user_0091
+      const getNextSequentialUsername = () => {
+        try {
+          let counter = parseInt(localStorage.getItem('bw_global_user_seq_counter') || '91', 10);
+          if (isNaN(counter) || counter < 91) counter = 91;
+          const padStr = counter.toString().padStart(4, '0');
+          localStorage.setItem('bw_global_user_seq_counter', (counter + 1).toString());
+          return `user_${padStr}`;
+        } catch (e) {
+          return 'user_0091';
+        }
+      };
+
       let chosenName = existingProfile?.name;
       if (!chosenName || chosenName === 'साहित्य साधक') {
-        const promptName = window.prompt ? window.prompt('गूगल लॉगिन: कृपया अपना पूरा नाम (Full Name) दर्ज करें:', '') : null;
+        const promptName = window.prompt ? window.prompt('गूगल लॉगिन: कृपया अपना पूरा नाम दर्ज करें:', '') : null;
         if (promptName && promptName.trim()) {
           chosenName = promptName.trim();
         } else {
@@ -214,29 +235,45 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         }
       }
 
-      const cleanUserSlug = chosenName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'writer';
+      const seqHandle = getNextSequentialUsername();
       const nowIso = new Date().toISOString();
+      const googleEmail = (existingProfile?.email || email.trim() || 'user.google@bolateeworld.in').toLowerCase();
 
-      const googleUserDraft = existingProfile ? {
-        ...existingProfile,
-        name: chosenName,
-        createdAt: existingProfile.createdAt || nowIso
-      } : {
-        name: chosenName,
-        username: `@${cleanUserSlug}_${Math.floor(100 + Math.random() * 900)}`,
-        email: 'user.google@bolateeworld.in',
-        phone: '+91 9812345678',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-        role: 'user',
-        city: 'प्रयागराज',
-        isVerified: true,
-        points: 20,
-        createdAt: nowIso
-      };
+      // Check if user already exists in database
+      const existingDbUser = usersMap[googleEmail];
+
+      let googleUserFinal = null;
+      let isNewUser = false;
+
+      if (existingDbUser) {
+        googleUserFinal = existingDbUser;
+      } else if (existingProfile && existingProfile.email === googleEmail) {
+        googleUserFinal = existingProfile;
+      } else {
+        isNewUser = true;
+        googleUserFinal = {
+          name: chosenName,
+          username: `@${seqHandle}`,
+          email: googleEmail,
+          phone: '+91 9812345678',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+          role: 'user',
+          city: 'प्रयागराज',
+          isVerified: true,
+          points: 30, // +30 Points on Account Creation
+          createdAt: nowIso,
+          lastUsernameChangeDate: nowIso
+        };
+        // Persist to user map
+        usersMap[googleEmail] = googleUserFinal;
+        try {
+          localStorage.setItem('bolteekalam_registered_users_map', JSON.stringify(usersMap));
+        } catch (e) {}
+      }
 
       setTimeout(() => {
         onClose();
-        onLoginSuccess(googleUserDraft, !existingProfile);
+        onLoginSuccess(googleUserFinal, isNewUser);
       }, 500);
 
     } catch (err) {
@@ -257,16 +294,15 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
   const handleInitiateSignup = async (e) => {
     e.preventDefault();
     setAuthError('');
-    setSuccessMsg('');
 
-    if (!name.trim()) {
+    if (!name.trim() || name.trim().length < 2) {
       setAuthError('कृपया अपना पूरा नाम दर्ज करें!');
       return;
     }
 
     const cleanUser = signupUsername.trim().toLowerCase().replace(/^[@#]/, '').replace(/[^a-z0-9_]/g, '');
     if (!cleanUser || cleanUser.length < 3) {
-      setAuthError('कृपया कम से कम 3 अक्षरों का यूज़रनेम दर्ज करें!');
+      setAuthError('कृपया कम से कम 3 अक्षरों का यूज़रनेम चुनें!');
       return;
     }
 
@@ -326,25 +362,32 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     const cleanUser = signupUsername.trim().toLowerCase().replace(/^[@#]/, '').replace(/[^a-z0-9_]/g, '');
     const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
     const finalPhone = cleanPhone && cleanPhone.length === 10 ? `+91 ${cleanPhone}` : '';
+    const cleanEmail = email.trim().toLowerCase();
+    const nowIso = new Date().toISOString();
 
     const newUser = {
       name: name.trim(),
-      username: `@${cleanUser || 'writer'}`,
-      email: email.trim().toLowerCase(),
+      username: `@${cleanUser || 'user_0091'}`,
+      email: cleanEmail,
       phone: finalPhone,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
       role: 'user',
       city: 'प्रयागराज',
       isVerified: true,
-      points: 100
+      points: 30,
+      createdAt: nowIso,
+      lastUsernameChangeDate: nowIso
     };
 
-    // Save persistent credentials for login
+    // Save persistent credentials & user map
     try {
-      localStorage.setItem(`user_pwd_${email.trim().toLowerCase()}`, password);
+      localStorage.setItem(`user_pwd_${cleanEmail}`, password);
+      const usersMap = JSON.parse(localStorage.getItem('bolteekalam_registered_users_map') || '{}');
+      usersMap[cleanEmail] = newUser;
+      localStorage.setItem('bolteekalam_registered_users_map', JSON.stringify(usersMap));
     } catch (e) {}
 
-    setSuccessMsg('ओटीपी सत्यापित! आपका नया खाता सफलतापूर्वक चालू हो गया है। (+100 वेलकम पॉइंट्स)');
+    setSuccessMsg('ओटीपी सत्यापित! आपका नया खाता सफलतापूर्वक चालू हो गया है। (+30 वेलकम पॉइंट्स)');
     setTimeout(() => {
       onLoginSuccess(newUser, true);
       onClose();

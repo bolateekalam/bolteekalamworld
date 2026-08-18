@@ -1249,6 +1249,23 @@ function AppContent() {
   const handlePostCreated = async (newPost) => {
     const authorEmail = currentUser?.email || 'user-anon';
     const authorName = userProfile?.name || 'साहित्य साधक';
+
+    // Verify 5 poems per day limit
+    const todayDateStr = new Date().toDateString();
+    const todayUserPosts = (posts || []).filter(p => {
+      const isMine = p.author?.id === authorEmail || 
+                     p.author?.email === authorEmail || 
+                     (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase());
+      if (!isMine) return false;
+      const postDate = p.timestamp ? new Date(p.timestamp).toDateString() : (p.date ? new Date(p.date).toDateString() : null);
+      return postDate === todayDateStr;
+    });
+
+    if (todayUserPosts.length >= 5) {
+      alert('⚠️ दैनिक सीमा पूर्ण! आप एक दिन में अधिकतम 5 कविताएं ही पोस्ट कर सकते हैं। कृपया कल नई रचना साझा करें।');
+      return;
+    }
+
     const authorUsername = userProfile?.username || `@${authorName.toLowerCase().replace(/\s+/g, '_')}`;
     const authorAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
     const authorCity = userProfile?.city || 'प्रयागराज';
@@ -1797,6 +1814,7 @@ function AppContent() {
         onClose={() => setShowCreateModal(false)}
         onPostCreated={handlePostCreated}
         userProfile={userProfile}
+        posts={posts}
       />
 
       {editingPost && (

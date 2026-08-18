@@ -57,7 +57,7 @@ export const checkUsernameAvailability = async (candidateUsername, currentUserId
   return { available: true, message: '✓ यह यूज़रनेम उपलब्ध है!' };
 };
 
-// 2. Check if User can change username this month (Limit: 2 times per 30 days)
+// 2. Check if User can change username this month (Limit: 1 time per 30 days)
 export const canChangeUsernameThisMonth = (userEmail) => {
   try {
     const key = `username_changes_${(userEmail || 'user').toLowerCase().trim()}`;
@@ -66,18 +66,27 @@ export const canChangeUsernameThisMonth = (userEmail) => {
     const recentChanges = history.filter(ts => typeof ts === 'number' && ts > thirtyDaysAgo);
     
     const used = recentChanges.length;
-    const remaining = Math.max(0, 2 - used);
+    const remaining = Math.max(0, 1 - used);
     
+    // Calculate days remaining until next allowed change
+    let daysLeft = 30;
+    if (used > 0 && recentChanges[0]) {
+      const msPassed = Date.now() - recentChanges[recentChanges.length - 1];
+      const msRemaining = (30 * 24 * 60 * 60 * 1000) - msPassed;
+      daysLeft = Math.ceil(msRemaining / (24 * 60 * 60 * 1000));
+    }
+
     return {
-      allowed: used < 2,
+      allowed: used < 1,
       remainingChanges: remaining,
       usedChanges: used,
-      message: used >= 2 
-        ? '⚠️ आप एक माह में केवल 2 बार ही यूज़रनेम बदल सकते हैं। इस महीने की सीमा समाप्त हो चुकी है।' 
-        : `इस माह शेष बदलाव: ${remaining}/2`
+      daysLeft: daysLeft,
+      message: used >= 1 
+        ? `⚠️ आप 30 दिन में केवल 1 बार ही यूज़रनेम बदल सकते हैं। अगला बदलाव ${daysLeft} दिन बाद संभव होगा।` 
+        : `इस माह शेष बदलाव: 1/1`
     };
   } catch (e) {
-    return { allowed: true, remainingChanges: 2, usedChanges: 0, message: 'इस माह शेष बदलाव: 2/2' };
+    return { allowed: true, remainingChanges: 1, usedChanges: 0, daysLeft: 0, message: 'इस माह शेष बदलाव: 1/1' };
   }
 };
 

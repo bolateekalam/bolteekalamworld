@@ -142,7 +142,7 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
     if (formattedUsername !== origUser) {
       const limit = canChangeUsernameThisMonth(userProfile?.email);
       if (!limit.allowed) {
-        setUsernameError('⚠️ आप एक माह में केवल 2 बार ही यूज़रनेम बदल सकते हैं। इस महीने की सीमा (2/2) समाप्त हो चुकी है।');
+        setUsernameError(limit.message || '⚠️ आप 30 दिन में केवल 1 बार ही यूज़रनेम बदल सकते हैं।');
         return;
       }
 

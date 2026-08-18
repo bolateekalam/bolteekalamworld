@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Send, Image, Tag, Sparkles, Wand2, Feather, BookOpen } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile }) => {
+export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, posts = [] }) => {
   const { t } = useLanguage();
 
   const [title, setTitle] = useState('');
@@ -13,6 +13,22 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile })
   const [showChhandHelper, setShowChhandHelper] = useState(false);
 
   if (!isOpen) return null;
+
+  // Calculate today's posts by current user
+  const userEmail = userProfile?.email || 'user';
+  const todayDateStr = new Date().toDateString();
+  const todayUserPosts = (posts || []).filter(p => {
+    const isMine = p.author?.id === userEmail || 
+                   p.author?.email === userEmail || 
+                   (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase()) ||
+                   (p.author?.username && userProfile?.username && p.author.username.trim().toLowerCase() === userProfile.username.trim().toLowerCase());
+    if (!isMine) return false;
+    const postDate = p.timestamp ? new Date(p.timestamp).toDateString() : (p.date ? new Date(p.date).toDateString() : null);
+    return postDate === todayDateStr;
+  });
+
+  const todayCount = todayUserPosts.length;
+  const isDailyLimitReached = todayCount >= 5;
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -245,6 +261,24 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile })
             )}
           </div>
 
+          {/* Daily Post Limit Warning Banner */}
+          {isDailyLimitReached ? (
+            <div className="p-3 bg-red-500/10 border-2 border-red-500 rounded-2xl text-xs text-red-700 dark:text-red-300 font-bold space-y-1 animate-in fade-in">
+              <p className="flex items-center gap-1.5">
+                <span>⚠️ दैनिक सीमा पूर्ण!</span>
+                <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[10px]">5/5 पूर्ण</span>
+              </p>
+              <p className="font-normal text-[11px]">
+                आप एक दिन में अधिकतम 5 कविताएं ही पोस्ट कर सकते हैं। आपकी आज की 5 कविताओं की सीमा पूरी हो चुकी है। कृपया कल नई रचना साझा करें।
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium px-1">
+              <span>दैनिक पोस्टिंग सीमा: <strong>{todayCount}/5</strong> आज पोस्ट की गईं</span>
+              <span className="text-emerald-600 font-bold">{5 - todayCount} रचनाएँ शेष</span>
+            </div>
+          )}
+
           {/* Publish Action Button */}
           <div className="flex justify-between items-center pt-2">
             <span className="text-[10px] text-slate-400 font-semibold">
@@ -253,8 +287,9 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile })
 
             <button
               type="submit"
+              disabled={isDailyLimitReached}
               aria-label="रचना प्रकाशित करें"
-              className="px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-900/20 flex items-center gap-2 transition active:scale-95"
+              className="px-6 py-3 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-900/20 flex items-center gap-2 transition active:scale-95 cursor-pointer"
             >
               <Send className="w-4 h-4" />
               <span>रचना प्रकाशित करें (+10 Pts)</span>
