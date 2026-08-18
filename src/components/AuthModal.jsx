@@ -39,6 +39,27 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     }
   }, [isOpen]);
 
+  // Real-time username verification against Supabase & Reserved names
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!signupUsername || signupUsername.trim().length < 3) {
+      setUsernameStatus({ checking: false, available: null, message: 'कम से कम 3 अक्षर दर्ज करें' });
+      return;
+    }
+
+    setUsernameStatus({ checking: true, available: null, message: 'जाँच हो रही है...' });
+    const timer = setTimeout(async () => {
+      const result = await checkUsernameAvailability(signupUsername);
+      setUsernameStatus({
+        checking: false,
+        available: result.available,
+        message: result.message
+      });
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [signupUsername, isOpen]);
+
   if (!isOpen) return null;
 
   // 1. Existing User Login Handler (Supabase Auth + Fallback)
@@ -213,26 +234,6 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       setSignupUsername(generated);
     }
   };
-
-  // Real-time username verification against Supabase & Reserved names
-  useEffect(() => {
-    if (!signupUsername || signupUsername.trim().length < 3) {
-      setUsernameStatus({ checking: false, available: null, message: 'कम से कम 3 अक्षर दर्ज करें' });
-      return;
-    }
-
-    setUsernameStatus({ checking: true, available: null, message: 'जाँच हो रही है...' });
-    const timer = setTimeout(async () => {
-      const result = await checkUsernameAvailability(signupUsername);
-      setUsernameStatus({
-        checking: false,
-        available: result.available,
-        message: result.message
-      });
-    }, 350);
-
-    return () => clearTimeout(timer);
-  }, [signupUsername]);
 
   // 4. Initiate New Account Registration & Generate Email OTP (Step 1)
   const handleInitiateSignup = async (e) => {
