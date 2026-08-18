@@ -214,6 +214,9 @@ export const HomeFeedView = ({
             onAddComment={onAddComment}
             onFollowAuthor={onFollowAuthor}
             requireAuth={requireAuth}
+            userProfile={userProfile}
+            authorProfileMap={authorProfileMap}
+            onDeductPoints={onYouTubeVisit}
           />
         ))}
       </div>

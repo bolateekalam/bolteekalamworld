@@ -268,19 +268,6 @@ export const ProfileView = ({
       isUnlocked: myPostsCount >= 50,
       badgeText: myPostsCount >= 50 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${myPostsCount}/50 कविताएं`,
       certificateId: `BW-50POSTS-${cleanUser.toUpperCase()}`
-    },
-    {
-      id: 'cert-100-points',
-      title: 'साहित्यिक प्रश्नोत्तरी व ज्ञान रत्न सम्मान पत्र',
-      type: 'साहित्यिक प्रश्नोत्तरी सम्मान पत्र',
-      description: 'साहित्यिक प्रश्नोत्तरी व साप्ताहिक चुनौतियों में 100+ अंक प्राप्त करने पर।',
-      category: '100+ रिवॉर्ड पॉइंट्स',
-      requiredStreak: 0,
-      requiredPosts: 0,
-      requiredPoints: 100,
-      isUnlocked: (profile.points || 0) >= 100,
-      badgeText: (profile.points || 0) >= 100 ? '✓ अनलॉक हो चुका है!' : `🔒 आवश्यक: 100 Points (वर्तमान: ${profile.points || 0})`,
-      certificateId: `BW-QUIZ-${cleanUser.toUpperCase()}`
     }
   ];
 
@@ -601,14 +588,14 @@ export const ProfileView = ({
           </div>
 
           <div className="pt-1 flex items-center justify-between text-xs flex-wrap gap-2">
-            <span className="text-[11px] text-slate-500 truncate">
-              यूआरएल: <strong>bolateeworld.in/{cleanUser}/wallet</strong>
+            <span className="text-[11px] text-slate-500">
+              दैनिक सक्रियता व रचनाओं से पॉइंट्स अर्जित करें
             </span>
             <button
               onClick={handleOpenFullWalletTab}
               className="text-rose-600 hover:text-rose-700 dark:text-rose-400 font-bold flex items-center gap-1 transition cursor-pointer"
             >
-              <span>सी मोर (See More) →</span>
+              <span>विस्तृत पासबुक (Full Statement) →</span>
             </button>
           </div>
         </div>
@@ -621,9 +608,11 @@ export const ProfileView = ({
           if (activeTab === 'certificates') {
             const nextMilestone = getNextMilestone(currentStreak);
             const daysRemaining = Math.max(0, nextMilestone - currentStreak);
+            const unlockedCerts = milestoneCertificates.filter(c => c.isUnlocked);
+            const lockedCerts = milestoneCertificates.filter(c => !c.isUnlocked);
 
             return (
-              <div className="space-y-4 animate-in fade-in duration-200">
+              <div className="space-y-5 animate-in fade-in duration-200">
                 
                 {/* 1. Dedicated Shareable URL & Live Streak Dashboard */}
                 <div className="bg-gradient-to-br from-[#0e2238] via-slate-900 to-[#0e2238] text-white border-2 border-amber-500/40 rounded-3xl p-4 sm:p-6 shadow-xl space-y-4">
@@ -716,35 +705,29 @@ export const ProfileView = ({
 
                 </div>
 
-                {/* 2. All Milestone Certificates Grid (Unlocked & Locked) */}
+                {/* 2. SECTION 1: Unlocked Certificates (Top Section) */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-lg">
                   <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 className="text-sm sm:text-base font-bold font-rozha text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                      <span>सभी साहित्यिक सम्मान पत्र सूची ({milestoneCertificates.length})</span>
+                    <h3 className="text-sm sm:text-base font-bold font-rozha text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                      <span>🏆 आपके प्राप्त मानद सम्मान पत्र ({unlockedCerts.length})</span>
                     </h3>
                     <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold text-xs rounded-full border border-emerald-300 dark:border-emerald-700">
-                      {milestoneCertificates.filter(c => c.isUnlocked).length} अनलॉक
+                      ✓ तुरंत डाउनलोड हेतु उपलब्ध
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {milestoneCertificates.map((cert) => (
+                    {unlockedCerts.map((cert) => (
                       <div 
                         key={cert.id}
-                        className={`rounded-2xl p-4 border-2 transition flex flex-col justify-between gap-3 shadow-md ${
-                          cert.isUnlocked 
-                            ? 'bg-[#fdfbf7] dark:bg-slate-800/80 border-[#0e2238] dark:border-amber-500/40 text-slate-900 dark:text-slate-100'
-                            : 'bg-slate-50 dark:bg-slate-800/40 border-slate-300 dark:border-slate-700 opacity-75'
-                        }`}
+                        className="rounded-2xl p-4 border-2 border-[#0e2238] dark:border-amber-500/50 bg-[#fdfbf7] dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 transition flex flex-col justify-between gap-3 shadow-md hover:shadow-lg"
                       >
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              cert.isUnlocked ? 'bg-emerald-100 text-emerald-800 border border-emerald-400' : 'bg-slate-200 text-slate-700'
-                            }`}>
-                              {cert.badgeText}
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-400 flex items-center gap-1">
+                              <span>✓</span> {cert.badgeText}
                             </span>
-                            <span className="text-lg">📜</span>
+                            <span className="text-xl">📜</span>
                           </div>
 
                           <h4 className="font-bold text-sm font-rozha text-[#0e2238] dark:text-amber-200">
@@ -763,20 +746,69 @@ export const ProfileView = ({
 
                           <button
                             onClick={() => setSelectedCertToView(cert)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                              cert.isUnlocked 
-                                ? 'bg-[#0e2238] hover:bg-slate-900 text-amber-300 shadow'
-                                : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
-                            }`}
+                            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0e2238] hover:bg-slate-900 text-amber-300 shadow flex items-center gap-1 transition cursor-pointer"
                           >
-                            {cert.isUnlocked ? <Sparkles className="w-3 h-3 text-amber-400" /> : <Lock className="w-3 h-3" />}
-                            <span>{cert.isUnlocked ? 'देखें व डाउनलोड' : 'विवरण देखें'}</span>
+                            <Sparkles className="w-3 h-3 text-amber-400" />
+                            <span>देखें व डाउनलोड करें</span>
                           </button>
                         </div>
                       </div>
                     ))}
                   </div>
+                </div>
 
+                {/* 3. SECTION 2: Upcoming / Locked Milestone Certificates (Bottom Section) */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-lg">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <h3 className="text-sm sm:text-base font-bold font-rozha text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                      <Lock className="w-4 h-4 text-amber-500" />
+                      <span>🔒 आगामी सम्मान पत्र ({lockedCerts.length})</span>
+                    </h3>
+                    <span className="text-xs text-slate-500 font-medium">
+                      सक्रियता बढ़ाते ही अनलॉक होंगे
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {lockedCerts.map((cert) => (
+                      <div 
+                        key={cert.id}
+                        className="rounded-2xl p-4 border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 opacity-80 transition flex flex-col justify-between gap-3 shadow-sm"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300 flex items-center gap-1">
+                              <Lock className="w-3 h-3" />
+                              <span>{cert.badgeText}</span>
+                            </span>
+                            <span className="text-lg opacity-60">📜</span>
+                          </div>
+
+                          <h4 className="font-bold text-sm font-rozha text-slate-800 dark:text-slate-200">
+                            {cert.title}
+                          </h4>
+
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-serif leading-relaxed">
+                            {cert.description}
+                          </p>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {cert.category}
+                          </span>
+
+                          <button
+                            onClick={() => setSelectedCertToView(cert)}
+                            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 transition flex items-center gap-1 cursor-pointer"
+                          >
+                            <Lock className="w-3 h-3" />
+                            <span>शर्तें देखें</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
               </div>
@@ -808,21 +840,6 @@ export const ProfileView = ({
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-between gap-2 text-xs flex-wrap sm:flex-nowrap">
-                    <div className="flex items-center gap-2 min-w-0 truncate">
-                      <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="font-mono text-slate-600 dark:text-slate-300 truncate">
-                        {walletShareUrl}
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleCopyWalletLink}
-                      className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center gap-1 shrink-0 transition active:scale-95 cursor-pointer"
-                    >
-                      {copiedWalletUrl ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedWalletUrl ? 'कॉपी हुआ!' : 'लिंक कॉपी'}</span>
-                    </button>
-                  </div>
 
                   <div className="space-y-2.5">
                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -899,6 +916,7 @@ export const ProfileView = ({
               userProfile={userProfile}
               requireAuth={requireAuth}
               isAuthorView={true}
+              onDeductPoints={onRechargePoints}
             />
           ));
         })()}

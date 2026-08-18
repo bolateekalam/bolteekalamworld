@@ -24,7 +24,8 @@ export const PostCard = ({
   requireAuth, 
   userProfile, 
   currentUser,
-  authorProfileMap
+  authorProfileMap,
+  onDeductPoints
 }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
@@ -396,6 +397,9 @@ export const PostCard = ({
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
           post={post}
+          isUserOwnPost={isUserOwnPost}
+          userPoints={userProfile?.points || 0}
+          onDeductPoints={onDeductPoints}
         />
       )}
 

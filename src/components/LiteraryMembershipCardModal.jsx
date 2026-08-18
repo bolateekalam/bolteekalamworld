@@ -568,8 +568,10 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
               ✦ बोलती वर्ल्ड डिजिटल साहित्यिक मंच ✦
             </h6>
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
-              <div className="sm:col-span-1 flex flex-col items-center justify-center p-1.5 bg-slate-900/50 rounded-lg border border-amber-500/30 text-center">
-                <span className="text-xl">🪶</span>
+              <div className="sm:col-span-1 flex flex-col items-center justify-center p-2 bg-white/10 rounded-xl border border-amber-400/40 text-center gap-1">
+                <div className="w-10 h-10 rounded-lg bg-white p-0.5 shadow flex items-center justify-center">
+                  <img src="/logo.png" alt="Bolti World" className="w-full h-full object-contain" />
+                </div>
                 <span className="font-rozha font-bold text-amber-200 text-xs">बोलती वर्ल्ड</span>
               </div>
               <div className="sm:col-span-3 space-y-1 text-[11px] text-slate-200 leading-relaxed font-serif">

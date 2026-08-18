@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, Share2, Copy, Check, Sparkles } from 'lucide-react';
+import { X, Download, Share2, Copy, Check, Sparkles, ShieldCheck, Lock, AlertCircle } from 'lucide-react';
 
 const WhatsAppIcon = (props) => (
   <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -27,11 +27,19 @@ const TwitterIcon = (props) => (
   </svg>
 );
 
-export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
+export const PoemCardShareModal = ({ 
+  isOpen, 
+  onClose, 
+  post, 
+  isUserOwnPost = false,
+  userPoints = 30,
+  onDeductPoints
+}) => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedPoemText, setCopiedPoemText] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [sharingWhatsApp, setSharingWhatsApp] = useState(false);
+  const [downloadSuccessMsg, setDownloadSuccessMsg] = useState('');
 
   if (!isOpen || !post) return null;
 
@@ -45,7 +53,7 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
 
   const cleanUser = authorUsername.replace(/^[@#]/, '');
   const postShareUrl = `https://www.bolateeworld.in/profile/${cleanUser}`;
-  const shareText = `📜 *${poemTitle}*\n\n"${poemContent.slice(0, 180)}${poemContent.length > 180 ? '...' : ''}"\n\n✍️ रचनाकार: ${authorName} (${authorUsername})\n🌐 पढ़ें बोलती कलम पर: ${postShareUrl}`;
+  const shareText = `📜 *${poemTitle}*\n\n"${poemContent.slice(0, 180)}${poemContent.length > 180 ? '...' : ''}"\n\n✍️ रचनाकार: ${authorName} (${authorUsername})\n🌐 पढ़ें बोलती वर्ल्ड पर: ${postShareUrl}`;
 
   // Clean poem lines
   const poemLines = poemContent.split('\n').map(line => {
@@ -54,28 +62,8 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
 
   const validLinesCount = poemLines.filter(l => l.length > 0).length;
 
-  const dataURLtoBlob = (dataurl) => {
-    try {
-      const arr = dataurl.split(',');
-      const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      return new Blob([u8arr], { type: mime });
-    } catch (e) {
-      return null;
-    }
-  };
-
-  // Generate 4:5 Aspect Ratio Canvas PNG for text posts
-  const generateCanvasPNG = () => {
-    if (hasAttachedPosterImage && attachedPosterUrl) {
-      return Promise.resolve(attachedPosterUrl);
-    }
-
+  // Generate 4:5 Aspect Ratio Canvas PNG with or without watermark
+  const generateCanvasPNG = (withWatermark = true) => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       canvas.width = 1080;
@@ -95,196 +83,135 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
       ctx.fillStyle = '#fffdf9';
       ctx.fillRect(0, 0, 1080, 1350);
 
-      // Sleek 24px Rounded Crimson Outer Border
-      ctx.strokeStyle = '#e11d48';
+      // Border
+      ctx.strokeStyle = '#0e2238';
       ctx.lineWidth = 10;
       ctx.stroke();
+
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(28, 28, 1024, 1294);
       ctx.restore();
 
-      // Top Header Bar
+      // Top Brand
+      ctx.fillStyle = '#0e2238';
+      ctx.font = 'bold 36px serif';
+      ctx.fillText('बोलती वर्ल्ड', 75, 95);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('(bolateeworld.in)', 260, 95);
+
+      // Title
       ctx.fillStyle = '#881337';
-      ctx.font = 'bold 42px serif';
-      const truncatedTopTitle = poemTitle.length > 22 ? poemTitle.slice(0, 22) + '...' : poemTitle;
-      ctx.fillText(truncatedTopTitle, 75, 115);
+      ctx.font = 'bold 44px serif';
+      const titleWidth = ctx.measureText(poemTitle).width;
+      ctx.fillText(poemTitle, (1080 - titleWidth) / 2, 190);
 
-      ctx.fillStyle = '#e11d48';
-      ctx.font = 'bold 24px sans-serif';
-      const categoryText = `श्रेणी: ${post.category || 'कविता'}`;
-      const catWidth = ctx.measureText(categoryText).width;
-      ctx.fillText(categoryText, 1005 - catWidth, 115);
-
-      // Header Divider Line
-      ctx.strokeStyle = '#e11d48';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(75, 150);
-      ctx.lineTo(1005, 150);
+      ctx.moveTo(300, 215);
+      ctx.lineTo(780, 215);
       ctx.stroke();
 
-      let fontSize = 38;
-      let lineHeight = 64;
-      let fontWeight = 'bold';
-
-      if (validLinesCount <= 6) {
-        fontSize = 42;
-        lineHeight = 68;
-        fontWeight = 'bold';
-      } else if (validLinesCount <= 10) {
-        fontSize = 34;
-        lineHeight = 54;
-        fontWeight = 'bold';
-      } else if (validLinesCount <= 16) {
-        fontSize = 28;
-        lineHeight = 44;
-        fontWeight = 'normal';
-      } else {
-        fontSize = 24;
-        lineHeight = 38;
-        fontWeight = 'normal';
-      }
-
+      // Poem Lines
       ctx.fillStyle = '#1e293b';
-      ctx.font = `${fontWeight} ${fontSize}px serif`;
+      let startY = 320;
+      let fontSize = validLinesCount <= 8 ? 32 : validLinesCount <= 14 ? 26 : 22;
+      let lineHeight = fontSize * 1.8;
+      ctx.font = `${fontSize}px serif`;
 
-      let currentY = 240;
-      const maxLinesY = 1140;
-
-      const renderLinesList = validLinesCount > 0 ? poemLines : ['★ बोलती कलम साहित्य रचना...'];
-
-      for (let i = 0; i < renderLinesList.length; i++) {
-        const line = renderLinesList[i];
-        if (currentY > maxLinesY) break;
-
+      poemLines.slice(0, 18).forEach((line) => {
         if (line === '') {
-          currentY += Math.round(lineHeight * 0.6);
+          startY += lineHeight * 0.5;
         } else {
-          ctx.fillText(line, 75, currentY);
-          currentY += lineHeight;
+          const lineWidth = ctx.measureText(line).width;
+          ctx.fillText(line, (1080 - lineWidth) / 2, startY);
+          startY += lineHeight;
         }
-      }
+      });
 
-      // Footer Divider
+      // Bottom Footer Author Info
       ctx.strokeStyle = '#cbd5e1';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(75, 1170);
-      ctx.lineTo(1005, 1170);
+      ctx.moveTo(65, 1220);
+      ctx.lineTo(1015, 1220);
       ctx.stroke();
 
-      const avatarImg = new Image();
-      avatarImg.crossOrigin = 'anonymous';
+      ctx.fillStyle = '#0e2238';
+      ctx.font = 'bold 26px serif';
+      ctx.fillText(`✍️ रचनाकार: ${authorName}`, 75, 1275);
 
-      const drawFooterDetails = () => {
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 30px sans-serif';
-        ctx.fillText(authorName, 180, 1240);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText(`${authorUsername}`, 75, 1310);
 
-        ctx.fillStyle = '#64748b';
-        ctx.font = '22px sans-serif';
-        ctx.fillText(authorUsername, 180, 1275);
+      // Watermark Stamp
+      if (withWatermark) {
+        ctx.fillStyle = '#881337';
+        ctx.font = 'bold 22px sans-serif';
+        const wmText = 'बोलती वर्ल्ड • boltiworld.in';
+        const wmWidth = ctx.measureText(wmText).width;
+        ctx.fillText(wmText, 1005 - wmWidth, 1290);
+      }
 
-        ctx.fillStyle = '#e11d48';
-        ctx.font = 'bold 26px sans-serif';
-        ctx.fillText('www.bolateeworld.in', 720, 1255);
-
-        resolve(canvas.toDataURL('image/png'));
-      };
-
-      avatarImg.onload = () => {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(115, 1250, 44, 0, Math.PI * 2, true);
-        ctx.clip();
-        ctx.drawImage(avatarImg, 71, 1206, 88, 88);
-        ctx.restore();
-
-        ctx.strokeStyle = '#e11d48';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(115, 1250, 45, 0, Math.PI * 2, true);
-        ctx.stroke();
-
-        drawFooterDetails();
-      };
-
-      avatarImg.onerror = () => {
-        drawFooterDetails();
-      };
-
-      avatarImg.src = authorAvatar;
+      resolve(canvas);
     });
   };
 
-  const handleDownloadPNG = async () => {
+  const handleDownloadPNG = async (withWatermark = true) => {
+    if (!isUserOwnPost) {
+      alert('⚠️ डाउनलोड केवल मूल लेखक के लिए उपलब्ध है। आप इसे सोशल मीडिया पर शेयर कर सकते हैं!');
+      return;
+    }
+
+    if (!withWatermark) {
+      if ((userPoints || 0) < 10) {
+        alert('⚠️ बिना वॉटरमार्क HD डाउनलोड के लिए कम से कम 10 रिवॉर्ड पॉइंट्स आवश्यक हैं।');
+        return;
+      }
+      if (onDeductPoints) {
+        onDeductPoints(10, 'रचना पोस्टर बिना वॉटरमार्क डाउनलोड करने पर');
+      }
+    }
+
     setDownloading(true);
     try {
-      const imageUrl = await generateCanvasPNG();
+      const canvas = await generateCanvasPNG(withWatermark);
       const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = `Bolateeworld_${poemTitle.replace(/\s+/g, '_')}_Poster.png`;
-      document.body.appendChild(link);
+      link.download = `BoltiWorld_${poemTitle.replace(/\s+/g, '_')}_${withWatermark ? 'Watermark' : 'HD'}.png`;
+      link.href = canvas.toDataURL('image/png');
       link.click();
-      document.body.removeChild(link);
+      setDownloadSuccessMsg(withWatermark ? '✓ वॉटरमार्क सहित पोस्टर डाउनलोड हो गया!' : '✓ बिना वॉटरमार्क HD पोस्टर डाउनलोड हुआ! (-10 Pts)');
+      setTimeout(() => setDownloadSuccessMsg(''), 4000);
     } catch (e) {
-      console.error('PNG download error:', e);
+      console.error('Download error:', e);
     } finally {
       setDownloading(false);
     }
   };
 
-  const handleShareWhatsApp = async () => {
-    setSharingWhatsApp(true);
-    try {
-      const imageUrl = await generateCanvasPNG();
-      const blob = dataURLtoBlob(imageUrl);
-
-      if (blob && navigator.share && navigator.canShare) {
-        const file = new File([blob], `Bolateeworld_${poemTitle.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              title: poemTitle,
-              text: shareText,
-              files: [file]
-            });
-            setSharingWhatsApp(false);
-            return;
-          } catch (err) {}
-        }
-      }
-
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
-    } catch (e) {
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
-    } finally {
-      setSharingWhatsApp(false);
-    }
+  const handleShareWhatsApp = () => {
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const handleShareFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postShareUrl)}&quote=${encodeURIComponent(shareText)}`;
-    window.open(url, '_blank');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postShareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const handleShareInstagram = () => {
     navigator.clipboard.writeText(shareText);
     setCopiedPoemText(true);
-    setTimeout(() => setCopiedPoemText(false), 2500);
-
-    if (navigator.share) {
-      navigator.share({
-        title: poemTitle,
-        text: shareText,
-        url: postShareUrl
-      }).catch(() => {});
-    } else {
-      window.open('https://www.instagram.com/', '_blank');
-    }
+    setTimeout(() => {
+      window.open('https://www.instagram.com', '_blank');
+      setCopiedPoemText(false);
+    }, 800);
   };
 
   const handleShareTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(postShareUrl)}`;
-    window.open(url, '_blank');
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const handleCopyLink = () => {
@@ -294,108 +221,70 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 select-none">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto relative">
         
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
           <div className="flex items-center gap-2">
-            <Share2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              रचना पोस्टर कार्ड साझा करें (HD Poster)
+            <Share2 className="w-5 h-5 text-rose-600" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-rozha">
+              रचना शेयर व पोस्टर
             </h3>
           </div>
-
-          <button
-            onClick={onClose}
-            aria-label="मॉडल बंद करें"
-            className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800"
-          >
+          <button onClick={onClose} className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Poster Image Preview Container */}
-        {hasAttachedPosterImage ? (
-          <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border-4 border-rose-600/40 bg-slate-950">
-            <img 
-              src={attachedPosterUrl} 
-              alt={poemTitle} 
-              className="w-full h-full object-contain"
-            />
+        {/* Visual Card Preview */}
+        <div className="p-4 rounded-2xl bg-[#fffdf9] dark:bg-slate-800/80 border-2 border-[#0e2238] shadow-inner space-y-2">
+          <div className="flex items-center justify-between text-xs border-b border-slate-200 dark:border-slate-700 pb-2">
+            <div className="flex items-center gap-1.5">
+              <img src="/logo.png" alt="Bolti World" className="w-5 h-5 object-contain" />
+              <span className="font-bold text-[#0e2238] dark:text-amber-200">बोलती वर्ल्ड</span>
+            </div>
+            <span className="text-[10px] text-slate-500">bolateeworld.in</span>
           </div>
-        ) : (
-          <div className="relative w-full aspect-[4/5] p-5 rounded-3xl bg-[#fffdf9] dark:bg-slate-900 border-4 border-rose-600/80 text-slate-900 dark:text-slate-100 shadow-xl flex flex-col justify-between overflow-hidden">
-            <div className="absolute inset-2 border border-rose-600/20 rounded-2xl pointer-events-none" />
 
-            <div className="flex justify-between items-center border-b border-rose-600/30 pb-2 z-10">
-              <h4 className="text-base sm:text-lg font-bold font-rozha text-rose-900 dark:text-rose-300 truncate max-w-[240px]">
-                {poemTitle}
-              </h4>
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 font-extrabold uppercase shrink-0">
-                श्रेणी: {post.category || 'कविता'}
-              </span>
-            </div>
+          <h4 className="font-bold text-sm text-center font-rozha text-rose-900 dark:text-rose-300 pt-1">
+            {poemTitle}
+          </h4>
 
-            <div className="my-auto py-2 z-10 overflow-hidden space-y-1">
-              <div className={`font-tiro text-slate-900 dark:text-slate-100 max-h-[250px] overflow-y-auto pr-1 ${
-                validLinesCount <= 6 ? 'text-sm sm:text-base font-bold leading-relaxed' : validLinesCount <= 10 ? 'text-xs sm:text-sm font-semibold leading-relaxed' : 'text-xs leading-normal'
-              }`}>
-                {poemLines.map((line, idx) => (
-                  line === '' ? (
-                    <div key={idx} className="h-2.5" />
-                  ) : (
-                    <p key={idx} className="py-0.5">
-                      {line}
-                    </p>
-                  )
-                ))}
-              </div>
-            </div>
+          <div className="font-tiro text-xs text-slate-800 dark:text-slate-200 max-h-36 overflow-y-auto space-y-0.5 pr-1 leading-relaxed text-center">
+            {poemLines.slice(0, 8).map((line, idx) => (
+              <p key={idx}>{line}</p>
+            ))}
+          </div>
 
-            <div className="pt-2 border-t border-slate-300 dark:border-slate-800 flex items-center justify-between text-xs z-10">
-              <div className="flex items-center gap-2">
-                <img 
-                  src={authorAvatar} 
-                  alt={authorName} 
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-rose-600" 
-                />
-                <div className="min-w-0">
-                  <span className="font-bold block text-slate-900 dark:text-slate-100 text-xs truncate max-w-[130px]">
-                    {authorName}
-                  </span>
-                  <span className="text-[10px] text-slate-500 truncate block">
-                    {authorUsername}
-                  </span>
-                </div>
-              </div>
-              <span className="text-[11px] font-extrabold text-rose-600 dark:text-rose-400">
-                www.bolateeworld.in
-              </span>
-            </div>
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-[11px]">
+            <span className="font-bold text-slate-700 dark:text-slate-300">✍️ {authorName}</span>
+            <span className="text-rose-600 dark:text-rose-400 font-bold">{authorUsername}</span>
+          </div>
+        </div>
+
+        {/* Success Message Banner */}
+        {downloadSuccessMsg && (
+          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500 rounded-xl text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 animate-in fade-in">
+            {downloadSuccessMsg}
           </div>
         )}
 
         {/* 1-Click Social Sharing Actions */}
         <div className="space-y-2 pt-1">
-          {copiedPoemText && (
-            <p className="text-[10px] text-center text-emerald-600 font-bold animate-in fade-in">
-              ✓ कविता व लिंक कॉपी हुआ! Instagram खुल रहा है...
-            </p>
-          )}
+          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+            🚀 सोशल मीडिया पर शेयर करें:
+          </span>
 
           <div className="grid grid-cols-4 gap-1.5">
-            {/* WhatsApp */}
             <button
               onClick={handleShareWhatsApp}
-              disabled={sharingWhatsApp}
               className="py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer"
             >
               <WhatsAppIcon className="w-4 h-4" />
               <span>WhatsApp</span>
             </button>
 
-            {/* Facebook */}
             <button
               onClick={handleShareFacebook}
               className="py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer"
@@ -404,7 +293,6 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
               <span>Facebook</span>
             </button>
 
-            {/* Instagram */}
             <button
               onClick={handleShareInstagram}
               className="py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer"
@@ -413,34 +301,71 @@ export const PoemCardShareModal = ({ isOpen, onClose, post }) => {
               <span>Instagram</span>
             </button>
 
-            {/* X / Twitter */}
             <button
               onClick={handleShareTwitter}
               className="py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer"
             >
               <TwitterIcon className="w-4 h-4" />
-              <span>X / Twitter</span>
+              <span>X (Twitter)</span>
             </button>
           </div>
 
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={handleDownloadPNG}
-              disabled={downloading}
-              className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition disabled:opacity-50 cursor-pointer"
-            >
-              <Download className="w-4 h-4" />
-              <span>{downloading ? 'डाउनलोडिंग...' : 'HD पोस्टर डाउनलोड (PNG)'}</span>
-            </button>
+          {/* Download Permissions Area */}
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
+            {!isUserOwnPost ? (
+              <div className="p-3 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-center space-y-1">
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-500" />
+                  <span>रचनाकार कॉपीराइट संरक्षण</span>
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  डाउनलोड केवल रचनाकार के लिए उपलब्ध है। आप इसे सीधे सोशल मीडिया पर शेयर कर सकते हैं।
+                </p>
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full mt-1.5 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition cursor-pointer"
+                >
+                  {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedLink ? 'लिंक कॉपी हुआ!' : 'रचना लिंक कॉपी करें'}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                  📥 अपनी रचना का पोस्टर डाउनलोड करें:
+                </span>
 
-            <button
-              onClick={handleCopyLink}
-              className="py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
-            >
-              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedLink ? 'कॉपी हुआ!' : 'लिंक कॉपी'}</span>
-            </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Option 1: Free with Watermark */}
+                  <button
+                    onClick={() => handleDownloadPNG(true)}
+                    disabled={downloading}
+                    className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold rounded-xl text-xs flex flex-col items-center justify-center gap-0.5 transition active:scale-95 cursor-pointer text-center"
+                  >
+                    <div className="flex items-center gap-1">
+                      <Download className="w-3.5 h-3.5 text-rose-600" />
+                      <span>मुफ़्त डाउनलोड</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-normal">(boltiworld.in वॉटरमार्क सहित)</span>
+                  </button>
+
+                  {/* Option 2: 10 Points without Watermark */}
+                  <button
+                    onClick={() => handleDownloadPNG(false)}
+                    disabled={downloading}
+                    className="p-2.5 bg-gradient-to-r from-amber-500 to-rose-600 hover:brightness-110 text-white font-bold rounded-xl text-xs flex flex-col items-center justify-center gap-0.5 transition active:scale-95 shadow cursor-pointer text-center"
+                  >
+                    <div className="flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+                      <span>HD डाउनलोड (-10 Pts)</span>
+                    </div>
+                    <span className="text-[10px] text-amber-100 font-normal">(बिना वॉटरमार्क क्रिस्टल HD)</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+
         </div>
 
       </div>
