@@ -89,6 +89,57 @@ export const HomeFeedView = ({
         </button>
       </div>
 
+      {/* 🎖️ 6-Month Literary Membership Card Quick Access Banner */}
+      <div 
+        onClick={() => onOpenMembershipCard && onOpenMembershipCard()}
+        className="p-4 rounded-3xl bg-gradient-to-r from-amber-500 via-rose-700 to-amber-600 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:brightness-105 transition border border-amber-300/40"
+      >
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-full bg-white text-rose-900 font-black text-[10px] uppercase shadow">
+              6-माह डिजिटल कार्ड
+            </span>
+            <span className="text-xs font-extrabold text-amber-100">राष्ट्रीय सदस्यता प्रमाणपत्र</span>
+          </div>
+          <h3 className="text-sm sm:text-base font-bold font-rozha text-amber-50">
+            🎖️ अपना 6-माह सदस्यता पत्र देखें व व्हाट्सएप पर शेयर करें
+          </h3>
+          <p className="text-[11px] text-amber-100 hidden sm:block">
+            प्रमाणित सदस्य संख्या, 6 माह की वैधता तिथि व आधिकारिक डिजिटल पहचान पत्र डाउनलोड करें।
+          </p>
+        </div>
+        <button className="px-3.5 py-2 bg-white text-rose-950 rounded-2xl text-xs font-black shadow hover:bg-amber-50 transition shrink-0 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          <span>कार्ड देखें →</span>
+        </button>
+      </div>
+
+      {/* 🔴 Boltee Kalam YouTube Official Showcase Card */}
+      <div className="p-4 rounded-3xl bg-gradient-to-r from-red-700 via-rose-900 to-red-800 text-white shadow-xl flex items-center justify-between gap-4 border border-red-500/30">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md bg-white text-red-700 font-black text-[10px] uppercase tracking-wider shadow flex items-center gap-1">
+              <span>🔴 YOUTUBE MANCH</span>
+            </span>
+            <span className="text-xs font-bold text-red-200">+100 Pts Bonus</span>
+          </div>
+          <h3 className="text-sm sm:text-base font-bold font-rozha text-white">
+            बोलती कलम YouTube चैनल से जुड़ें एवं काव्य पाठ का आनंद लें
+          </h3>
+          <p className="text-[11px] text-red-100 hidden sm:block">
+            हमारे आधिकारिक यूट्यूब चैनल @bolateekalam को सब्सक्राइब करें और पाएं 100 रिवॉर्ड पॉइंट्स।
+          </p>
+        </div>
+        <a
+          href="https://www.youtube.com/@bolateekalam"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 bg-white text-red-700 hover:bg-red-50 font-black rounded-2xl text-xs shadow-md transition shrink-0 flex items-center gap-1.5"
+        >
+          <span>🔴 Subscribe (+100 Pts)</span>
+        </a>
+      </div>
+
       {/* Weekly Literature Challenge Banner */}
       {dailyChallenge && (
         <DailyChallenge 

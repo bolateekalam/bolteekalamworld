@@ -264,7 +264,7 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
             {/* Phone & Email */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मोबाइल नंबर:</label>
+                <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">मोबाइल नंबर (ऐच्छिक):</label>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
@@ -272,7 +272,7 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
-                    placeholder="10 अंकों का मोबाइल नंबर"
+                    placeholder="+91 XXXXX XXXXX (ऐच्छिक)"
                   />
                 </div>
               </div>
@@ -284,11 +284,48 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
-                    placeholder="आपका ईमेल"
+                    readOnly
+                    disabled
+                    className="w-full pl-9 p-2.5 rounded-xl bg-slate-200/60 dark:bg-slate-800/60 font-bold border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 cursor-not-allowed"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* City / Location */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-700 dark:text-slate-300">शहर / स्थान (City / Location):</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(async (pos) => {
+                        try {
+                          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&zoom=10`);
+                          if (res.ok) {
+                            const d = await res.json();
+                            setCity(d.address?.city || d.address?.state_district || d.address?.town || 'प्रयागराज');
+                          }
+                        } catch (e) {}
+                      });
+                    }
+                  }}
+                  className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md"
+                >
+                  <MapPin className="w-3 h-3 text-rose-600" />
+                  <span>📍 स्थान ऑटो-डिटेक्ट करें</span>
+                </button>
+              </div>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-rose-500 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full pl-9 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  placeholder="उदा. प्रयागराज, दिल्ली, लखनऊ..."
+                />
               </div>
             </div>
 

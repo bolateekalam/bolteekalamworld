@@ -169,10 +169,10 @@ export const ProfileView = ({
             </p>
 
             {/* Email & Verified Phone Badge */}
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-1">
+            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-1 flex-wrap">
               <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
                 <ShieldCheck className="w-4 h-4" />
-                <span>फोन: {profile.phone || 'ऑथराइज्ड यूज़र (+91 9812345678)'}</span>
+                <span>फोन: {profile.phone ? profile.phone : '+91 XXXXX XXXXX (ऐच्छिक)'}</span>
               </span>
               {profile.email && (
                 <span className="flex items-center gap-1">

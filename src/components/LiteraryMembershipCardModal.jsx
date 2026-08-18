@@ -374,14 +374,14 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         </div>
 
         {/* Action Controls */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
           <button
             onClick={handleDownloadPNG}
             disabled={downloading}
             className="py-2.5 px-3 bg-gradient-to-r from-rose-700 to-rose-800 hover:from-rose-800 hover:to-rose-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
-            <span>{downloading ? 'डाउनलोड हो रहा...' : 'PNG इमेज़ डाउनलोड करें'}</span>
+            <span>{downloading ? 'डाउनलोड हो रहा...' : 'PNG कार्ड डाउनलोड करें'}</span>
           </button>
 
           <button
@@ -389,15 +389,24 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
             className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95"
           >
             <WhatsAppIcon />
-            <span>WhatsApp पर शेयर</span>
+            <span>WhatsApp पर कार्ड शेयर करें</span>
           </button>
+
+          <a
+            href="https://www.youtube.com/@bolateekalam"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="py-2.5 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95"
+          >
+            <span>🔴 Boltee Kalam YouTube चैनल सब्सक्राइब करें</span>
+          </a>
 
           <button
             onClick={handleCopyShareLink}
             className="py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95"
           >
             {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-            <span>{copiedLink ? 'लिंक कॉपी हुआ!' : 'लिंक कॉपी करें'}</span>
+            <span>{copiedLink ? 'प्रोफ़ाइल लिंक कॉपी हुआ!' : 'प्रोफ़ाइल लिंक कॉपी करें'}</span>
           </button>
         </div>
 

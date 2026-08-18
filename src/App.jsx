@@ -875,26 +875,16 @@ function AppContent() {
     setUserProfile(updatedProf);
     localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updatedProf));
 
-    // If Google 1-Click Login: DIRECT ACCESS INTO APP WITH ZERO POPUPS
-    if (isDirectLogin) {
-      localStorage.setItem(`onboarding_completed_${userEmail}`, 'true');
-      setShowFirstTimeModal(false);
-      setShowAuthModal(false);
+    const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
+    const isDefaultUsername = !updatedProf.username || updatedProf.username === '@writer' || updatedProf.username.startsWith('@writer_');
 
-      const currentPath = (window.location.pathname || '/').toLowerCase();
-      if (currentPath === '/profile' || window.location.hash === '#/profile') {
-        handleNavigateView('profile');
-      }
-      return;
-    }
-
-    const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`) || localStorage.getItem('onboarding_completed_global');
-
-    if (!hasCompletedOnboarding && isDirectLogin === false) {
-      setPendingFirstTimeUser(userObj);
+    if (!hasCompletedOnboarding || isDefaultUsername) {
+      setPendingFirstTimeUser(updatedProf);
       setShowFirstTimeModal(true);
+      setShowAuthModal(false);
     } else {
       setShowFirstTimeModal(false);
+      setShowAuthModal(false);
       const currentPath = (window.location.pathname || '/').toLowerCase();
       if (currentPath === '/profile' || window.location.hash === '#/profile') {
         handleNavigateView('profile');
@@ -958,9 +948,68 @@ function AppContent() {
     localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updated));
     updateUserProfileInDB(updated, userEmail);
 
+    if (updated.avatar) {
+      localStorage.setItem(`custom_avatar_${userEmail}`, updated.avatar);
+      localStorage.setItem('custom_avatar_global', updated.avatar);
+    }
+
+    // Dynamic Cascade Update across published posts & comments
+    setPosts(prevPosts => {
+      return prevPosts.map(p => {
+        const isUserPost = Boolean(
+          (userEmail && p.author?.email && p.author.email.toLowerCase() === userEmail.toLowerCase()) ||
+          p.author?.id === 'user-me' ||
+          (p.author?.name && updated.name && p.author.name.trim().toLowerCase() === updated.name.trim().toLowerCase()) ||
+          (p.author?.username && updated.username && p.author.username.trim().toLowerCase() === updated.username.trim().toLowerCase()) ||
+          (p.author?.name && p.author.name.includes('आप'))
+        );
+
+        const updatedComments = (p.comments || []).map(c => {
+          const isUserComment = Boolean(
+            (userEmail && c.authorEmail && c.authorEmail.toLowerCase() === userEmail.toLowerCase()) ||
+            (c.authorId === 'user-me') ||
+            (c.author && updated.name && c.author.trim().toLowerCase() === updated.name.trim().toLowerCase()) ||
+            (c.author && c.author.includes('आप'))
+          );
+
+          if (isUserComment) {
+            return {
+              ...c,
+              author: updated.name || c.author,
+              authorUsername: updated.username || c.authorUsername,
+              avatar: updated.avatar || c.avatar
+            };
+          }
+          return c;
+        });
+
+        if (isUserPost) {
+          return {
+            ...p,
+            author: {
+              ...p.author,
+              name: updated.name || p.author?.name,
+              username: updated.username || p.author?.username,
+              avatar: updated.avatar || p.author?.avatar,
+              email: userEmail
+            },
+            comments: updatedComments
+          };
+        }
+
+        return {
+          ...p,
+          comments: updatedComments
+        };
+      });
+    });
+
     setShowFirstTimeModal(false);
     setShowAuthModal(false);
     setPendingFirstTimeUser(null);
+
+    // Auto-trigger 6-Month Membership Card popup immediately upon registration completion!
+    setShowGlobalMembershipModal(true);
 
     handleRewardPoints(50, 'प्रथम प्रोफ़ाइल पूर्ण करने पर (Welcome Bonus)');
   };
@@ -1369,6 +1418,8 @@ function AppContent() {
         setUnreadNotifications={setUnreadNotifications}
         onSearchSubmit={handleSearchSubmit}
         userPoints={userProfile?.points || 0}
+        onOpenMembershipCard={() => setShowGlobalMembershipModal(true)}
+        onOpenYouTube={() => requireAuth(() => setShowYouTubeModal(true))}
       />
 
       {/* Main Layout Container */}

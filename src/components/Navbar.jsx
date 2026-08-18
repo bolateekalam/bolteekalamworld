@@ -25,7 +25,9 @@ export const Navbar = ({
   setUserRole,
   currentUser,
   onOpenAuthModal,
-  onLogout
+  onLogout,
+  onOpenMembershipCard,
+  onOpenYouTube
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -105,8 +107,33 @@ export const Navbar = ({
         </form>
 
         {/* Action Controls: Sleek & Clean Header */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          
+        <div className="flex items-center gap-1.5 sm:gap-3">
+
+          {/* 6-Month Membership Card Button */}
+          {onOpenMembershipCard && (
+            <button
+              onClick={onOpenMembershipCard}
+              aria-label="6-माह डिजिटल कार्ड देखें"
+              className="px-2.5 py-1.5 bg-gradient-to-r from-amber-500 via-rose-600 to-rose-700 text-white font-extrabold rounded-xl text-[11px] flex items-center gap-1 shadow-md hover:brightness-110 active:scale-95 transition"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-200 animate-spin" />
+              <span className="hidden sm:inline">🎖️ 6-माह कार्ड</span>
+              <span className="sm:hidden">🎖️ कार्ड</span>
+            </button>
+          )}
+
+          {/* YouTube Channel Button */}
+          {onOpenYouTube && (
+            <button
+              onClick={onOpenYouTube}
+              aria-label="Boltee Kalam YouTube चैनल खोलें"
+              className="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-[11px] flex items-center gap-1 shadow hover:scale-105 active:scale-95 transition"
+            >
+              <span className="text-xs">🔴</span>
+              <span className="hidden md:inline">YouTube</span>
+            </button>
+          )}
+
           {/* Notification Bell Icon */}
           <div className="relative">
             <button
@@ -170,6 +197,40 @@ export const Navbar = ({
                     <User className="w-4 h-4 text-rose-600" />
                     <span>मेरा प्रोफ़ाइल</span>
                   </button>
+
+                  {/* Option: मेरा 6-माह डिजिटल कार्ड */}
+                  {onOpenMembershipCard && (
+                    <button
+                      onClick={() => { onOpenMembershipCard(); setShowUserDropdown(false); }}
+                      aria-label="मेरा 6-माह डिजिटल कार्ड खोलें"
+                      className="w-full text-left px-3 py-2 hover:bg-amber-50 dark:hover:bg-amber-950/40 flex items-center justify-between text-amber-900 dark:text-amber-100 font-extrabold"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        <span>🎖️ 6-माह डिजिटल सदस्यता कार्ड</span>
+                      </div>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500 to-rose-600 text-white font-black shadow-sm">
+                        FREE
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Option: Boltee Kalam YouTube */}
+                  {onOpenYouTube && (
+                    <button
+                      onClick={() => { onOpenYouTube(); setShowUserDropdown(false); }}
+                      aria-label="Boltee Kalam YouTube चैनल खोलें"
+                      className="w-full text-left px-3 py-2 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center justify-between text-red-600 dark:text-red-400 font-bold"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">🔴</span>
+                        <span>Boltee Kalam YouTube चैनल</span>
+                      </div>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-extrabold">
+                        +100 Pts
+                      </span>
+                    </button>
+                  )}
 
                   {/* Option 2: कवि इमेज़ पोस्टर Studio (25 Pts) */}
                   <button
