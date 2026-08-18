@@ -875,16 +875,14 @@ function AppContent() {
     setUserProfile(updatedProf);
     localStorage.setItem('bolteekalam_user_profile', JSON.stringify(updatedProf));
 
-    const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${userEmail}`);
-    const isDefaultUsername = !updatedProf.username || updatedProf.username === '@writer' || updatedProf.username.startsWith('@writer_');
+    setShowAuthModal(false);
+    setShowFirstTimeModal(false);
 
-    if (!hasCompletedOnboarding || isDefaultUsername) {
-      setPendingFirstTimeUser(updatedProf);
-      setShowFirstTimeModal(true);
-      setShowAuthModal(false);
+    // If new account signup, open the 6-Month Membership Card immediately!
+    if (isDirectLogin === true) {
+      setShowGlobalMembershipModal(true);
+      handleRewardPoints(100, 'नया खाता बनाने पर (Welcome Bonus)');
     } else {
-      setShowFirstTimeModal(false);
-      setShowAuthModal(false);
       const currentPath = (window.location.pathname || '/').toLowerCase();
       if (currentPath === '/profile' || window.location.hash === '#/profile') {
         handleNavigateView('profile');

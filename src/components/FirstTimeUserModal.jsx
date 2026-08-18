@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, AtSign, Phone, Mail, MapPin, Sparkles, CheckCircle2, ShieldCheck, Camera, Calendar, BookOpen, Navigation, Loader2 } from 'lucide-react';
 
+import { checkUsernameAvailability } from '../lib/userService';
+
 export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(() => {
@@ -18,6 +20,8 @@ export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
   
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState({ checking: false, available: true, message: '' });
   const [error, setError] = useState('');
 
   // Sync state when user prop updates (e.g., from Google Login or Signup)
@@ -35,6 +39,27 @@ export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
       }
     }
   }, [user, isOpen]);
+
+  // Real-time username verification
+  useEffect(() => {
+    const clean = username.trim().toLowerCase().replace(/^[@#]/, '');
+    if (!clean || clean.length < 3) {
+      setUsernameStatus({ checking: false, available: false, message: 'कम से कम 3 अक्षर दर्ज करें' });
+      return;
+    }
+
+    setUsernameStatus({ checking: true, available: null, message: 'जाँच हो रही है...' });
+    const timer = setTimeout(async () => {
+      const res = await checkUsernameAvailability(clean, user?.id, user?.email);
+      setUsernameStatus({
+        checking: false,
+        available: res.available,
+        message: res.message
+      });
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [username, user]);
 
   // Calculate age dynamically from DOB
   const calculateAge = (dobString) => {
@@ -95,35 +120,62 @@ export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     setError('');
 
     const finalName = name.trim() || user?.name || 'साहित्य साधक';
     const finalEmail = email.trim() || user?.email || 'user@bolteekalam.com';
 
-    // Username validation
+    // Username uniqueness validation
     const cleanUser = (username.trim() || finalName.toLowerCase().replace(/\s+/g, '_')).replace(/^[@#]/, '').replace(/[^a-zA-Z0-9_]/g, '');
-    const finalUsername = `@${cleanUser || 'writer'}`;
+    
+    if (cleanUser.length < 3) {
+      setError('यूज़रनेम कम से कम 3 अक्षरों का होना चाहिए!');
+      return;
+    }
 
-    // Phone number: optional! If not provided, save as empty / optional
-    const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
-    const finalPhone = cleanPhone && cleanPhone.length === 10 ? `+91 ${cleanPhone}` : '';
+    setIsSubmitting(true);
+    try {
+      const checkRes = await checkUsernameAvailability(cleanUser, user?.id, user?.email);
+      if (!checkRes.available) {
+        setError(checkRes.message);
+        setIsSubmitting(false);
+        return;
+      }
 
-    onCompleteProfile({
-      ...user,
-      name: finalName,
-      username: finalUsername,
-      phone: finalPhone,
-      email: finalEmail,
-      city: city.trim() || 'प्रयागराज',
-      birthday,
-      age: calculateAge(birthday),
-      genre,
-      bio: bio.trim(),
-      avatar: selectedAvatar,
-      isVerified: true
-    });
+      const finalUsername = `@${cleanUser || 'writer'}`;
+      const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+      const finalPhone = cleanPhone && cleanPhone.length === 10 ? `+91 ${cleanPhone}` : '';
+
+      onCompleteProfile({
+        ...user,
+        name: finalName,
+        username: finalUsername,
+        phone: finalPhone,
+        email: finalEmail,
+        city: city.trim() || 'प्रयागराज',
+        birthday,
+        age: calculateAge(birthday),
+        genre,
+        bio: bio.trim(),
+        avatar: selectedAvatar,
+        isVerified: true
+      });
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      // Fallback complete so user is never stuck
+      onCompleteProfile({
+        ...user,
+        name: finalName,
+        username: `@${cleanUser}`,
+        avatar: selectedAvatar,
+        city: city || 'प्रयागराज',
+        isVerified: true
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCustomImageUpload = (e) => {
@@ -387,10 +439,21 @@ export const FirstTimeUserModal = ({ isOpen, user, onCompleteProfile }) => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 transition active:scale-95 mt-2 cursor-pointer"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-75 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 transition active:scale-95 mt-2 cursor-pointer"
           >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>प्रोफ़ाइल सहेजें एवं 6-माह कार्ड प्राप्त करें (+50 Welcome Pts)</span>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>प्रोफ़ाइल सहेजी जा रही है...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                <span>प्रोफ़ाइल सहेजें एवं 6-माह कार्ड प्राप्त करें (+50 Welcome Pts)</span>
+              </>
+            )}
           </button>
 
         </form>

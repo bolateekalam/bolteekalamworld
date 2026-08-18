@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Lock, Mail, User, MapPin, Sparkles, LogIn, UserPlus, CheckCircle2, ShieldCheck, Phone, KeyRound, AlertTriangle, Crown, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
+import { checkUsernameAvailability } from '../lib/userService';
 
 export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) => {
   const { t } = useLanguage();
@@ -19,6 +20,9 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
 
   // Signup Form State
   const [name, setName] = useState('');
+  const [signupUsername, setSignupUsername] = useState('');
+  const [isCustomUsernameSet, setIsCustomUsernameSet] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState({ checking: false, available: null, message: '' });
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -201,6 +205,35 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     }
   };
 
+  // Auto-generate username from name if not manually edited
+  const handleNameChange = (val) => {
+    setName(val);
+    if (!isCustomUsernameSet) {
+      const generated = val.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      setSignupUsername(generated);
+    }
+  };
+
+  // Real-time username verification against Supabase & Reserved names
+  useEffect(() => {
+    if (!signupUsername || signupUsername.trim().length < 3) {
+      setUsernameStatus({ checking: false, available: null, message: 'कम से कम 3 अक्षर दर्ज करें' });
+      return;
+    }
+
+    setUsernameStatus({ checking: true, available: null, message: 'जाँच हो रही है...' });
+    const timer = setTimeout(async () => {
+      const result = await checkUsernameAvailability(signupUsername);
+      setUsernameStatus({
+        checking: false,
+        available: result.available,
+        message: result.message
+      });
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [signupUsername]);
+
   // 4. Initiate New Account Registration & Generate Email OTP (Step 1)
   const handleInitiateSignup = async (e) => {
     e.preventDefault();
@@ -209,6 +242,19 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
 
     if (!name.trim()) {
       setAuthError('कृपया अपना पूरा नाम दर्ज करें!');
+      return;
+    }
+
+    const cleanUser = signupUsername.trim().toLowerCase().replace(/^[@#]/, '').replace(/[^a-z0-9_]/g, '');
+    if (!cleanUser || cleanUser.length < 3) {
+      setAuthError('कृपया कम से कम 3 अक्षरों का यूज़रनेम दर्ज करें!');
+      return;
+    }
+
+    // Verify username uniqueness
+    const checkRes = await checkUsernameAvailability(cleanUser);
+    if (!checkRes.available) {
+      setAuthError(checkRes.message);
       return;
     }
 
@@ -225,14 +271,14 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     // Try Supabase Auth Sign Up
     try {
       const cleanEmail = email.trim().toLowerCase();
-      const cleanUsername = `@${name.trim().toLowerCase().replace(/\s+/g, '_')}`;
+      const finalUsername = `@${cleanUser}`;
       await supabase.auth.signUp({
         email: cleanEmail,
         password: password,
         options: {
           data: {
             name: name.trim(),
-            username: cleanUsername
+            username: finalUsername
           }
         }
       });
@@ -244,7 +290,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     setGeneratedOtp(mockOtp);
     setOtpInput(mockOtp); // Pre-fill for instant smooth experience
     setStep(2);
-    setSuccessMsg(`🎉 आपका सत्यापन कोड (${mockOtp}) जनरेट हो गया है! नीचे ऑटो-फ़िल कोड दबाएँ या ओटीपी दर्ज करें।`);
+    setSuccessMsg(`🎉 आपका सत्यापन कोड (${mockOtp}) जनरेट हो गया है! नीचे 'सत्यापित करें' दबाएँ।`);
   };
 
   // 5. Verify OTP & Finalize Account Creation (Step 2)
@@ -258,12 +304,16 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       return;
     }
 
+    const cleanUser = signupUsername.trim().toLowerCase().replace(/^[@#]/, '').replace(/[^a-z0-9_]/g, '');
+    const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+    const finalPhone = cleanPhone && cleanPhone.length === 10 ? `+91 ${cleanPhone}` : '';
+
     const newUser = {
       name: name.trim(),
-      username: `@${name.trim().toLowerCase().replace(/\s+/g, '_')}`,
+      username: `@${cleanUser || 'writer'}`,
       email: email.trim().toLowerCase(),
-      phone: phone ? `+91 ${phone.trim()}` : '+91 9812345678',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+      phone: finalPhone,
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
       role: 'user',
       city: 'प्रयागराज',
       isVerified: true,
@@ -275,11 +325,11 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       localStorage.setItem(`user_pwd_${email.trim().toLowerCase()}`, password);
     } catch (e) {}
 
-    setSuccessMsg('ओटीपी सत्यापित! आपका नया खाता सफलतापूर्वक चालू हो गया है। (+100 वेलकम पॉइंट्स जोड़ दिए गए हैं)');
+    setSuccessMsg('ओटीपी सत्यापित! आपका नया खाता सफलतापूर्वक चालू हो गया है। (+100 वेलकम पॉइंट्स)');
     setTimeout(() => {
-      onLoginSuccess(newUser);
+      onLoginSuccess(newUser, true);
       onClose();
-    }, 600);
+    }, 500);
   };
 
   return (
@@ -441,6 +491,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         {/* FORM 2: CREATE NEW ACCOUNT (STEP 1: DETAILS & PASSWORD, STEP 2: EMAIL OTP) */}
         {activeTab === 'signup' && step === 1 && (
           <form onSubmit={handleInitiateSignup} className="space-y-3 relative z-10">
+            {/* Full Name */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
                 <User className="w-3.5 h-3.5 text-rose-500" />
@@ -450,12 +501,57 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
                 type="text"
                 required
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="उदा. संजय कुमार या काजल सिंह"
                 className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-rose-500 font-semibold"
               />
             </div>
 
+            {/* Custom Unique Username */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                  <span className="text-rose-500 font-extrabold">@</span>
+                  <span>मनपसंद यूज़रनेम (Custom Username)</span>
+                </label>
+                {usernameStatus.checking ? (
+                  <span className="text-[10px] text-slate-400 font-semibold">जाँच हो रही है...</span>
+                ) : usernameStatus.available === true ? (
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    ✓ उपलब्ध है
+                  </span>
+                ) : usernameStatus.available === false ? (
+                  <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                    {usernameStatus.message}
+                  </span>
+                ) : null}
+              </div>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-xs font-bold text-slate-400">@</span>
+                <input
+                  type="text"
+                  required
+                  value={signupUsername}
+                  onChange={(e) => {
+                    setIsCustomUsernameSet(true);
+                    setSignupUsername(e.target.value.replace(/^[@#]/, '').replace(/\s+/g, '_').toLowerCase());
+                  }}
+                  placeholder="kaviraj_singh"
+                  className={`w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none transition ${
+                    usernameStatus.available === true
+                      ? 'border-emerald-500/80 focus:border-emerald-500 ring-1 ring-emerald-500/20'
+                      : usernameStatus.available === false
+                      ? 'border-rose-500 focus:border-rose-500 ring-1 ring-rose-500/20'
+                      : 'border-slate-200 dark:border-slate-700 focus:border-rose-500'
+                  }`}
+                />
+              </div>
+              <p className="text-[10px] text-slate-400">
+                * केवल अद्वितीय नाम मान्य है, एक यूज़रनेम केवल एक ही लेखक का होगा।
+              </p>
+            </div>
+
+            {/* Email Address */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
                 <Mail className="w-3.5 h-3.5 text-rose-500" />
@@ -467,6 +563,25 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="उदा. yourname@gmail.com"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-rose-500 font-semibold"
+              />
+            </div>
+
+            {/* Mobile Phone Number (Optional) */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  <span>मोबाइल नंबर (ऐच्छिक)</span>
+                </label>
+                <span className="text-[10px] text-slate-400 font-semibold">वैकल्पिक</span>
+              </div>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                maxLength={10}
+                placeholder="उदा. 9876543210 (वैकल्पिक)"
                 className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-rose-500 font-semibold"
               />
             </div>

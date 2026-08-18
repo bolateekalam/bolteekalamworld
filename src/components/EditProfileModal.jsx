@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Upload, Save, User, MapPin, FileText, CheckCircle2, Image as ImageIcon, Camera, Phone, Mail, BookOpen, Calendar, AtSign, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { checkUsernameAvailability, canChangeUsernameThisMonth, recordUsernameChange } from '../lib/userService';
 
 export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }) => {
   const { t } = useLanguage();
   const fileInputRef = useRef(null);
 
+  const initialUsername = (userProfile?.username || 'writer_user').replace(/^[@#]/, '');
   const [name, setName] = useState(userProfile?.name || 'नया साहित्य साधक');
-  const [username, setUsername] = useState((userProfile?.username || 'writer_user').replace(/^[@#]/, ''));
+  const [username, setUsername] = useState(initialUsername);
   const [phone, setPhone] = useState(userProfile?.phone || '');
   const [email, setEmail] = useState(userProfile?.email || '');
   const [city, setCity] = useState(userProfile?.city || 'प्रयागराज');
@@ -18,14 +20,15 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
   
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [usernameError, setUsernameError] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState({ checking: false, available: true, message: '' });
+  const [monthlyLimitInfo, setMonthlyLimitInfo] = useState({ allowed: true, remainingChanges: 2, usedChanges: 0, message: '' });
   const [isCompressing, setIsCompressing] = useState(false);
-
-  const reservedUsernames = ['sanjayrai_founder', 'sanjayrai', 'akash_cofounder', 'super_admin', 'bolteekalamworld'];
 
   useEffect(() => {
     if (userProfile) {
       setName(userProfile.name || '');
-      setUsername((userProfile.username || 'writer').replace(/^[@#]/, ''));
+      const u = (userProfile.username || 'writer').replace(/^[@#]/, '');
+      setUsername(u);
       setPhone(userProfile.phone || '');
       setEmail(userProfile.email || '');
       setCity(userProfile.city || 'प्रयागराज');
@@ -33,8 +36,39 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
       setBirthday(userProfile.birthday || '03 अगस्त 2026');
       setGenre(userProfile.genre || 'कविता (Poetry)');
       setAvatar(userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300');
+      
+      const limit = canChangeUsernameThisMonth(userProfile.email);
+      setMonthlyLimitInfo(limit);
     }
   }, [userProfile, isOpen]);
+
+  // Real-time username verification
+  useEffect(() => {
+    const cleanUser = username.trim().toLowerCase().replace(/^[@#]/, '');
+    const origUser = (userProfile?.username || '').trim().toLowerCase().replace(/^[@#]/, '');
+
+    if (!cleanUser || cleanUser === origUser) {
+      setUsernameStatus({ checking: false, available: true, message: '' });
+      return;
+    }
+
+    if (cleanUser.length < 3) {
+      setUsernameStatus({ checking: false, available: false, message: 'कम से कम 3 अक्षर लिखें' });
+      return;
+    }
+
+    setUsernameStatus({ checking: true, available: null, message: 'जाँच हो रही है...' });
+    const timer = setTimeout(async () => {
+      const res = await checkUsernameAvailability(cleanUser, userProfile?.id, userProfile?.email);
+      setUsernameStatus({
+        checking: false,
+        available: res.available,
+        message: res.message
+      });
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [username, userProfile]);
 
   const presetAvatars = [
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
@@ -60,10 +94,8 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
       const reader = new FileReader();
       reader.onload = (event) => {
         const rawDataUrl = event.target.result;
-        // 1. Instantly set preview so user sees new avatar right away!
         setAvatar(rawDataUrl);
 
-        // 2. Compress via Canvas2D (~100KB) for permanent storage
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
@@ -99,21 +131,35 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setUsernameError('');
 
-    let formattedUsername = username.trim().toLowerCase().replace(/^[@#]/, '');
+    let formattedUsername = username.trim().toLowerCase().replace(/^[@#]/, '').replace(/\s+/g, '_');
+    const origUser = (userProfile?.username || '').trim().toLowerCase().replace(/^[@#]/, '');
 
-    if (reservedUsernames.includes(formattedUsername) && userProfile?.username?.replace(/^[@#]/, '') !== formattedUsername) {
-      setUsernameError(`यह यूज़रनेम (${formattedUsername}) पहले से सुरक्षित है! कृपया कोई अन्य यूनिक यूज़रनेम लिखें।`);
-      return;
+    // If username changed, verify monthly change limit and uniqueness
+    if (formattedUsername !== origUser) {
+      const limit = canChangeUsernameThisMonth(userProfile?.email);
+      if (!limit.allowed) {
+        setUsernameError('⚠️ आप एक माह में केवल 2 बार ही यूज़रनेम बदल सकते हैं। इस महीने की सीमा (2/2) समाप्त हो चुकी है।');
+        return;
+      }
+
+      const res = await checkUsernameAvailability(formattedUsername, userProfile?.id, userProfile?.email);
+      if (!res.available) {
+        setUsernameError(res.message);
+        return;
+      }
+
+      // Record successful username change timestamp
+      recordUsernameChange(userProfile?.email);
     }
 
     onSaveProfile({
       ...userProfile,
       name,
-      username: formattedUsername,
+      username: `@${formattedUsername}`,
       phone,
       email,
       city,
@@ -247,17 +293,32 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
               </div>
 
               <div>
-                <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">यूनिक यूज़रनेम (Unique Username):</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300">यूज़रनेम (@handle):</label>
+                  <span className={`text-[10px] font-bold ${monthlyLimitInfo.allowed ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600'}`}>
+                    {monthlyLimitInfo.message}
+                  </span>
+                </div>
                 <div className="relative">
+                  <AtSign className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value.replace(/^[@#]/, ''))}
-                    className="w-full p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    onChange={(e) => setUsername(e.target.value.replace(/^[@#]/, '').replace(/\s+/g, '_').toLowerCase())}
+                    className={`w-full pl-9 pr-4 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold border text-slate-900 dark:text-slate-100 ${
+                      usernameStatus.available === false
+                        ? 'border-rose-500 ring-1 ring-rose-500/30'
+                        : 'border-slate-200 dark:border-slate-700'
+                    }`}
                     placeholder="उदा. kajal या sanjayrai"
                     required
                   />
                 </div>
+                {usernameStatus.message && (
+                  <p className={`text-[10px] mt-1 font-semibold ${usernameStatus.available ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    {usernameStatus.message}
+                  </p>
+                )}
               </div>
             </div>
 
