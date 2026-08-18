@@ -192,7 +192,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         });
       } catch (e) {}
 
-      // Single Google Account Constraint: Check for existing saved profile
+      // Google Account Profile check
       let existingProfile = null;
       try {
         const savedProf = localStorage.getItem('bolteekalam_user_profile');
@@ -204,16 +204,34 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         }
       } catch (e) {}
 
-      const googleUserDraft = existingProfile || {
-        name: 'साहित्य साधक',
-        username: `@writer_${Math.floor(1000 + Math.random() * 9000)}`,
-        email: 'user.verified@gmail.com',
+      let chosenName = existingProfile?.name;
+      if (!chosenName || chosenName === 'साहित्य साधक') {
+        const promptName = window.prompt ? window.prompt('गूगल लॉगिन: कृपया अपना पूरा नाम (Full Name) दर्ज करें:', '') : null;
+        if (promptName && promptName.trim()) {
+          chosenName = promptName.trim();
+        } else {
+          chosenName = name.trim() || 'साहित्यिक लेखक';
+        }
+      }
+
+      const cleanUserSlug = chosenName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'writer';
+      const nowIso = new Date().toISOString();
+
+      const googleUserDraft = existingProfile ? {
+        ...existingProfile,
+        name: chosenName,
+        createdAt: existingProfile.createdAt || nowIso
+      } : {
+        name: chosenName,
+        username: `@${cleanUserSlug}_${Math.floor(100 + Math.random() * 900)}`,
+        email: 'user.google@bolateeworld.in',
         phone: '+91 9812345678',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
         role: 'user',
-        city: 'वाराणसी (बनारस)',
+        city: 'प्रयागराज',
         isVerified: true,
-        points: 150
+        points: 20,
+        createdAt: nowIso
       };
 
       setTimeout(() => {

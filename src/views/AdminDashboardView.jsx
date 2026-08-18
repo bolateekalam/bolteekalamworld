@@ -20,7 +20,9 @@ export const AdminDashboardView = ({
   onUpdateFestivalTheme,
   youtubeProofs = [],
   onApproveProof,
-  onRejectProof
+  onRejectProof,
+  onPenaltyProof,
+  onBanUserFromYouTube
 }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('weeklyJury');
@@ -878,24 +880,61 @@ export const AdminDashboardView = ({
 
                   {/* Action Buttons for Pending items */}
                   {proof.status === 'pending' && (
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => onApproveProof && onApproveProof(proof)}
-                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 cursor-pointer"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>स्वीकृत करें (+10 Pts Credit)</span>
-                      </button>
+                    <div className="space-y-2 pt-1">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onApproveProof && onApproveProof(proof)}
+                          className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>स्वीकृत करें (+10 Pts Credit)</span>
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => onRejectProof && onRejectProof(proof)}
-                        className="py-2 px-3 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
-                      >
-                        <XCircle className="w-4 h-4" />
-                        <span>अस्वीकृत</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => onRejectProof && onRejectProof(proof)}
+                          className="py-2 px-3 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          <span>सामान्य अस्वीकृत</span>
+                        </button>
+                      </div>
+
+                      {/* Anti-Fraud Penalty Trigger Buttons */}
+                      <div className="p-2.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl space-y-1.5 text-[11px]">
+                        <span className="font-bold text-red-700 dark:text-red-300 block">
+                          ⚠️ धोखाधड़ी / डुप्लीकेट स्क्रीनशॉट पेनल्टी (Anti-Fraud Actions):
+                        </span>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => onPenaltyProof && onPenaltyProof(proof, -50, 1)}
+                            className="py-1.5 px-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-[10px] transition active:scale-95 cursor-pointer shadow-sm"
+                            title="1st Strike: -50 Points Debit"
+                          >
+                            1st Strike (-50 Pts)
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => onPenaltyProof && onPenaltyProof(proof, -100, 2)}
+                            className="py-1.5 px-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg text-[10px] transition active:scale-95 cursor-pointer shadow-sm"
+                            title="2nd Strike: -100 Points Debit"
+                          >
+                            2nd Strike (-100 Pts)
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => onBanUserFromYouTube && onBanUserFromYouTube(proof)}
+                            className="py-1.5 px-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-lg text-[10px] transition active:scale-95 cursor-pointer shadow-sm"
+                            title="3rd Strike: Permanently Block User from YouTube Task"
+                          >
+                            🚫 ब्लॉक करें (Ban)
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

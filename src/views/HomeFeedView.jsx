@@ -37,11 +37,11 @@ export const HomeFeedView = ({
   return (
     <div className="space-y-6">
 
-      {/* 🇮🇳 15th August Independence Day Patriotic Special Banner (100% Fail-Safe Gradient) */}
+      {/* 🇮🇳 Welcome Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-rose-900 to-emerald-800 text-white shadow-2xl p-6 border border-amber-400/30">
         <div className="absolute -right-8 -bottom-8 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-2 max-w-xl">
+          <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500 text-white text-xs font-extrabold shadow-md">
               <Sparkles className="w-3.5 h-3.5 fill-white" />
               <span>राष्ट्रीय डिजिटल साहित्यिक मंच ✍️</span>
@@ -53,79 +53,75 @@ export const HomeFeedView = ({
               अपनी कविताएँ, ग़ज़लें, विचार साझा करें, दैनिक काव्य चुनौतियों में भाग लें और सुंदर कवि पोस्टर डिज़ाइन करें।
             </p>
           </div>
-
-          <button
-            onClick={() => {
-              if (requireAuth && !requireAuth()) return;
-              if (setActiveView) setActiveView('posterStudio');
-            }}
-            className="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xl flex items-center gap-2 transition transform active:scale-95 shrink-0 cursor-pointer"
-          >
-            <ImageIcon className="w-4 h-4 text-slate-950" />
-            <span>साहित्यिक पोस्टर बनाएं</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
-      {/* 📸 Poet Digital Poster Maker Banner */}
-      <div 
-        onClick={() => {
-          if (requireAuth && !requireAuth()) return;
-          if (setActiveView) setActiveView('posterStudio');
-        }}
-        className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-purple-900 via-indigo-900 to-rose-900 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-95 transition group border border-purple-500/20"
-      >
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-md bg-rose-500 text-white font-extrabold text-[10px] uppercase tracking-wider shadow">
-              POSTER STUDIO
-            </span>
-            <span className="text-xs font-bold text-purple-200">डिजिटल कवि पोस्टर मेकर</span>
+      {/* 50-50 Split Grid: Left = Poster Studio (1/2), Right = 6-Month Digital Card (1/2) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Left: 📸 Digital Poet Poster Studio */}
+        <div 
+          onClick={() => {
+            if (requireAuth && !requireAuth()) return;
+            if (setActiveView) setActiveView('posterStudio');
+          }}
+          className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 text-white shadow-xl flex flex-col justify-between gap-3 cursor-pointer hover:scale-[1.01] transition border border-purple-500/30 group"
+        >
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 rounded-md bg-purple-600 text-white font-extrabold text-[10px] uppercase tracking-wider shadow">
+                POSTER STUDIO
+              </span>
+              <span className="text-xs font-bold text-purple-200">📸 डिजिटल पोस्टर</span>
+            </div>
+            <h3 className="text-sm sm:text-base font-bold font-rozha text-purple-100 group-hover:text-amber-200 transition">
+              कवि फोटो पोस्टर मेकर
+            </h3>
+            <p className="text-xs text-purple-200/90 leading-relaxed font-tiro">
+              अपनी कविता को सुंदर डिजिटल पोस्टर में बदलें और एचडी फोटो डाउनलोड करें।
+            </p>
           </div>
-          <h3 className="text-sm sm:text-base font-bold font-rozha text-purple-100 group-hover:underline">
-            📸 अपनी कविता को सुंदर फोटो पोस्टर में बदलकर शेयर करें
-          </h3>
-          <p className="text-[11px] text-purple-200 hidden sm:block">
-            फोटो स्टूडियो कैनवास का उपयोग करें और अपनी रचना का 1-क्लिक शेयर पोस्टर कार्ड बनाएं।
-          </p>
-        </div>
 
-        <button className="px-4 py-2 bg-white text-purple-950 rounded-2xl text-xs font-extrabold shadow-md hover:bg-purple-100 transition shrink-0 flex items-center gap-1.5">
-          <ImageIcon className="w-3.5 h-3.5 text-purple-700" />
-          <span>पोस्टर स्टूडियो खोलें →</span>
-        </button>
-      </div>
-
-      {/* 🎖️ 6-Month Literary Membership Card Quick Access Banner */}
-      <div 
-        onClick={() => {
-          if (requireAuth && !requireAuth()) return;
-          if (onOpenMembershipCard) onOpenMembershipCard();
-        }}
-        className="p-4 rounded-3xl bg-gradient-to-r from-amber-500 via-rose-700 to-amber-600 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:brightness-105 transition border border-amber-300/40"
-      >
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full bg-white text-rose-900 font-black text-[10px] uppercase shadow">
-              6-माह डिजिटल कार्ड
-            </span>
-            <span className="text-xs font-extrabold text-amber-100">राष्ट्रीय सदस्यता प्रमाणपत्र</span>
+          <div className="pt-2 flex justify-end">
+            <button className="px-4 py-2 bg-white hover:bg-purple-50 text-purple-950 rounded-2xl text-xs font-extrabold shadow transition flex items-center gap-1.5">
+              <ImageIcon className="w-3.5 h-3.5 text-purple-700" />
+              <span>पोस्टर बनाएं →</span>
+            </button>
           </div>
-          <h3 className="text-sm sm:text-base font-bold font-rozha text-amber-50">
-            🎖️ अपना 6-माह सदस्यता पत्र देखें व सोशल मीडिया पर शेयर करें
-          </h3>
-          <p className="text-[11px] text-amber-100 hidden sm:block">
-            प्रमाणित सदस्य संख्या, 6 माह की वैधता तिथि व आधिकारिक डिजिटल पहचान पत्र डाउनलोड करें।
-          </p>
         </div>
-        <button className="px-3.5 py-2 bg-white text-rose-950 rounded-2xl text-xs font-black shadow hover:bg-amber-50 transition shrink-0 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-          <span>कार्ड देखें →</span>
-        </button>
+
+        {/* Right: 🎖️ 6-Month Literary Membership Card */}
+        <div 
+          onClick={() => {
+            if (requireAuth && !requireAuth()) return;
+            if (onOpenMembershipCard) onOpenMembershipCard();
+          }}
+          className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-600 via-rose-800 to-rose-950 text-white shadow-xl flex flex-col justify-between gap-3 cursor-pointer hover:scale-[1.01] transition border border-amber-400/40 group"
+        >
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[10px] uppercase shadow">
+                6-माह डिजिटल कार्ड
+              </span>
+              <span className="text-xs font-extrabold text-amber-200">🎖️ सदस्यता पत्र</span>
+            </div>
+            <h3 className="text-sm sm:text-base font-bold font-rozha text-amber-50 group-hover:text-amber-300 transition">
+              राष्ट्रीय 6-माह डिजिटल सदस्यता प्रमाणपत्र
+            </h3>
+            <p className="text-xs text-amber-100/90 leading-relaxed font-tiro">
+              सदस्यता क्रमांक, 6 माह की वैधता तिथि व आधिकारिक डिजिटल पहचान पत्र डाउनलोड करें।
+            </p>
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl text-xs font-black shadow transition flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
+              <span>कार्ड देखें →</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* 🔴 Boltee Kalam YouTube Official Showcase & Task Card */}
+      {/* 🔴 Boltee Kalam YouTube Official Showcase & Task Card (Below the 50-50 Grid) */}
       <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-red-700 via-rose-900 to-red-800 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-red-500/30">
         <div className="space-y-1 max-w-lg">
           <div className="flex items-center gap-2">

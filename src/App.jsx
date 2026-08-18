@@ -224,6 +224,8 @@ function AppContent() {
     } catch (e) {}
   };
 
+  const [profileInitialTab, setProfileInitialTab] = useState('works');
+
   // Notifications List State (Persisted in localStorage)
   const [notificationsList, setNotificationsList] = useState(() => {
     try {
@@ -429,10 +431,13 @@ function AppContent() {
           if (stored) savedProf = JSON.parse(stored);
         } catch (e) {}
 
-        const existingPoints = savedProf?.points !== undefined ? savedProf.points : 100;
+        const existingPoints = savedProf?.points !== undefined ? savedProf.points : 20;
         const preservedAvatar = savedProf?.avatar || session.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200';
-        const preservedName = savedProf?.name || session.user.user_metadata?.full_name || 'गूगल यूज़र';
-        const preservedUsername = savedProf?.username || `@${(session.user.user_metadata?.full_name || 'writer').toLowerCase().replace(/\s+/g, '_')}`;
+        const rawGoogleName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || userEmail.split('@')[0];
+        const preservedName = savedProf?.name && savedProf.name !== 'साहित्य साधक' ? savedProf.name : (rawGoogleName || 'साहित्यिक लेखक');
+        const preservedUsername = savedProf?.username || `@${(rawGoogleName || 'writer').toLowerCase().replace(/\s+/g, '_')}`;
+        const accountCreatedIso = savedProf?.createdAt || localStorage.getItem(`bw_account_created_${userEmail}`) || new Date().toISOString();
+        try { localStorage.setItem(`bw_account_created_${userEmail}`, accountCreatedIso); } catch (e) {}
 
         const googleProfile = {
           name: preservedName,
@@ -445,10 +450,11 @@ function AppContent() {
           isVerified: true,
           points: existingPoints,
           phone: savedProf?.phone || localStorage.getItem(`user_phone_${userEmail}`) || '',
-          birthday: savedProf?.birthday || localStorage.getItem(`user_dob_${userEmail}`) || ''
+          birthday: savedProf?.birthday || localStorage.getItem(`user_dob_${userEmail}`) || '',
+          createdAt: accountCreatedIso
         };
 
-        handleLoginSuccess(googleProfile, true);
+        handleLoginSuccess(googleProfile, !savedProf);
       }
     });
 
@@ -577,8 +583,15 @@ function AppContent() {
           document.title = 'कवि इमेज़ पोस्टर Studio — बोलती कलम | bolateeworld.in';
           return;
         }
+        if (rawPath.includes('/wallet') || rawHash.includes('wallet')) {
+          setActiveView('profile');
+          setProfileInitialTab('wallet');
+          document.title = 'साहित्य रिवॉर्ड पॉइंट्स पासबुक — बोलती कलम | bolateeworld.in';
+          return;
+        }
         if (rawPath === '/profile' || rawHash === '#/profile') {
           setActiveView('profile');
+          setProfileInitialTab('works');
           document.title = 'मेरी साहित्य प्रोफ़ाइल — बोलती कलम | bolateeworld.in';
           return;
         }
@@ -855,6 +868,41 @@ function AppContent() {
       return updated;
     });
     alert(`टास्क अस्वीकृत कर दिया गया है।`);
+  };
+
+  const handlePenaltyYouTubeProof = (proof, penaltyAmount, strikeNum) => {
+    const statusKey = penaltyAmount === -50 ? 'penalty50' : 'penalty100';
+    setYoutubeProofs(prev => {
+      const updated = prev.map(p => p.id === proof.id ? { ...p, status: statusKey } : p);
+      try {
+        localStorage.setItem('bolteekalam_youtube_proofs_v1', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    try {
+      localStorage.setItem(`bw_yt_strikes_${proof.userEmail}`, String(strikeNum));
+    } catch (e) {}
+
+    handleRewardPoints(penaltyAmount, `यूट्यूब फेक/डुप्लीकेट स्क्रीनशॉट पेनल्टी (${penaltyAmount} Pts) • Strike ${strikeNum}`);
+    alert(`⚠️ पेनल्टी लागू! ${proof.userName} के वॉलेट से ${Math.abs(penaltyAmount)} पॉइंट्स माइनस कर दिए गए हैं (Strike ${strikeNum}/3)।`);
+  };
+
+  const handleBanUserFromYouTube = (proof) => {
+    setYoutubeProofs(prev => {
+      const updated = prev.map(p => p.id === proof.id ? { ...p, status: 'banned' } : p);
+      try {
+        localStorage.setItem('bolteekalam_youtube_proofs_v1', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    try {
+      localStorage.setItem(`bw_yt_banned_${proof.userEmail}`, 'true');
+      localStorage.setItem(`bw_yt_strikes_${proof.userEmail}`, '3');
+    } catch (e) {}
+
+    alert(`🚫 ब्लॉक सफल! ${proof.userName} को यूट्यूब टास्क से स्थायी रूप से ब्लॉक कर दिया गया है।`);
   };
 
   const handleYouTubeVisit = () => {
@@ -1650,6 +1698,8 @@ function AppContent() {
                 points: Math.max(userProfile?.points || 0, 50 + ((posts || []).filter(p => p && (p.author?.id === currentUser?.email || p.author?.email === currentUser?.email || p.author?.id === 'user-me' || (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase()))).length * 10))
               }}
               walletTransactions={walletTransactions}
+              initialTab={profileInitialTab}
+              onOpenMembershipCard={handleOpenMembershipCard}
               onRechargePoints={handleRechargePoints}
               onOpenCertificate={openCertificateModal}
               onOpenEditProfile={() => setShowEditProfileModal(true)}
@@ -1679,6 +1729,8 @@ function AppContent() {
               youtubeProofs={youtubeProofs}
               onApproveProof={handleApproveYouTubeProof}
               onRejectProof={handleRejectYouTubeProof}
+              onPenaltyProof={handlePenaltyYouTubeProof}
+              onBanUserFromYouTube={handleBanUserFromYouTube}
             />
           )}
 
@@ -1780,6 +1832,7 @@ function AppContent() {
           currentUser={currentUser}
           userProfile={userProfile}
           onSubmitProof={handleSubmitYouTubeProof}
+          allProofs={youtubeProofs}
         />
       )}
 

@@ -43,8 +43,29 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
   const savedCustomAvatar = localStorage.getItem(`custom_avatar_${userEmail}`) || localStorage.getItem('custom_avatar_global');
   const userAvatar = savedCustomAvatar || userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
 
-  const startDateStr = '05 अगस्त 2026';
-  const endDateStr = '05 फ़रवरी 2027';
+  // Dynamic Hindi Date Formatter & Exact 6-Month Account Lifetime Calculation
+  const formatHindiDate = (d) => {
+    const hindiMonths = ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = hindiMonths[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const rawCreated = userProfile?.createdAt || localStorage.getItem(`bw_account_created_${userEmail}`) || new Date().toISOString();
+  const createdDate = new Date(rawCreated);
+  const validCreatedDate = isNaN(createdDate.getTime()) ? new Date() : createdDate;
+
+  // Issue date is the exact platform account creation date
+  const startDateStr = formatHindiDate(validCreatedDate);
+
+  // Expiry date is exactly 6 months from account creation date
+  const expiryDate = new Date(validCreatedDate);
+  expiryDate.setMonth(expiryDate.getMonth() + 6);
+  const endDateStr = formatHindiDate(expiryDate);
+
+  // Check if 6 months lifetime has passed
+  const isExpired = new Date().getTime() > expiryDate.getTime();
 
   const getSequentialMembershipId = () => {
     try {
@@ -67,7 +88,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
 
   const membershipId = getSequentialMembershipId();
   const shareProfileUrl = `https://www.bolateeworld.in/profile/${cleanUsername}`;
-  const shareText = `🎖️ मेरा राष्ट्रीय 6-माह डिजिटल साहित्यिक सदस्यता पत्र — 'बोलती कलम' (bolateeworld.in)\nलेखक: ${userName} (@${cleanUsername})\nसदस्यता क्रमांक: ${membershipId}\nदेखें: ${shareProfileUrl}`;
+  const shareText = `🎖️ मेरा राष्ट्रीय 6-माह डिजिटल साहित्यिक सदस्यता पत्र — 'बोलती कलम' (bolateeworld.in)\nलेखक: ${userName} (@${cleanUsername})\nसदस्यता क्रमांक: ${membershipId}\nवैधता: ${endDateStr} ${isExpired ? '(समाप्त)' : '(सक्रिय)'}\nदेखें: ${shareProfileUrl}`;
 
   // Generate 4:5 Aspect Ratio (1080x1350) High-Resolution Royal Parchment Card PNG
   const generateCanvasPNG = () => {
@@ -153,18 +174,28 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         ctx.fillText(userText, (1080 - userWidth) / 2, 470);
 
         // Verified Badge Pill (Centered Y = 512)
-        const badgeText = '✓ 100% नि:शुल्क आजीवन साहित्यिक सदस्य';
+        const badgeText = isExpired 
+          ? '⚠️ सदस्यता समाप्त (EXPIRED — 6 माह पूर्ण)' 
+          : '✓ 6-माह सक्रिय साहित्यिक सदस्य (bolateeworld.in)';
         ctx.font = 'bold 19px sans-serif';
         const badgeWidth = ctx.measureText(badgeText).width + 36;
         const badgeX = (1080 - badgeWidth) / 2;
 
-        ctx.fillStyle = '#dcfce7';
-        ctx.fillRect(badgeX, 488, badgeWidth, 34);
-        ctx.strokeStyle = '#16a34a';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(badgeX, 488, badgeWidth, 34);
-
-        ctx.fillStyle = '#15803d';
+        if (isExpired) {
+          ctx.fillStyle = '#fee2e2';
+          ctx.fillRect(badgeX, 488, badgeWidth, 34);
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(badgeX, 488, badgeWidth, 34);
+          ctx.fillStyle = '#b91c1c';
+        } else {
+          ctx.fillStyle = '#dcfce7';
+          ctx.fillRect(badgeX, 488, badgeWidth, 34);
+          ctx.strokeStyle = '#16a34a';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(badgeX, 488, badgeWidth, 34);
+          ctx.fillStyle = '#15803d';
+        }
         ctx.fillText(badgeText, badgeX + 18, 512);
 
         // 4. Literary Motto Box (Y = 540)
@@ -215,9 +246,9 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         ctx.fillStyle = '#64748b';
         ctx.font = '18px sans-serif';
         ctx.fillText('⏳ वैधता (6 माह)', 815, 665);
-        ctx.fillStyle = '#be123c';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.fillText(endDateStr, 815, 700);
+        ctx.fillStyle = isExpired ? '#dc2626' : '#be123c';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(`${endDateStr} ${isExpired ? '(समाप्त)' : '(सक्रिय)'}`, 815, 700);
 
         // 6. 4 Golden Pillars & Privileges Box (Y = 745, H = 260)
         ctx.fillStyle = '#881337'; // Royal Crimson Box
@@ -444,9 +475,15 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
             <p className="text-xs font-bold text-rose-700">
               @{cleanUsername}
             </p>
-            <span className="px-3 py-0.5 rounded-full bg-emerald-100 border border-emerald-500 text-emerald-800 text-[10px] font-extrabold shadow-sm">
-              ✓ 100% नि:शुल्क आजीवन साहित्यिक सदस्य
-            </span>
+            {isExpired ? (
+              <span className="px-3 py-0.5 rounded-full bg-rose-100 border border-rose-500 text-rose-800 text-[10px] font-extrabold shadow-sm">
+                ⚠️ सदस्यता समाप्त (EXPIRED — 6 माह पूर्ण)
+              </span>
+            ) : (
+              <span className="px-3 py-0.5 rounded-full bg-emerald-100 border border-emerald-500 text-emerald-800 text-[10px] font-extrabold shadow-sm">
+                ✓ 6-माह सक्रिय साहित्यिक सदस्य (bolateeworld.in)
+              </span>
+            )}
           </div>
 
           {/* Motto Box */}
@@ -472,7 +509,9 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
             </div>
             <div>
               <span className="text-slate-500 block text-[10px]">⏳ वैधता (6 माह)</span>
-              <span className="font-bold text-rose-700">{endDateStr}</span>
+              <span className={`font-bold ${isExpired ? 'text-red-600' : 'text-rose-700'}`}>
+                {endDateStr} {isExpired ? '(समाप्त)' : '(सक्रिय)'}
+              </span>
             </div>
           </div>
 
