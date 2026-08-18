@@ -586,13 +586,19 @@ function AppContent() {
         if (rawPath.includes('/wallet') || rawHash.includes('wallet')) {
           setActiveView('profile');
           setProfileInitialTab('wallet');
-          document.title = 'साहित्य रिवॉर्ड पॉइंट्स पासबुक — बोलती कलम | bolateeworld.in';
+          document.title = 'साहित्य रिवॉर्ड पॉइंट्स पासबुक — बोलती वर्ल्ड | bolateeworld.in';
+          return;
+        }
+        if (rawPath.includes('/certificate') || rawHash.includes('certificate')) {
+          setActiveView('certificates');
+          setProfileInitialTab('certificates');
+          document.title = 'मेरे साहित्यिक सम्मान पत्र (E-Certificates) — बोलती वर्ल्ड | bolateeworld.in';
           return;
         }
         if (rawPath === '/profile' || rawHash === '#/profile') {
           setActiveView('profile');
           setProfileInitialTab('works');
-          document.title = 'मेरी साहित्य प्रोफ़ाइल — बोलती कलम | bolateeworld.in';
+          document.title = 'मेरी साहित्य प्रोफ़ाइल — बोलती वर्ल्ड | bolateeworld.in';
           return;
         }
 

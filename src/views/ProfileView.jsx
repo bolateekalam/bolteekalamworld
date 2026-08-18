@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, ShieldCheck, Flame, BookOpen, Bookmark, Award, Trophy,
   Eye, Heart, Sparkles, MapPin, Calendar, Share2, Copy, Check, 
   Gift, Lock, Package, Edit3, Send, Phone, Mail, UserPlus, UserCheck, Archive,
-  ArrowUpRight, ArrowDownRight, History, ExternalLink, AlertCircle, ChevronRight, Wallet, Download
+  ArrowUpRight, ArrowDownRight, History, ExternalLink, AlertCircle, ChevronRight, Wallet, Download, Clock
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import PostCard from '../components/PostCard';
 import PointsExplanationModal from '../components/PointsExplanationModal';
 import LiteraryMembershipCardModal from '../components/LiteraryMembershipCardModal';
 import CertificateGenerator from '../components/CertificateGenerator';
+import { getUserStreakData, logActiveTime, getNextMilestone } from '../lib/streakService';
 import { initiateRazorpayCheckout } from '../lib/razorpayService';
 
 export const ProfileView = ({ 
@@ -31,9 +32,10 @@ export const ProfileView = ({
   initialTab = 'works'
 }) => {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState(initialTab); // 'works' | 'archived' | 'bookmarks' | 'wallet' | 'certificates'
+  const [activeTab, setActiveTab] = useState(initialTab); // 'works' | 'certificates' | 'wallet' | 'archived' | 'bookmarks'
   const [copiedPortfolio, setCopiedPortfolio] = useState(false);
   const [copiedWalletUrl, setCopiedWalletUrl] = useState(false);
+  const [copiedCertUrl, setCopiedCertUrl] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
   const [showMembershipModal, setShowMembershipModal] = useState(false);
   const [selectedCertToView, setSelectedCertToView] = useState(null);
@@ -46,7 +48,7 @@ export const ProfileView = ({
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
     cover: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200',
     badge: 'verifiedAuthor',
-    bio: 'हिंदी साहित्य एवं काव्य का साधक। बोलती कलम मंच पर नियमित रचनाकार।',
+    bio: 'हिंदी साहित्य एवं काव्य का साधक। बोलती वर्ल्ड मंच पर नियमित रचनाकार।',
     city: 'प्रयागराज',
     joined: 'अगस्त 2026',
     points: 30,
@@ -55,48 +57,230 @@ export const ProfileView = ({
     streak: 3
   };
 
+  const userEmail = profile.email || 'user';
   const cleanUser = (profile.username || 'writer').replace(/^[@#]/, '');
   const walletShareUrl = `https://www.bolateeworld.in/${cleanUser}/wallet`;
+  const certificateShareUrl = `https://www.bolateeworld.in/${cleanUser}/certificate`;
+
+  const [streakData, setStreakData] = useState(() => getUserStreakData(userEmail));
+
+  // 15-second active engagement session heartbeat
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const updated = logActiveTime(userEmail, 15);
+      setStreakData(updated);
+    }, 15000);
+
+    return () => clearInterval(timer);
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   const myPostsCount = posts.filter(p => !p.isArchived).length;
+  const currentStreak = streakData?.streak || profile.streak || 1;
+  const activeSeconds = streakData?.todayActiveSeconds || 60;
+  const is5MinReached = activeSeconds >= 300;
 
-  // Milestone Certificates Data
+  // Complete Continuous Streak Milestones & Creation Certificates
   const milestoneCertificates = [
     {
-      id: 'cert-1',
+      id: 'cert-welcome',
       title: 'प्रथम साहित्यिक पदार्पण सम्मान पत्र',
       type: 'प्रथम साहित्यिक पदार्पण सम्मान पत्र',
-      description: 'बोलती कलम परिवार में शामिल होने व साहित्यिक यात्रा प्रारंभ करने पर मानद सम्मान।',
-      category: 'साहित्यिक पदार्पण 2026',
+      description: 'बोलती वर्ल्ड में नया खाता बनने पर आपकी साहित्यिक यात्रा के शुभारंभ हेतु मानद स्वागत सम्मान।',
+      category: 'साहित्यिक पदार्पण (Day 0)',
+      requiredStreak: 0,
       requiredPosts: 0,
       requiredPoints: 0,
       isUnlocked: true,
       badgeText: '✓ खाता बनने पर प्राप्त (UNLOCKED)',
-      certificateId: `BK-JOIN-${cleanUser.toUpperCase()}-01`
+      certificateId: `BW-JOIN-${cleanUser.toUpperCase()}-01`
     },
     {
-      id: 'cert-2',
-      title: 'अर्ध-शतक काव्य श्री सम्मान पत्र',
+      id: 'cert-streak-30',
+      title: 'मासिक काव्य साधना सम्मान पत्र (30 Days Active Streak)',
+      type: 'मासिक काव्य साधना सम्मान पत्र',
+      description: 'लगातार 30 दिन तक रोज़ाना 5 मिनट बोलती वर्ल्ड मंच पर अखंड उपस्थिति व काव्य साधना पूर्ण करने पर।',
+      category: '30 दिन निरंतर सक्रियता',
+      requiredStreak: 30,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 30,
+      badgeText: currentStreak >= 30 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/30 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-30D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-60',
+      title: 'द्वि-मासिक साहित्य अनुरागी सम्मान पत्र (60 Days Active Streak)',
+      type: 'द्वि-मासिक साहित्य अनुरागी सम्मान पत्र',
+      description: 'लगातार 60 दिन तक बोलती वर्ल्ड मंच पर साहित्य सृजन व सक्रिय सहभागिता निभाने के उपलक्ष्य में।',
+      category: '60 दिन निरंतर सक्रियता',
+      requiredStreak: 60,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 60,
+      badgeText: currentStreak >= 60 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/60 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-60D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-90',
+      title: 'त्रैमासिक काव्य गौरव सम्मान पत्र (90 Days Active Streak)',
+      type: 'त्रैमासिक काव्य गौरव सम्मान पत्र',
+      description: '3 माह (90 दिन) तक अनवरत साहित्यिक साधना एवं सृजनात्मक योगदान हेतु राष्ट्रीय सम्मान पत्र।',
+      category: '90 दिन निरंतर सक्रियता',
+      requiredStreak: 90,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 90,
+      badgeText: currentStreak >= 90 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/90 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-90D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-120',
+      title: 'चतुर्मासिक साहित्य रत्न सम्मान पत्र (120 Days Active Streak)',
+      type: 'चतुर्मासिक साहित्य रत्न सम्मान पत्र',
+      description: '120 दिनों की निरंतर निष्ठा और उत्कृष्ट काव्य सक्रियता हेतु विशिष्ट मानद प्रशस्ति पत्र।',
+      category: '120 दिन निरंतर सक्रियता',
+      requiredStreak: 120,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 120,
+      badgeText: currentStreak >= 120 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/120 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-120D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-150',
+      title: 'पंच-मासिक काव्य विभूति सम्मान पत्र (150 Days Active Streak)',
+      type: 'पंच-मासिक काव्य विभूति सम्मान पत्र',
+      description: '150 दिन निरंतर मंच पर उपस्थिति दर्ज कराकर साहित्य संवर्धन में अनुपम योगदान देने पर।',
+      category: '150 दिन निरंतर सक्रियता',
+      requiredStreak: 150,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 150,
+      badgeText: currentStreak >= 150 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/150 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-150D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-180',
+      title: 'अर्ध-वार्षिक साहित्य शिरोमणि सम्मान पत्र (180 Days Active Streak)',
+      type: 'अर्ध-वार्षिक साहित्य शिरोमणि सम्मान पत्र',
+      description: '6 माह (180 दिन) की अटूट साहित्यिक तपस्या और अखंड उपस्थिति हेतु सर्वोच्च अर्ध-वार्षिक सम्मान।',
+      category: '180 दिन (6 माह) सक्रियता',
+      requiredStreak: 180,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 180,
+      badgeText: currentStreak >= 180 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/180 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-180D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-210',
+      title: 'सप्त-मासिक काव्य भास्कर सम्मान पत्र (210 Days Active Streak)',
+      type: 'सप्त-मासिक काव्य भास्कर सम्मान पत्र',
+      description: '210 दिनों की लगातार सृजनात्मक निष्ठा और शब्दों की निरंतर सेवा हेतु।',
+      category: '210 दिन निरंतर सक्रियता',
+      requiredStreak: 210,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 210,
+      badgeText: currentStreak >= 210 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/210 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-210D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-240',
+      title: 'अष्ट-मासिक साहित्य मार्तंड सम्मान पत्र (240 Days Active Streak)',
+      type: 'अष्ट-मासिक साहित्य मार्तंड सम्मान पत्र',
+      description: '8 माह (240 दिन) की अखण्ड साहित्य साधना व काव्य संवर्धन हेतु विशेष सम्मान पत्र।',
+      category: '240 दिन निरंतर सक्रियता',
+      requiredStreak: 240,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 240,
+      badgeText: currentStreak >= 240 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/240 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-240D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-270',
+      title: 'नव-मासिक काव्य महर्षि सम्मान पत्र (270 Days Active Streak)',
+      type: 'नव-मासिक काव्य महर्षि सम्मान पत्र',
+      description: '270 दिनों तक निरंतर मंच पर अपनी साहित्यिक उपस्थिति दर्ज कराकर गौरव बढ़ाने पर।',
+      category: '270 दिन निरंतर सक्रियता',
+      requiredStreak: 270,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 270,
+      badgeText: currentStreak >= 270 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/270 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-270D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-300',
+      title: 'दश-मासिक साहित्य सरस्वती सम्मान पत्र (300 Days Active Streak)',
+      type: 'दश-मासिक साहित्य सरस्वती सम्मान पत्र',
+      description: '300 दिनों की अखंड साधना से मां सरस्वती की काव्य सेवा करने पर सादर समर्पित सम्मान पत्र।',
+      category: '300 दिन निरंतर सक्रियता',
+      requiredStreak: 300,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 300,
+      badgeText: currentStreak >= 300 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/300 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-300D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-330',
+      title: 'एकादश-मासिक काव्य शिखर सम्मान पत्र (330 Days Active Streak)',
+      type: 'एकादश-मासिक काव्य शिखर सम्मान पत्र',
+      description: '11 माह (330 दिन) तक अविराम साहित्यिक रचनाशीलता एवं सक्रियता हेतु शिखर सम्मान।',
+      category: '330 दिन निरंतर सक्रियता',
+      requiredStreak: 330,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 330,
+      badgeText: currentStreak >= 330 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/330 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-330D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-streak-360',
+      title: 'राष्ट्रीय वार्षिक साहित्य मनीषी एवं तपस्वी महा-सम्मान पत्र (360 Days / 1 Year Streak)',
+      type: 'राष्ट्रीय वार्षिक साहित्य मनीषी महा-सम्मान पत्र',
+      description: 'संपूर्ण 1 वर्ष (360 दिन) तक निरंतर दैनिक 5-मिनट सक्रियता व अखंड साधना पूर्ण करने पर बोलती वर्ल्ड का सर्वोच्च सम्मान।',
+      category: '1 वर्ष पूर्ण अखंड साधना',
+      requiredStreak: 360,
+      requiredPosts: 0,
+      requiredPoints: 0,
+      isUnlocked: currentStreak >= 360,
+      badgeText: currentStreak >= 360 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${currentStreak}/360 दिन स्ट्रीक`,
+      certificateId: `BW-STREAK-360D-${cleanUser.toUpperCase()}`
+    },
+    {
+      id: 'cert-50-posts',
+      title: 'अर्ध-शतक काव्य श्री सम्मान पत्र (50 Posts Milestone)',
       type: 'अर्ध-शतक काव्य श्री सम्मान पत्र',
-      description: 'बोलती कलम मंच पर 50 उत्कृष्ट काव्य रचनाएँ पूर्ण करने पर विशिष्ट राष्ट्रीय सम्मान।',
-      category: '50 काव्य रचनाएँ मील का पत्थर',
+      description: 'बोलती वर्ल्ड मंच पर 50 उत्कृष्ट काव्य रचनाएँ पूर्ण करने पर विशिष्ट राष्ट्रीय सम्मान।',
+      category: '50 काव्य रचनाएँ',
+      requiredStreak: 0,
       requiredPosts: 50,
       requiredPoints: 0,
       isUnlocked: myPostsCount >= 50,
       badgeText: myPostsCount >= 50 ? '✓ अनलॉक हो चुका है!' : `🔒 प्रगति: ${myPostsCount}/50 कविताएं`,
-      certificateId: `BK-50POSTS-${cleanUser.toUpperCase()}-02`
+      certificateId: `BW-50POSTS-${cleanUser.toUpperCase()}`
     },
     {
-      id: 'cert-3',
+      id: 'cert-100-points',
       title: 'साहित्यिक प्रश्नोत्तरी व ज्ञान रत्न सम्मान पत्र',
       type: 'साहित्यिक प्रश्नोत्तरी सम्मान पत्र',
-      description: 'साहित्यिक प्रश्नोत्तरी व साप्ताहिक चुनौतियों में उत्कृष्ट प्रदर्शन हेतु विशिष्ट प्रशस्ति पत्र।',
-      category: 'प्रश्नोत्तरी एवं ज्ञान प्रतियोगिता',
+      description: 'साहित्यिक प्रश्नोत्तरी व साप्ताहिक चुनौतियों में 100+ अंक प्राप्त करने पर।',
+      category: '100+ रिवॉर्ड पॉइंट्स',
+      requiredStreak: 0,
       requiredPosts: 0,
       requiredPoints: 100,
       isUnlocked: (profile.points || 0) >= 100,
       badgeText: (profile.points || 0) >= 100 ? '✓ अनलॉक हो चुका है!' : `🔒 आवश्यक: 100 Points (वर्तमान: ${profile.points || 0})`,
-      certificateId: `BK-QUIZ-${cleanUser.toUpperCase()}-03`
+      certificateId: `BW-QUIZ-${cleanUser.toUpperCase()}`
     }
   ];
 
@@ -111,6 +295,19 @@ export const ProfileView = ({
     navigator.clipboard.writeText(walletShareUrl);
     setCopiedWalletUrl(true);
     setTimeout(() => setCopiedWalletUrl(false), 2000);
+  };
+
+  const handleCopyCertLink = () => {
+    navigator.clipboard.writeText(certificateShareUrl);
+    setCopiedCertUrl(true);
+    setTimeout(() => setCopiedCertUrl(false), 2000);
+  };
+
+  const handleOpenCertificatesTab = () => {
+    setActiveTab('certificates');
+    try {
+      window.history.pushState(null, '', `/${cleanUser}/certificate`);
+    } catch (e) {}
   };
 
   const handleOpenFullWalletTab = () => {
@@ -179,7 +376,7 @@ export const ProfileView = ({
               </button>
 
               <button
-                onClick={() => setActiveTab('certificates')}
+                onClick={handleOpenCertificatesTab}
                 className="flex-1 sm:flex-initial px-3.5 py-2 bg-gradient-to-r from-[#0e2238] to-slate-900 text-amber-300 border border-amber-500/40 rounded-2xl text-xs font-extrabold shadow hover:brightness-110 transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Award className="w-3.5 h-3.5 text-amber-400" />
@@ -224,7 +421,7 @@ export const ProfileView = ({
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-tiro max-w-2xl">
-              {profile.bio || 'हिंदी साहित्य एवं काव्य का नया साधक। बोलती कलम मंच पर नियमित रचनाकार।'}
+              {profile.bio || 'हिंदी साहित्य एवं काव्य का नया साधक। बोलती वर्ल्ड मंच पर नियमित रचनाकार।'}
             </p>
 
             {/* Email & Phone */}
@@ -272,11 +469,17 @@ export const ProfileView = ({
               <p className="text-[10px] text-slate-500 font-semibold">फ़ॉलोअर्स</p>
             </div>
 
-            <div className="space-y-0.5">
-              <div className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
-                {profile.streak || 1} दिन
+            <div 
+              onClick={handleOpenCertificatesTab}
+              className="space-y-0.5 cursor-pointer p-1 rounded-xl hover:bg-orange-500/10 transition group"
+            >
+              <div className="flex items-center justify-center gap-1 text-orange-600 dark:text-orange-400 font-bold text-sm sm:text-base group-hover:scale-105 transition">
+                <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 fill-orange-500" />
+                <span>{currentStreak} दिन</span>
               </div>
-              <p className="text-[10px] text-slate-500 font-semibold">सक्रियता</p>
+              <p className="text-[10px] text-slate-500 font-semibold underline decoration-dotted truncate">
+                स्ट्रीक ट्रैकर 🔥
+              </p>
             </div>
           </div>
 
@@ -297,7 +500,7 @@ export const ProfileView = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('certificates')}
+            onClick={handleOpenCertificatesTab}
             aria-label="मेरे सम्मान पत्र देखें"
             className={`py-3 border-b-2 transition flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
               activeTab === 'certificates' 
@@ -306,7 +509,7 @@ export const ProfileView = ({
             }`}
           >
             <Award className="w-3.5 h-3.5 text-amber-500" />
-            <span>📜 मेरे सम्मान पत्र ({milestoneCertificates.filter(c => c.isUnlocked).length})</span>
+            <span>📜 मेरे सम्मान पत्र ({milestoneCertificates.filter(c => c.isUnlocked).length}/{milestoneCertificates.length})</span>
           </button>
 
           <button
@@ -349,7 +552,7 @@ export const ProfileView = ({
 
       </div>
 
-      {/* 2. Last 5 Points Summary Widget (Displayed on works tab for instant visibility) */}
+      {/* 2. Last 5 Points Summary Widget */}
       {activeTab === 'works' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -414,28 +617,117 @@ export const ProfileView = ({
       {/* Tab Content */}
       <div className="space-y-4">
         {(() => {
-          // 📜 TAB: Milestone Certificates
+          // 📜 TAB: Milestone Certificates & Continuous Streak Showcase
           if (activeTab === 'certificates') {
+            const nextMilestone = getNextMilestone(currentStreak);
+            const daysRemaining = Math.max(0, nextMilestone - currentStreak);
+
             return (
               <div className="space-y-4 animate-in fade-in duration-200">
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-lg">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                
+                {/* 1. Dedicated Shareable URL & Live Streak Dashboard */}
+                <div className="bg-gradient-to-br from-[#0e2238] via-slate-900 to-[#0e2238] text-white border-2 border-amber-500/40 rounded-3xl p-4 sm:p-6 shadow-xl space-y-4">
+                  
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-amber-500/30 pb-3">
                     <div className="space-y-0.5">
-                      <h2 className="text-base sm:text-lg font-bold font-rozha text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                        <Award className="w-5 h-5 text-amber-500" />
-                        <span>मेरे आधिकारिक साहित्यिक सम्मान पत्र (Milestone Certificates)</span>
-                      </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        लेखक: <strong>{profile.name}</strong> (@{cleanUser})
+                      <div className="flex items-center gap-2">
+                        <Award className="w-6 h-6 text-amber-400" />
+                        <h2 className="text-base sm:text-xl font-bold font-rozha text-amber-200">
+                          साहित्यिक सम्मान पत्र गैलरी (E-Certificates Gallery)
+                        </h2>
+                      </div>
+                      <p className="text-xs text-slate-300">
+                        लेखक: <strong>{profile.name}</strong> (@{cleanUser}) • bolateeworld.in
                       </p>
                     </div>
-                    <span className="px-3 py-1 bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 font-bold text-xs rounded-full border border-amber-300 dark:border-amber-700">
-                      {milestoneCertificates.filter(c => c.isUnlocked).length}/{milestoneCertificates.length} अनलॉक
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={handleCopyCertLink}
+                        className="flex-1 sm:flex-initial px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow cursor-pointer"
+                      >
+                        {copiedCertUrl ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedCertUrl ? 'URL कॉपी हुआ!' : '📜 सम्मान पत्र URL कॉपी करें'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Shareable Link Box */}
+                  <div className="p-2.5 bg-slate-950/60 rounded-xl border border-amber-500/20 flex items-center justify-between gap-2 text-xs">
+                    <span className="font-mono text-amber-300 truncate">
+                      {certificateShareUrl}
+                    </span>
+                    <span className="text-[10px] text-slate-400 shrink-0">
+                      सार्वजनिक लिंक
                     </span>
                   </div>
 
-                  {/* Certificates Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Daily 5-Minute Active Session & Streak Progress */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    
+                    {/* Streak Counter */}
+                    <div className="p-3 bg-slate-800/80 rounded-2xl border border-amber-500/30 space-y-1">
+                      <span className="text-[11px] text-amber-400 font-bold block flex items-center gap-1">
+                        <Flame className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
+                        <span>वर्तमान सक्रिय स्ट्रीक</span>
+                      </span>
+                      <div className="text-2xl font-black text-white">
+                        {currentStreak} दिन
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">
+                        अगला सम्मान: {nextMilestone} दिन पर ({daysRemaining} दिन शेष)
+                      </span>
+                    </div>
+
+                    {/* Today 5-Min Timer */}
+                    <div className="p-3 bg-slate-800/80 rounded-2xl border border-amber-500/30 space-y-1">
+                      <span className="text-[11px] text-emerald-400 font-bold block flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>आज की 5-मिनट सक्रियता</span>
+                      </span>
+                      <div className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>{Math.min(300, activeSeconds)}/300 सेकंड</span>
+                        {is5MinReached ? (
+                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] rounded border border-emerald-500/40">✓ पूर्ण</span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] rounded border border-amber-500/40">प्रगति पर</span>
+                        )}
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-emerald-500 transition-all duration-300"
+                          style={{ width: `${Math.min(100, (activeSeconds / 300) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Reset Rule Notice */}
+                    <div className="p-3 bg-red-950/40 rounded-2xl border border-red-500/30 space-y-0.5 text-xs text-red-200 flex flex-col justify-center">
+                      <span className="font-bold flex items-center gap-1 text-red-400 text-[11px]">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>स्ट्रीक नियम:</span>
+                      </span>
+                      <p className="text-[10px] text-red-300 leading-tight">
+                        यदि 1 दिन भी अनुपस्थित रहते हैं, तो स्ट्रीक रीस्टार्ट (1-2) हो जाएगी। लगातार बने रहें!
+                      </p>
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* 2. All Milestone Certificates Grid (Unlocked & Locked) */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-lg">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <h3 className="text-sm sm:text-base font-bold font-rozha text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <span>सभी साहित्यिक सम्मान पत्र सूची ({milestoneCertificates.length})</span>
+                    </h3>
+                    <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold text-xs rounded-full border border-emerald-300 dark:border-emerald-700">
+                      {milestoneCertificates.filter(c => c.isUnlocked).length} अनलॉक
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {milestoneCertificates.map((cert) => (
                       <div 
                         key={cert.id}
@@ -455,9 +747,9 @@ export const ProfileView = ({
                             <span className="text-lg">📜</span>
                           </div>
 
-                          <h3 className="font-bold text-sm font-rozha text-[#0e2238] dark:text-amber-200">
+                          <h4 className="font-bold text-sm font-rozha text-[#0e2238] dark:text-amber-200">
                             {cert.title}
-                          </h3>
+                          </h4>
 
                           <p className="text-xs text-slate-600 dark:text-slate-300 font-serif leading-relaxed">
                             {cert.description}
@@ -484,7 +776,9 @@ export const ProfileView = ({
                       </div>
                     ))}
                   </div>
+
                 </div>
+
               </div>
             );
           }
@@ -495,7 +789,6 @@ export const ProfileView = ({
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-5 shadow-lg">
                   
-                  {/* Wallet Header & Share Link Box */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -515,7 +808,6 @@ export const ProfileView = ({
                     </div>
                   </div>
 
-                  {/* Shareable Wallet URL Box */}
                   <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-between gap-2 text-xs flex-wrap sm:flex-nowrap">
                     <div className="flex items-center gap-2 min-w-0 truncate">
                       <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
@@ -532,22 +824,6 @@ export const ProfileView = ({
                     </button>
                   </div>
 
-                  {/* Points Rules & Transparency */}
-                  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-800 rounded-2xl text-xs text-amber-900 dark:text-amber-200 space-y-1">
-                    <p className="font-bold flex items-center gap-1">
-                      <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-                      <span>पॉइंट्स नियम एवं पारदर्शिता:</span>
-                    </p>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] list-disc list-inside text-amber-800 dark:text-amber-300">
-                      <li>नया खाता बनाने पर: <strong>+30 Pts (Welcome Bonus)</strong></li>
-                      <li>यूट्यूब चैनल विजिट करने पर: <strong>+25 Pts</strong></li>
-                      <li>यूट्यूब टास्क स्क्रीनशॉट पर: <strong>+10 Pts</strong></li>
-                      <li>रचना लाइक / कमेंट पर: <strong>+1 Pt</strong></li>
-                      <li>डुप्लीकेट/फेक स्क्रीनशॉट पेनल्टी: <strong>-50 Pts / -100 Pts</strong></li>
-                    </ul>
-                  </div>
-
-                  {/* Full Ledger Transactions List */}
                   <div className="space-y-2.5">
                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                       <History className="w-4 h-4 text-rose-500" />
@@ -651,6 +927,7 @@ export const ProfileView = ({
           userPoints={profile.points || 0}
           userProfile={profile}
           totalUserPosts={myPostsCount}
+          userStreak={currentStreak}
         />
       )}
 

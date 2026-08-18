@@ -481,11 +481,14 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
           
           {/* Top Row: Brand & Serial */}
           <div className="flex items-center justify-between border-b-2 border-amber-500/60 pb-2.5">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🪶</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-white border border-amber-400 p-0.5 shadow-sm flex items-center justify-center shrink-0">
+                <img src="/logo.png" alt="Bolti World Logo" className="w-full h-full object-contain" />
+              </div>
               <div>
-                <h4 className="text-lg sm:text-xl font-black text-[#0e2238] font-rozha leading-none">
-                  बोलती वर्ल्ड <span className="text-xs font-sans font-bold text-slate-600">(bolateeworld.in)</span>
+                <h4 className="text-lg sm:text-xl font-black text-[#0e2238] font-rozha leading-none flex items-center gap-1.5">
+                  <span>बोलती वर्ल्ड</span>
+                  <span className="text-[11px] font-sans font-bold text-slate-600">(bolateeworld.in)</span>
                 </h4>
                 <p className="text-[11px] font-serif italic text-slate-600 pt-0.5">
                   “शब्दों से संवाद, विचारों से परिवर्तन”
