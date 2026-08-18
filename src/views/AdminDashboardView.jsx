@@ -17,11 +17,15 @@ export const AdminDashboardView = ({
   patrioticBanner,
   setPatrioticBanner,
   activeFestivalTheme,
-  onUpdateFestivalTheme
+  onUpdateFestivalTheme,
+  youtubeProofs = [],
+  onApproveProof,
+  onRejectProof
 }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('weeklyJury');
   const [selectedFestivalKey, setSelectedFestivalKey] = useState(activeFestivalTheme?.id || 'auto');
+  const [zoomedProofImage, setZoomedProofImage] = useState(null);
 
   // New Weekly Topic Form State
   const [newTopicTitle, setNewTopicTitle] = useState('15 अगस्त: स्वतंत्रता और मेरी कलम');
@@ -325,13 +329,14 @@ export const AdminDashboardView = ({
       <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto p-1 gap-2 bg-white dark:bg-slate-900 rounded-2xl">
         {[
           { id: 'weeklyJury', label: '1. 🏆 साप्ताहिक चुनौती ज्यूरी', icon: Trophy, badge: weeklySubmissions.length },
-          { id: 'usersList', label: '2. 📱 सत्यापित यूज़र व मोबाइल ऑडिट', icon: ShieldCheck, badge: registeredUsers.length },
-          { id: 'editBanner', label: '3. 🖼️ बैनर व फ़ोटो एडिटर', icon: Edit3 },
-          { id: 'createTopic', label: '4. ➕ नया साप्ताहिक विषय', icon: PlusCircle },
-          { id: 'birthdays', label: '5. 🎂 जन्मदिन कार्ड जनरेटर', icon: Cake, badge: birthdayUsers.length },
-          { id: 'moderation', label: '6. 🗑️ सामग्री नियंत्रण (Posts)', icon: Trash2, badge: posts.length },
-          { id: 'flagged', label: '7. ⚠️ AI फ़्लैग्ड पोस्ट्स', icon: AlertTriangle, badge: flaggedPosts.length },
-          { id: 'kits', label: '8. 📦 पार्सल किट डिस्पैच', icon: Package, badge: kitShipments.filter(k => k.status === 'PENDING').length }
+          { id: 'youtubeProofs', label: '2. 🎬 यूट्यूब टास्क सत्यापन', icon: ShieldCheck, badge: youtubeProofs.filter(p => p.status === 'pending').length },
+          { id: 'usersList', label: '3. 📱 सत्यापित यूज़र व मोबाइल ऑडिट', icon: ShieldCheck, badge: registeredUsers.length },
+          { id: 'editBanner', label: '4. 🖼️ बैनर व फ़ोटो एडिटर', icon: Edit3 },
+          { id: 'createTopic', label: '5. ➕ नया साप्ताहिक विषय', icon: PlusCircle },
+          { id: 'birthdays', label: '6. 🎂 जन्मदिन कार्ड जनरेटर', icon: Cake, badge: birthdayUsers.length },
+          { id: 'moderation', label: '7. 🗑️ सामग्री नियंत्रण (Posts)', icon: Trash2, badge: posts.length },
+          { id: 'flagged', label: '8. ⚠️ AI फ़्लैग्ड पोस्ट्स', icon: AlertTriangle, badge: flaggedPosts.length },
+          { id: 'kits', label: '9. 📦 पार्सल किट डिस्पैच', icon: Package, badge: kitShipments.filter(k => k.status === 'PENDING').length }
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -771,42 +776,153 @@ export const AdminDashboardView = ({
         </div>
       )}
 
-      {/* Tab 8: Bolti Kalam Kit Shipping Queue */}
-      {activeTab === 'kits' && (
+      {/* Tab 2: YouTube Task Screenshot Approvals */}
+      {activeTab === 'youtubeProofs' && (
         <div className="space-y-4">
-          <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Package className="w-4 h-4 text-amber-500" />
-            <span>बोलती कलम किट डिस्पैच अनुरोध (5,000 Points Rewards)</span>
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-rose-600" />
+              <span>यूट्यूब लाइक व कमेंट स्क्रीनशॉट टास्क सत्यापन (+10 Points Queue)</span>
+            </h3>
+            <span className="text-[11px] font-bold text-slate-500">
+              कुल सबमिशन: {youtubeProofs.length} | प्रतीक्षारत (Pending): {youtubeProofs.filter(p => p.status === 'pending').length}
+            </span>
+          </div>
 
-          <div className="space-y-3">
-            {kitShipments.map((ship) => (
-              <div key={ship.id} className="p-4 bg-white dark:bg-slate-900 border border-amber-500/30 rounded-2xl flex items-center justify-between gap-4 text-xs">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 dark:text-slate-100">{ship.userName}</span>
-                    <span className="px-2 py-0.2 rounded bg-amber-500/20 text-amber-600 font-mono font-bold">
-                      {ship.points} pts
-                    </span>
+          {youtubeProofs.length === 0 ? (
+            <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-2">
+              <ShieldCheck className="w-8 h-8 text-slate-400 mx-auto" />
+              <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                वर्तमान में कोई यूट्यूब स्क्रीनशॉट सबमिशन पेंडिंग नहीं है।
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {youtubeProofs.map((proof) => (
+                <div 
+                  key={proof.id} 
+                  className={`p-4 bg-white dark:bg-slate-900 border rounded-3xl space-y-3 shadow-sm transition ${
+                    proof.status === 'pending'
+                      ? 'border-amber-500/50 bg-amber-50/20'
+                      : proof.status === 'approved'
+                      ? 'border-emerald-500/40 bg-emerald-50/10'
+                      : 'border-rose-500/40 bg-rose-50/10 opacity-75'
+                  }`}
+                >
+                  {/* Submitter User Info Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img 
+                        src={proof.userAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'} 
+                        alt={proof.userName} 
+                        className="w-10 h-10 rounded-full object-cover ring-2 ring-rose-500/40 shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                          {proof.userName}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 truncate">
+                          {proof.userUsername} • {proof.userEmail}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0">
+                      {proof.status === 'pending' ? (
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-extrabold text-[10px] flex items-center gap-1">
+                          <Activity className="w-3 h-3 animate-pulse" />
+                          <span>⏳ पेंडिंग</span>
+                        </span>
+                      ) : proof.status === 'approved' ? (
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-extrabold text-[10px] flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>✓ स्वीकृत (+10 Pts)</span>
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300 font-extrabold text-[10px] flex items-center gap-1">
+                          <XCircle className="w-3 h-3" />
+                          <span>✕ अस्वीकृत</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-slate-600 dark:text-slate-400 font-semibold">{ship.address}</p>
-                </div>
 
-                {ship.status === 'DISPATCHED' ? (
-                  <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 font-bold rounded-xl shrink-0 flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>डिस्पैच हो गया</span>
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => handleDispatchKit(ship.id)}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs shrink-0 shadow transition active:scale-95"
-                  >
-                    कुरियर डिस्पैच मार्क करें
-                  </button>
-                )}
-              </div>
-            ))}
+                  {/* Submission Time & Note */}
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
+                    <p>🕒 सबमिट तिथि: <strong>{proof.submittedAt}</strong></p>
+                    {proof.notes && (
+                      <p className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl italic">
+                        "{proof.notes}"
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Screenshot Thumbnail with Click to Zoom */}
+                  {proof.screenshotUrl && (
+                    <div 
+                      onClick={() => setZoomedProofImage(proof.screenshotUrl)}
+                      className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-950 h-36 cursor-pointer group flex items-center justify-center"
+                      title="ज़ूम करके स्क्रीनशॉट देखें"
+                    >
+                      <img 
+                        src={proof.screenshotUrl} 
+                        alt="Screenshot Proof" 
+                        className="w-full h-full object-contain group-hover:scale-105 transition duration-300"
+                      />
+                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold gap-1">
+                        <Image className="w-4 h-4" />
+                        <span>बड़ा करके देखें</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons for Pending items */}
+                  {proof.status === 'pending' && (
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => onApproveProof && onApproveProof(proof)}
+                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition active:scale-95 cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>स्वीकृत करें (+10 Pts Credit)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onRejectProof && onRejectProof(proof)}
+                        className="py-2 px-3 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        <span>अस्वीकृत</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Screenshot Zoom Lightbox Modal */}
+      {zoomedProofImage && (
+        <div 
+          onClick={() => setZoomedProofImage(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in"
+        >
+          <div className="relative max-w-2xl w-full max-h-[90vh] bg-slate-900 rounded-3xl overflow-hidden p-2 flex flex-col items-center">
+            <button 
+              onClick={() => setZoomedProofImage(null)}
+              className="absolute top-4 right-4 p-2 bg-slate-800 text-white rounded-full hover:bg-slate-700 transition z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img 
+              src={zoomedProofImage} 
+              alt="Zoomed Screenshot Proof" 
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl"
+            />
           </div>
         </div>
       )}

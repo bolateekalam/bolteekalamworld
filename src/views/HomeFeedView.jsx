@@ -18,6 +18,8 @@ export const HomeFeedView = ({
   onAddComment,
   onFollowAuthor,
   onOpenMembershipCard,
+  onOpenYouTubeTask,
+  onYouTubeVisit,
   userProfile,
   requireAuth,
   activeFestivalTheme,
@@ -53,7 +55,10 @@ export const HomeFeedView = ({
           </div>
 
           <button
-            onClick={() => setActiveView && setActiveView('posterStudio')}
+            onClick={() => {
+              if (requireAuth && !requireAuth()) return;
+              if (setActiveView) setActiveView('posterStudio');
+            }}
             className="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xl flex items-center gap-2 transition transform active:scale-95 shrink-0 cursor-pointer"
           >
             <ImageIcon className="w-4 h-4 text-slate-950" />
@@ -65,7 +70,10 @@ export const HomeFeedView = ({
 
       {/* 📸 Poet Digital Poster Maker Banner */}
       <div 
-        onClick={() => setActiveView && setActiveView('posterStudio')}
+        onClick={() => {
+          if (requireAuth && !requireAuth()) return;
+          if (setActiveView) setActiveView('posterStudio');
+        }}
         className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-purple-900 via-indigo-900 to-rose-900 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-95 transition group border border-purple-500/20"
       >
         <div className="space-y-1">
@@ -91,7 +99,10 @@ export const HomeFeedView = ({
 
       {/* 🎖️ 6-Month Literary Membership Card Quick Access Banner */}
       <div 
-        onClick={() => onOpenMembershipCard && onOpenMembershipCard()}
+        onClick={() => {
+          if (requireAuth && !requireAuth()) return;
+          if (onOpenMembershipCard) onOpenMembershipCard();
+        }}
         className="p-4 rounded-3xl bg-gradient-to-r from-amber-500 via-rose-700 to-amber-600 text-white shadow-xl flex items-center justify-between gap-4 cursor-pointer hover:brightness-105 transition border border-amber-300/40"
       >
         <div className="space-y-1">
@@ -102,7 +113,7 @@ export const HomeFeedView = ({
             <span className="text-xs font-extrabold text-amber-100">राष्ट्रीय सदस्यता प्रमाणपत्र</span>
           </div>
           <h3 className="text-sm sm:text-base font-bold font-rozha text-amber-50">
-            🎖️ अपना 6-माह सदस्यता पत्र देखें व व्हाट्सएप पर शेयर करें
+            🎖️ अपना 6-माह सदस्यता पत्र देखें व सोशल मीडिया पर शेयर करें
           </h3>
           <p className="text-[11px] text-amber-100 hidden sm:block">
             प्रमाणित सदस्य संख्या, 6 माह की वैधता तिथि व आधिकारिक डिजिटल पहचान पत्र डाउनलोड करें।
@@ -114,30 +125,47 @@ export const HomeFeedView = ({
         </button>
       </div>
 
-      {/* 🔴 Boltee Kalam YouTube Official Showcase Card */}
-      <div className="p-4 rounded-3xl bg-gradient-to-r from-red-700 via-rose-900 to-red-800 text-white shadow-xl flex items-center justify-between gap-4 border border-red-500/30">
-        <div className="space-y-1">
+      {/* 🔴 Boltee Kalam YouTube Official Showcase & Task Card */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-red-700 via-rose-900 to-red-800 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-red-500/30">
+        <div className="space-y-1 max-w-lg">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-md bg-white text-red-700 font-black text-[10px] uppercase tracking-wider shadow flex items-center gap-1">
-              <span>🔴 YOUTUBE MANCH</span>
+            <span className="px-2.5 py-0.5 rounded-md bg-white text-red-700 font-black text-[10px] uppercase tracking-wider shadow flex items-center gap-1">
+              <span>🔴 YOUTUBE SPECIAL</span>
             </span>
-            <span className="text-xs font-bold text-red-200">+100 Pts Bonus</span>
+            <span className="text-xs font-extrabold text-amber-300">+25 Pts Visit • +10 Pts Task</span>
           </div>
           <h3 className="text-sm sm:text-base font-bold font-rozha text-white">
-            बोलती कलम YouTube चैनल से जुड़ें एवं काव्य पाठ का आनंद लें
+            बोलती कलम YouTube चैनल — काव्य पाठ, पॉडकास्ट व स्पेशल टास्क
           </h3>
-          <p className="text-[11px] text-red-100 hidden sm:block">
-            हमारे आधिकारिक यूट्यूब चैनल @bolateekalam को सब्सक्राइब करें और पाएं 100 रिवॉर्ड पॉइंट्स।
+          <p className="text-[11px] text-red-100">
+            यूट्यूब चैनल विजिट करने पर <strong>+25 पॉइंट्स</strong> और वीडियो लाइक/कमेंट का स्क्रीनशॉट सबमिट करने पर <strong>+10 पॉइंट्स</strong> प्राप्त करें।
           </p>
         </div>
-        <a
-          href="https://www.youtube.com/@bolateekalam"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-4 py-2 bg-white text-red-700 hover:bg-red-50 font-black rounded-2xl text-xs shadow-md transition shrink-0 flex items-center gap-1.5"
-        >
-          <span>🔴 Subscribe (+100 Pts)</span>
-        </a>
+
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <button
+            type="button"
+            onClick={() => {
+              if (onYouTubeVisit) onYouTubeVisit();
+              else window.open('https://www.youtube.com/@bolteekalam', '_blank');
+            }}
+            className="px-3.5 py-2 bg-white text-red-700 hover:bg-red-50 font-extrabold rounded-2xl text-xs shadow transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>🔴 चैनल देखें (+25 Pts)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (requireAuth && !requireAuth()) return;
+              if (onOpenYouTubeTask) onOpenYouTubeTask();
+            }}
+            className="px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold rounded-2xl text-xs shadow-lg transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
+            <span>स्क्रीनशॉट टास्क (+10 Pts)</span>
+          </button>
+        </div>
       </div>
 
       {/* Weekly Literature Challenge Banner */}

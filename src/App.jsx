@@ -15,6 +15,7 @@ import NotificationDrawer from './components/NotificationDrawer';
 import PublicProfileModal from './components/PublicProfileModal';
 import PoetryBattleChallengeModal from './components/PoetryBattleChallengeModal';
 import LiteraryMembershipCardModal from './components/LiteraryMembershipCardModal';
+import YouTubeTaskModal from './components/YouTubeTaskModal';
 import ReferEarnModal from './components/ReferEarnModal';
 import AdminAuthModal from './components/AdminAuthModal';
 
@@ -192,6 +193,16 @@ function AppContent() {
 
   // Global 6-Month Membership Card Modal State
   const [showGlobalMembershipModal, setShowGlobalMembershipModal] = useState(false);
+
+  // YouTube Task Modal & Proofs State
+  const [showYouTubeTaskModal, setShowYouTubeTaskModal] = useState(false);
+  const [youtubeProofs, setYoutubeProofs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bolteekalam_youtube_proofs_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
 
   // Global Festival Ambient Theme Engine State
   const [activeFestivalTheme, setActiveFestivalTheme] = useState(() => {
@@ -645,6 +656,10 @@ function AppContent() {
   };
 
   const handleLikePost = (post, isLikedState, likesCountState) => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     if (!post) return;
     const newIsLiked = isLikedState !== undefined ? isLikedState : !post.isLiked;
     const newLikesCount = likesCountState !== undefined ? likesCountState : (newIsLiked ? (post.likes || 0) + 1 : Math.max(0, (post.likes || 0) - 1));
@@ -725,6 +740,10 @@ function AppContent() {
   };
 
   const handleAddCommentToPost = (postId, commentObj) => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     // Save to persistent localStorage comments map
     try {
       const storedCommentsMap = localStorage.getItem('bolteekalam_saved_comments_v1');
@@ -784,6 +803,69 @@ function AppContent() {
       try { localStorage.setItem('bolteekalam_unread_notifications_v1', String(updated)); } catch(e){}
       return updated;
     });
+  };
+
+  // Safe Membership Card Trigger (Requires Auth)
+  const handleOpenMembershipCard = () => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
+    setShowGlobalMembershipModal(true);
+  };
+
+  // YouTube Task Modal & Handlers
+  const handleOpenYouTubeTask = () => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
+    setShowYouTubeTaskModal(true);
+  };
+
+  const handleSubmitYouTubeProof = (proofData) => {
+    setYoutubeProofs(prev => {
+      const updated = [proofData, ...prev];
+      try {
+        localStorage.setItem('bolteekalam_youtube_proofs_v1', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const handleApproveYouTubeProof = (proof) => {
+    setYoutubeProofs(prev => {
+      const updated = prev.map(p => p.id === proof.id ? { ...p, status: 'approved' } : p);
+      try {
+        localStorage.setItem('bolteekalam_youtube_proofs_v1', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    handleRewardPoints(10, 'यूट्यूब लाइक/कमेंट टास्क अप्रूव होने पर (+10 Pts)');
+    alert(`🎉 टास्क स्वीकृत! ${proof.userName} को 10 रिवॉर्ड पॉइंट्स क्रेडिट कर दिए गए हैं।`);
+  };
+
+  const handleRejectYouTubeProof = (proof) => {
+    setYoutubeProofs(prev => {
+      const updated = prev.map(p => p.id === proof.id ? { ...p, status: 'rejected' } : p);
+      try {
+        localStorage.setItem('bolteekalam_youtube_proofs_v1', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    alert(`टास्क अस्वीकृत कर दिया गया है।`);
+  };
+
+  const handleYouTubeVisit = () => {
+    window.open('https://www.youtube.com/@bolteekalam', '_blank');
+    if (currentUser) {
+      const visitedKey = `yt_visited_${currentUser.email || 'user'}`;
+      if (!localStorage.getItem(visitedKey)) {
+        localStorage.setItem(visitedKey, 'true');
+        handleRewardPoints(25, 'यूट्यूब चैनल विजिट करने पर (+25 Pts)');
+      }
+    }
   };
 
   // 2. Strict Auth Gatekeeper Helper
@@ -881,7 +963,7 @@ function AppContent() {
     // If new account signup, open the 6-Month Membership Card immediately!
     if (isDirectLogin === true) {
       setShowGlobalMembershipModal(true);
-      handleRewardPoints(100, 'नया खाता बनाने पर (Welcome Bonus)');
+      handleRewardPoints(20, 'नया खाता बनाने पर (Welcome Bonus)');
     } else {
       const currentPath = (window.location.pathname || '/').toLowerCase();
       if (currentPath === '/profile' || window.location.hash === '#/profile') {
@@ -1416,8 +1498,8 @@ function AppContent() {
         setUnreadNotifications={setUnreadNotifications}
         onSearchSubmit={handleSearchSubmit}
         userPoints={userProfile?.points || 0}
-        onOpenMembershipCard={() => setShowGlobalMembershipModal(true)}
-        onOpenYouTube={() => requireAuth(() => setShowYouTubeModal(true))}
+        onOpenMembershipCard={handleOpenMembershipCard}
+        onOpenYouTube={handleYouTubeVisit}
       />
 
       {/* Main Layout Container */}
@@ -1431,7 +1513,7 @@ function AppContent() {
           setUserRole={setUserRole}
           onOpenCreatePost={handleOpenCreatePostProtected}
           onOpenReferEarn={() => requireAuth(() => setShowReferEarnModal(true))}
-          onOpenYouTube={() => requireAuth(() => setShowYouTubeModal(true))}
+          onOpenYouTube={handleYouTubeVisit}
           userPoints={userProfile?.points || 0}
           currentUser={currentUser}
           onOpenAuthModal={() => setShowAuthModal(true)}
@@ -1478,7 +1560,9 @@ function AppContent() {
               onLikePost={handleLikePost}
               onAddComment={handleAddCommentToPost}
               onFollowAuthor={handleFollowAuthor}
-              onOpenMembershipCard={() => setShowGlobalMembershipModal(true)}
+              onOpenMembershipCard={handleOpenMembershipCard}
+              onOpenYouTubeTask={handleOpenYouTubeTask}
+              onYouTubeVisit={handleYouTubeVisit}
               userProfile={userProfile}
               requireAuth={requireAuth}
               setActiveView={handleNavigateView}
@@ -1582,12 +1666,19 @@ function AppContent() {
 
           {activeView === 'admin' && (
             <AdminDashboardView
+              posts={posts}
+              setPosts={setPosts}
+              userProfile={userProfile}
+              setUserProfile={setUserProfile}
               weeklyChallenge={weeklyChallenge}
               setWeeklyChallenge={setWeeklyChallenge}
               patrioticBanner={patrioticBanner}
               setPatrioticBanner={setPatrioticBanner}
               activeFestivalTheme={activeFestivalTheme}
               onUpdateFestivalTheme={handleUpdateFestivalTheme}
+              youtubeProofs={youtubeProofs}
+              onApproveProof={handleApproveYouTubeProof}
+              onRejectProof={handleRejectYouTubeProof}
             />
           )}
 
@@ -1682,6 +1773,16 @@ function AppContent() {
         />
       )}
 
+      {showYouTubeTaskModal && (
+        <YouTubeTaskModal
+          isOpen={true}
+          onClose={() => setShowYouTubeTaskModal(false)}
+          currentUser={currentUser}
+          userProfile={userProfile}
+          onSubmitProof={handleSubmitYouTubeProof}
+        />
+      )}
+
       {showReferEarnModal && (
         <ReferEarnModal
           isOpen={true}
@@ -1690,8 +1791,6 @@ function AppContent() {
           onRewardPoints={handleRewardPoints}
         />
       )}
-
-
 
       {showYouTubeModal && (
         <YouTubeSubscribeModal
