@@ -66,7 +66,7 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
       icon: YouTubeIcon,
       color: 'bg-red-600 text-white shadow-red-900/20',
       textColor: 'text-red-600 dark:text-red-400',
-      link: 'https://www.youtube.com'
+      link: 'https://www.youtube.com/@bolteekalam'
     },
     {
       id: 'instagram',

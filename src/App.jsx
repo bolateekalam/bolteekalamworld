@@ -1477,7 +1477,7 @@ function AppContent() {
 
   const handleSubscribeYouTube = () => {
     handleRewardPoints(20, 'यूट्यूब चैनल सब्सक्राइब करने पर');
-    window.open('https://www.youtube me', '_blank');
+    window.open('https://www.youtube.com/@bolteekalam', '_blank');
   };
 
   const handlePublishPosterPost = (posterData) => {
@@ -1700,7 +1700,7 @@ function AppContent() {
             <AudioStoriesView setActiveView={handleNavigateView} />
           )}
 
-          {activeView === 'profile' && (
+          {(activeView === 'profile' || activeView === 'certificates') && (
             <ProfileView
               posts={posts.filter(p => 
                 p.author?.id === currentUser?.email || 
@@ -1715,7 +1715,7 @@ function AppContent() {
                 points: Math.max(userProfile?.points || 0, 50 + ((posts || []).filter(p => p && (p.author?.id === currentUser?.email || p.author?.email === currentUser?.email || p.author?.id === 'user-me' || (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase()))).length * 10))
               }}
               walletTransactions={walletTransactions}
-              initialTab={profileInitialTab}
+              initialTab={activeView === 'certificates' ? 'certificates' : profileInitialTab}
               onOpenMembershipCard={handleOpenMembershipCard}
               onRechargePoints={handleRechargePoints}
               onOpenCertificate={openCertificateModal}

@@ -11,6 +11,7 @@ export const Sidebar = ({ activeView, setActiveView, userRole, userProfile }) =>
 
   const navItems = [
     { id: 'feed', label: 'होम', icon: Home, path: '/' },
+    { id: 'certificates', label: '📜 सम्मान पत्र (Certificates)', icon: Award, badge: 'UNLOCKED', badgeColor: 'bg-amber-600', path: '/certificates' },
     { id: 'battles', label: 'कविताएँ', icon: Swords, path: '/poetry-battle' },
     { id: 'dailyChallenge', label: 'कहानी / लेख', icon: Flame, path: '/sahityik-chunautiyan' },
     { id: 'competitions', label: 'शायरी', icon: Trophy, path: '/sahityik-darpan' },
