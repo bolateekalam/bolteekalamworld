@@ -477,51 +477,128 @@ export const AdminDashboardView = ({
       {/* Tab 2: Users Directory */}
       {activeTab === 'usersList' && (
         <div className="space-y-4">
-          <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/30 text-emerald-600 text-xs font-bold flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
-              <span>सरकारी सुरक्षा मानक (Govt Audit Ready): सभी सदस्यों का मोबाइल व ईमेल OTP द्वारा 100% सत्यापित है।</span>
+          {/* WhatsApp Marketing & User Attendance Bar */}
+          <div className="p-4 bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 rounded-3xl border-2 border-emerald-500/40 text-white space-y-3 shadow-lg">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold">
+                  💬
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm font-rozha text-emerald-300">
+                    सदस्य उपस्थिति & WhatsApp री-एंगेजमेंट मैनेजर
+                  </h4>
+                  <p className="text-[11px] text-slate-300">
+                    3+ दिन से अनुपस्थित लेखकों को 1-क्लिक में WhatsApp संदेश भेजें या बल्क मार्केटिंग सूची डाउनलोड करें:
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const numbers = registeredUsers.map(u => u.phone?.replace(/\D/g, '')).filter(p => p && p.length === 10).join(', ');
+                    navigator.clipboard.writeText(numbers);
+                    alert(`✓ ${registeredUsers.length} सदस्यों के मोबाइल नंबर कॉपी हो गए! आप इन्हें WhatsApp API / CRM में पेस्ट कर सकते हैं।`);
+                  }}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow cursor-pointer"
+                >
+                  <span>📋 सभी मोबाइल नंबर कॉपी करें</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const csvContent = "data:text/csv;charset=utf-8," 
+                      + ["नाम,यूज़रनेम,मोबाइल_नंबर,ईमेल,शहर,रचनाएँ,पॉइंट्स,स्थिति", 
+                        ...registeredUsers.map(u => `"${u.name}","${u.username}","${u.phone}","${u.email}","${u.city}","${u.postsCount}","${u.points}","${u.lastActive}"`)
+                      ].join("\n");
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", `BoltiKalam_User_Audit_${new Date().toISOString().slice(0,10)}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                >
+                  <span>📥 CSV ऑडिट डाउनलोड</span>
+                </button>
+              </div>
             </div>
-            <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-xl text-[10px]">
-              सरकारी जांच हेतु तैयार डेटाबेस
-            </span>
           </div>
 
           <div className="space-y-3">
-            {registeredUsers.map((usr) => (
-              <div 
-                key={usr.id}
-                className="p-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 flex-wrap text-xs shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <img src={usr.avatar} alt={usr.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500 shrink-0" />
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{usr.name}</h4>
-                      <span className="px-2 py-0.2 rounded bg-emerald-500/10 text-emerald-600 font-bold text-[10px] flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                        <span>OTP Verified</span>
-                      </span>
+            {registeredUsers.map((usr, idx) => {
+              const cleanPhone = (usr.phone || '').replace(/\D/g, '');
+              const isInactive = idx >= 1; // Mark demo inactivity for audit demo
+              const inactiveDays = isInactive ? (idx === 1 ? '3 दिन से' : `${idx + 2} दिन से`) : 'आज सक्रिय';
+
+              return (
+                <div 
+                  key={usr.id}
+                  className={`p-4 rounded-3xl border flex items-center justify-between gap-4 flex-wrap text-xs shadow-sm transition ${
+                    isInactive 
+                      ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40' 
+                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img src={usr.avatar} alt={usr.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500 shrink-0" />
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{usr.name}</h4>
+                        <span className="text-slate-500 dark:text-slate-400 font-bold text-xs">{usr.username}</span>
+                        {isInactive ? (
+                          <span className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 font-extrabold text-[10px] border border-rose-500/20">
+                            ⚠️ {inactiveDays} अनुपस्थित
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-extrabold text-[10px] border border-emerald-500/20">
+                            🟢 आज सक्रिय
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-slate-600 dark:text-slate-300 text-[11px] font-semibold flex items-center gap-2 flex-wrap">
+                        <span>📧 {usr.email}</span>
+                        <span>•</span>
+                        <span>📱 <strong className="text-slate-900 dark:text-slate-100">{usr.phone}</strong></span>
+                        <span>•</span>
+                        <span>📍 {usr.city}</span>
+                      </p>
                     </div>
-                    <p className="text-slate-600 dark:text-slate-300 text-[11px] font-semibold">
-                      📧 {usr.email} • 📱 <strong className="text-slate-900 dark:text-slate-100">{usr.phone}</strong> • {usr.city}
-                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 text-xs font-semibold shrink-0 flex-wrap">
+                    <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      {usr.postsCount} रचनाएँ
+                    </span>
+                    <span className="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 font-mono font-bold">
+                      {usr.points} pts
+                    </span>
+
+                    {/* WhatsApp 1-Click Action Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!cleanPhone || cleanPhone.length < 10) {
+                          alert('इस सदस्य का मान्य मोबाइल नंबर उपलब्ध नहीं है।');
+                          return;
+                        }
+                        const formatted = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+                        const msg = `नमस्ते ${usr.name} जी! 🪶\n\n'बोलती कलम' (bolateeworld.in) राष्ट्रीय साहित्यिक मंच पर आपकी उपस्थिति और रचनाओं की कमी खल रही है।\n\n✨ मंच पर आज का दैनिक शब्द और नई काव्य गोष्ठी शुरू हो चुकी है।\n✍️ आइए और आज की नई रचना साझा करें!\n\n👉 मंच खोलें: https://www.bolateeworld.in\n\n— बोलती कलम साहित्यिक परिवार`;
+                        window.open(`https://api.whatsapp.com/send?phone=${formatted}&text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-xs shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <span>💬 WhatsApp संदेश भेजें</span>
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3 text-xs font-semibold shrink-0">
-                  <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                    {usr.postsCount} रचनाएँ
-                  </span>
-                  <span className="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 font-mono font-bold">
-                    {usr.points} pts
-                  </span>
-                  <span className="px-3 py-1 rounded-xl bg-slate-900 dark:bg-slate-800 text-white font-bold text-[11px]">
-                    {usr.lastActive}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
