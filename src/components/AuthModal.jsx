@@ -384,7 +384,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     try {
       const cleanEmail = email.trim().toLowerCase();
       const finalUsername = `@${cleanUser}`;
-      await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
         password: password,
         options: {
@@ -395,13 +395,16 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
           }
         }
       });
+      if (error) {
+        console.warn('Supabase Signup notice:', error.message);
+      }
     } catch (err) {
       console.warn('Supabase Signup warning:', err);
     }
   };
 
   // 5. Resend OTP Handler
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     if (resendCooldown > 0) return;
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
     setSecretOtp(newOtp);
@@ -409,10 +412,18 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     setResendCooldown(30);
     setSuccessMsg(`🔄 नया 6-अंकों का ओटीपी आपकी ईमेल (${email}) पर पुनः भेजा गया है।`);
     console.info(`[Bolti Kalam] Resent Security OTP for ${email}: ${newOtp}`);
+
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      await supabase.auth.resend({
+        type: 'signup',
+        email: cleanEmail
+      });
+    } catch (e) {}
   };
 
   // 6. Verify OTP & Finalize Account Creation (Step 2)
-  const handleVerifyOtpAndCreate = (e) => {
+  const handleVerifyOtpAndCreate = async (e) => {
     e.preventDefault();
     setAuthError('');
 
@@ -427,59 +438,6 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       setAuthError('गलत ओटीपी दर्ज किया गया है! कृपया अपनी ईमेल में आया सही कोड डालें।');
       return;
     }
-
-    // 7. Forgot Password - Send OTP
-  const handleInitiateForgotPassword = (e) => {
-    e.preventDefault();
-    setAuthError('');
-    if (!forgotEmail.trim() || !forgotEmail.includes('@')) {
-      setAuthError('कृपया अपनी सही पंजीकृत ईमेल आईडी दर्ज करें!');
-      return;
-    }
-    const cleanEmail = forgotEmail.trim().toLowerCase();
-    const generated = Math.floor(100000 + Math.random() * 900000).toString();
-    setSecretOtp(generated);
-    setOtpInput('');
-    setPassword('');
-    setResendCooldown(30);
-    setStep(2);
-    setSuccessMsg(`📩 पासवर्ड रीसेट कोड आपकी ईमेल (${cleanEmail}) पर भेज दिया गया है।`);
-    console.info(`[Bolti Kalam] Reset Password OTP for ${cleanEmail}: ${generated}`);
-  };
-
-  // 8. Forgot Password - Verify OTP & Set New Password
-  const handleVerifyOtpAndResetPassword = (e) => {
-    e.preventDefault();
-    setAuthError('');
-    if (otpInput.trim() !== secretOtp && otpInput.trim() !== '123456') {
-      setAuthError('गलत ओटीपी कोड! कृपया ईमेल में आया 6-अंकों का कोड दर्ज करें।');
-      return;
-    }
-    if (!isPasswordValid) {
-      setAuthError('नया पासवर्ड नियमों के अनुसार होना चाहिए (5+ अक्षर, 2+ अंक, 1+ विशेष चिह्न)!');
-      return;
-    }
-    const cleanEmail = forgotEmail.trim().toLowerCase();
-    try {
-      localStorage.setItem(`user_pwd_${cleanEmail}`, password);
-      const rawMap = localStorage.getItem('bolteekalam_registered_users_map');
-      if (rawMap) {
-        const usersMap = JSON.parse(rawMap);
-        if (usersMap[cleanEmail]) {
-          usersMap[cleanEmail].password = password;
-          localStorage.setItem('bolteekalam_registered_users_map', JSON.stringify(usersMap));
-        }
-      }
-    } catch (err) {}
-
-    setSuccessMsg('✅ पासवर्ड सफलतापूर्वक बदल दिया गया है! अब नए पासवर्ड से लॉगिन करें।');
-    setTimeout(() => {
-      setActiveTab('login');
-      setLoginEmail(cleanEmail);
-      setLoginPassword('');
-      setStep(1);
-    }, 1200);
-  };
 
     const cleanUser = sanitizeUsername(signupUsername);
     const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
@@ -514,6 +472,63 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       onLoginSuccess(newUser, true);
       onClose();
     }, 500);
+  };
+
+  // 7. Forgot Password - Send OTP
+  const handleInitiateForgotPassword = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    if (!forgotEmail.trim() || !forgotEmail.includes('@')) {
+      setAuthError('कृपया अपनी सही पंजीकृत ईमेल आईडी दर्ज करें!');
+      return;
+    }
+    const cleanEmail = forgotEmail.trim().toLowerCase();
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+    setSecretOtp(generated);
+    setOtpInput('');
+    setPassword('');
+    setResendCooldown(30);
+    setStep(2);
+    setSuccessMsg(`📩 पासवर्ड रीसेट कोड आपकी ईमेल (${cleanEmail}) पर भेज दिया गया है।`);
+    console.info(`[Bolti Kalam] Reset Password OTP for ${cleanEmail}: ${generated}`);
+
+    try {
+      await supabase.auth.resetPasswordForEmail(cleanEmail);
+    } catch (e) {}
+  };
+
+  // 8. Forgot Password - Verify OTP & Set New Password
+  const handleVerifyOtpAndResetPassword = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    if (otpInput.trim() !== secretOtp && otpInput.trim() !== '123456') {
+      setAuthError('गलत ओटीपी कोड! कृपया ईमेल में आया 6-अंकों का कोड दर्ज करें।');
+      return;
+    }
+    if (!isPasswordValid) {
+      setAuthError('नया पासवर्ड नियमों के अनुसार होना चाहिए (5+ अक्षर, 2+ अंक, 1+ विशेष चिह्न)!');
+      return;
+    }
+    const cleanEmail = forgotEmail.trim().toLowerCase();
+    try {
+      localStorage.setItem(`user_pwd_${cleanEmail}`, password);
+      const rawMap = localStorage.getItem('bolteekalam_registered_users_map');
+      if (rawMap) {
+        const usersMap = JSON.parse(rawMap);
+        if (usersMap[cleanEmail]) {
+          usersMap[cleanEmail].password = password;
+          localStorage.setItem('bolteekalam_registered_users_map', JSON.stringify(usersMap));
+        }
+      }
+    } catch (err) {}
+
+    setSuccessMsg('✅ पासवर्ड सफलतापूर्वक बदल दिया गया है! अब नए पासवर्ड से लॉगिन करें।');
+    setTimeout(() => {
+      setActiveTab('login');
+      setLoginEmail(cleanEmail);
+      setLoginPassword('');
+      setStep(1);
+    }, 1200);
   };
 
   return (
