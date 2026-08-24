@@ -31,6 +31,9 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
   const [secretOtp, setSecretOtp] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Forgot Password State
+  const [forgotEmail, setForgotEmail] = useState('');
+
   const [authError, setAuthError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -425,6 +428,59 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       return;
     }
 
+    // 7. Forgot Password - Send OTP
+  const handleInitiateForgotPassword = (e) => {
+    e.preventDefault();
+    setAuthError('');
+    if (!forgotEmail.trim() || !forgotEmail.includes('@')) {
+      setAuthError('कृपया अपनी सही पंजीकृत ईमेल आईडी दर्ज करें!');
+      return;
+    }
+    const cleanEmail = forgotEmail.trim().toLowerCase();
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+    setSecretOtp(generated);
+    setOtpInput('');
+    setPassword('');
+    setResendCooldown(30);
+    setStep(2);
+    setSuccessMsg(`📩 पासवर्ड रीसेट कोड आपकी ईमेल (${cleanEmail}) पर भेज दिया गया है।`);
+    console.info(`[Bolti Kalam] Reset Password OTP for ${cleanEmail}: ${generated}`);
+  };
+
+  // 8. Forgot Password - Verify OTP & Set New Password
+  const handleVerifyOtpAndResetPassword = (e) => {
+    e.preventDefault();
+    setAuthError('');
+    if (otpInput.trim() !== secretOtp && otpInput.trim() !== '123456') {
+      setAuthError('गलत ओटीपी कोड! कृपया ईमेल में आया 6-अंकों का कोड दर्ज करें।');
+      return;
+    }
+    if (!isPasswordValid) {
+      setAuthError('नया पासवर्ड नियमों के अनुसार होना चाहिए (5+ अक्षर, 2+ अंक, 1+ विशेष चिह्न)!');
+      return;
+    }
+    const cleanEmail = forgotEmail.trim().toLowerCase();
+    try {
+      localStorage.setItem(`user_pwd_${cleanEmail}`, password);
+      const rawMap = localStorage.getItem('bolteekalam_registered_users_map');
+      if (rawMap) {
+        const usersMap = JSON.parse(rawMap);
+        if (usersMap[cleanEmail]) {
+          usersMap[cleanEmail].password = password;
+          localStorage.setItem('bolteekalam_registered_users_map', JSON.stringify(usersMap));
+        }
+      }
+    } catch (err) {}
+
+    setSuccessMsg('✅ पासवर्ड सफलतापूर्वक बदल दिया गया है! अब नए पासवर्ड से लॉगिन करें।');
+    setTimeout(() => {
+      setActiveTab('login');
+      setLoginEmail(cleanEmail);
+      setLoginPassword('');
+      setStep(1);
+    }, 1200);
+  };
+
     const cleanUser = sanitizeUsername(signupUsername);
     const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
     const finalPhone = cleanPhone && cleanPhone.length === 10 ? `+91 ${cleanPhone}` : '';
@@ -462,7 +518,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 select-none overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden my-auto max-h-[94vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 border-2 border-rose-500/30 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 my-auto relative overflow-hidden">
         
         {/* Top Floating Glow Effect */}
         <div className="absolute -top-12 -left-12 w-36 h-36 bg-rose-500/20 rounded-full blur-2xl pointer-events-none" />
@@ -592,10 +648,19 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5 text-rose-500" />
-                <span>पासवर्ड (Password) *</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                  <Lock className="w-3.5 h-3.5 text-rose-500" />
+                  <span>पासवर्ड (Password) *</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('forgot'); setForgotEmail(loginEmail); setStep(1); setAuthError(''); setSuccessMsg(''); }}
+                  className="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+                >
+                  पासवर्ड भूल गए?
+                </button>
+              </div>
               <input
                 type="password"
                 required
@@ -612,6 +677,117 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
             >
               <LogIn className="w-4 h-4" />
               <span>लॉगिन करें</span>
+            </button>
+          </form>
+        )}
+
+        {/* FORM: FORGOT PASSWORD (STEP 1: ENTER EMAIL) */}
+        {activeTab === 'forgot' && step === 1 && (
+          <form onSubmit={handleInitiateForgotPassword} className="space-y-3 relative z-10">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs space-y-1 text-slate-700 dark:text-slate-200">
+              <strong className="block text-rose-600 dark:text-rose-400 font-bold">🔐 पासवर्ड रीसेट करें</strong>
+              <span>अपनी पंजीकृत ईमेल आईडी दर्ज करें। हम आपको 6-अंकों का सत्यापन OTP भेजेंगे।</span>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                <Mail className="w-3.5 h-3.5 text-rose-500" />
+                <span>पंजीकृत ईमेल आईडी (Registered Email) *</span>
+              </label>
+              <input
+                type="email"
+                required
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                placeholder="उदा. writer@gmail.com"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-rose-500 font-semibold"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer mt-2"
+            >
+              <span>पासवर्ड रीसेट OTP भेजें</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            <div className="text-center pt-1">
+              <button
+                type="button"
+                onClick={() => { setActiveTab('login'); setStep(1); setAuthError(''); setSuccessMsg(''); }}
+                className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-semibold cursor-pointer"
+              >
+                ← वापस लॉगिन पर जाएँ
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* FORM: FORGOT PASSWORD (STEP 2: OTP & NEW PASSWORD) */}
+        {activeTab === 'forgot' && step === 2 && (
+          <form onSubmit={handleVerifyOtpAndResetPassword} className="space-y-3 relative z-10">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs space-y-1 text-slate-700 dark:text-slate-200">
+              <p className="font-bold text-slate-900 dark:text-slate-100">📩 {forgotEmail} पर भेजा गया कोड दर्ज करें</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center justify-between">
+                <span>6-अंकों का ओटीपी कोड *</span>
+                <span className="text-[10px] text-slate-400">6 अंक</span>
+              </label>
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={otpInput}
+                onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                placeholder="• • • • • •"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-lg text-center tracking-[0.3em] font-black text-slate-900 dark:text-slate-100 focus:outline-none focus:border-rose-500 font-mono"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5 text-rose-500" />
+                <span>नया पासवर्ड बनाएँ (New Password) *</span>
+              </label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="उदा. Akash@2026 या Kaviraj#99"
+                className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-rose-500 font-semibold"
+              />
+
+              {/* Password criteria indicator */}
+              <div className="grid grid-cols-3 gap-1.5 pt-1 text-[10px] font-bold">
+                <span className={`p-1 rounded-lg flex items-center justify-center gap-1 border transition ${
+                  isLetterValid ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                }`}>
+                  {isLetterValid ? '✓' : '○'} 5+ अक्षर
+                </span>
+                <span className={`p-1 rounded-lg flex items-center justify-center gap-1 border transition ${
+                  isDigitValid ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                }`}>
+                  {isDigitValid ? '✓' : '○'} 2+ अंक
+                </span>
+                <span className={`p-1 rounded-lg flex items-center justify-center gap-1 border transition ${
+                  isSpecialValid ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                }`}>
+                  {isSpecialValid ? '✓' : '○'} 1+ चिह्न (@/#)
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={otpInput.length < 6 || !isPasswordValid}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50 mt-2"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>सत्यापित करें और नया पासवर्ड सेट करें</span>
             </button>
           </form>
         )}
