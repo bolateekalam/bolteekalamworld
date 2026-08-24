@@ -57,7 +57,7 @@ export const HomeFeedView = ({
       </div>
 
       {/* 50-50 Split Grid: Left = Poster Studio (1/2), Right = 6-Month Digital Card (1/2) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
         {/* Left: 📸 Digital Poet Poster Studio */}
         <div 
           onClick={() => {
@@ -67,11 +67,11 @@ export const HomeFeedView = ({
           className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 text-white shadow-xl flex flex-col justify-between gap-3 cursor-pointer hover:scale-[1.01] transition border border-purple-500/30 group"
         >
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded-md bg-purple-600 text-white font-extrabold text-[10px] uppercase tracking-wider shadow">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-extrabold text-[10px] uppercase tracking-wider shadow shrink-0 whitespace-nowrap">
                 POSTER STUDIO
               </span>
-              <span className="text-xs font-bold text-purple-200">📸 डिजिटल पोस्टर</span>
+              <span className="text-xs font-bold text-purple-200 shrink-0 whitespace-nowrap">📸 डिजिटल पोस्टर</span>
             </div>
             <h3 className="text-sm sm:text-base font-bold font-rozha text-purple-100 group-hover:text-amber-200 transition">
               कवि फोटो पोस्टर मेकर
@@ -82,7 +82,7 @@ export const HomeFeedView = ({
           </div>
 
           <div className="pt-2 flex justify-end">
-            <button className="px-4 py-2 bg-white hover:bg-purple-50 text-purple-950 rounded-2xl text-xs font-extrabold shadow transition flex items-center gap-1.5">
+            <button className="px-4 py-2 bg-white hover:bg-purple-50 text-purple-950 rounded-2xl text-xs font-extrabold shadow transition flex items-center gap-1.5 shrink-0">
               <ImageIcon className="w-3.5 h-3.5 text-purple-700" />
               <span>पोस्टर बनाएं →</span>
             </button>
@@ -98,11 +98,11 @@ export const HomeFeedView = ({
           className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-600 via-rose-800 to-rose-950 text-white shadow-xl flex flex-col justify-between gap-3 cursor-pointer hover:scale-[1.01] transition border border-amber-400/40 group"
         >
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[10px] uppercase shadow">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-[10px] uppercase shadow shrink-0 whitespace-nowrap">
                 6-माह डिजिटल कार्ड
               </span>
-              <span className="text-xs font-extrabold text-amber-200">🎖️ सदस्यता पत्र</span>
+              <span className="text-xs font-extrabold text-amber-200 shrink-0 whitespace-nowrap">🎖️ सदस्यता पत्र</span>
             </div>
             <h3 className="text-sm sm:text-base font-bold font-rozha text-amber-50 group-hover:text-amber-300 transition">
               राष्ट्रीय 6-माह डिजिटल सदस्यता प्रमाणपत्र
@@ -113,7 +113,7 @@ export const HomeFeedView = ({
           </div>
 
           <div className="pt-2 flex justify-end">
-            <button className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl text-xs font-black shadow transition flex items-center gap-1.5">
+            <button className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl text-xs font-black shadow transition flex items-center gap-1.5 shrink-0">
               <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
               <span>कार्ड देखें →</span>
             </button>
@@ -122,30 +122,30 @@ export const HomeFeedView = ({
       </div>
 
       {/* 🔴 Boltee Kalam YouTube Official Showcase & Task Card (Below the 50-50 Grid) */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-red-700 via-rose-900 to-red-800 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-red-500/30">
-        <div className="space-y-1 max-w-lg">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-md bg-white text-red-700 font-black text-[10px] uppercase tracking-wider shadow flex items-center gap-1">
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-red-700 via-rose-900 to-red-800 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-red-500/30">
+        <div className="space-y-1.5 max-w-lg flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-md bg-white text-red-700 font-black text-[10px] uppercase tracking-wider shadow flex items-center gap-1 shrink-0 whitespace-nowrap">
               <span>🔴 YOUTUBE SPECIAL</span>
             </span>
-            <span className="text-xs font-extrabold text-amber-300">+25 Pts Visit • +10 Pts Task</span>
+            <span className="text-xs font-extrabold text-amber-300 shrink-0 whitespace-nowrap">+25 Pts Visit • +10 Pts Task</span>
           </div>
           <h3 className="text-sm sm:text-base font-bold font-rozha text-white">
             बोलती कलम YouTube चैनल — काव्य पाठ, पॉडकास्ट व स्पेशल टास्क
           </h3>
-          <p className="text-[11px] text-red-100">
+          <p className="text-[11px] text-red-100/90 leading-relaxed">
             यूट्यूब चैनल विजिट करने पर <strong>+25 पॉइंट्स</strong> और वीडियो लाइक/कमेंट का स्क्रीनशॉट सबमिट करने पर <strong>+10 पॉइंट्स</strong> प्राप्त करें।
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap w-full sm:w-auto justify-start sm:justify-end">
           <button
             type="button"
             onClick={() => {
               if (onYouTubeVisit) onYouTubeVisit();
               else window.open('https://www.youtube.com/@bolteekalam', '_blank');
             }}
-            className="px-3.5 py-2 bg-white text-red-700 hover:bg-red-50 font-extrabold rounded-2xl text-xs shadow transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            className="flex-1 sm:flex-initial px-3.5 py-2 bg-white text-red-700 hover:bg-red-50 font-extrabold rounded-2xl text-xs shadow transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
           >
             <span>🔴 चैनल देखें (+25 Pts)</span>
           </button>
@@ -156,9 +156,9 @@ export const HomeFeedView = ({
               if (requireAuth && !requireAuth()) return;
               if (onOpenYouTubeTask) onOpenYouTubeTask();
             }}
-            className="px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold rounded-2xl text-xs shadow-lg transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            className="flex-1 sm:flex-initial px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold rounded-2xl text-xs shadow-lg transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
           >
-            <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
+            <Sparkles className="w-3.5 h-3.5 fill-slate-950 shrink-0" />
             <span>स्क्रीनशॉट टास्क (+10 Pts)</span>
           </button>
         </div>

@@ -44,7 +44,7 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
   }, [posts, currentUser, userProfile]);
 
   return (
-    <aside className="w-80 shrink-0 hidden lg:block space-y-4">
+    <aside className="w-72 2xl:w-80 shrink-0 hidden xl:block space-y-4">
 
       {/* 1. 📜 Milestone Certificates Side Widget (Prominently visible) */}
       <div className="bg-gradient-to-br from-[#0e2238] via-slate-900 to-[#0e2238] text-white border-2 border-amber-500/40 rounded-3xl p-4 shadow-xl space-y-3 relative overflow-hidden">
@@ -63,7 +63,7 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
             📜 प्रथम साहित्यिक पदार्पण सम्मान पत्र
           </span>
           <p className="text-[10px] text-slate-300 leading-relaxed font-serif">
-            बोलती वर्ल्ड (Bolti World) में खाता बनते ही जारी किया गया आधिकारिक डिजिटल सम्मान पत्र।
+            बोलती कलम (Bolti Kalam) में खाता बनते ही जारी किया गया आधिकारिक डिजिटल सम्मान पत्र।
           </p>
         </div>
 
