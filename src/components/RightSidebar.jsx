@@ -27,7 +27,7 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
     if (currentUser || userProfile) {
       const name = userProfile?.name || currentUser?.name || 'आप (कवि)';
       const avatar = userProfile?.avatar || currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150';
-      const points = userProfile?.points || 30;
+      const points = userProfile?.points || 50;
       authorMap.set(name, { name, points: `${points} अंक`, avatar });
     }
 
@@ -35,7 +35,7 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
       const name = p.authorName || p.author?.name;
       if (name && !authorMap.has(name)) {
         const avatar = p.authorAvatar || p.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150';
-        const points = (p.likes || 5) * 10 + 30;
+        const points = p.author?.points || 50;
         authorMap.set(name, { name, points: `${points} अंक`, avatar });
       }
     });

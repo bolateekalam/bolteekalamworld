@@ -87,7 +87,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
           role: 'admin',
           city: 'प्रयागराज (मुख्यालय)',
           isVerified: true,
-          points: 99999
+          points: 50
         };
         onLoginSuccess(adminUser);
         onClose();
@@ -117,7 +117,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
           role: 'user',
           city: 'प्रयागराज',
           isVerified: true,
-          points: 100
+          points: 50
         };
         setSuccessMsg('सफलतापूर्वक लॉगिन हो गया!');
         setTimeout(() => {
@@ -143,7 +143,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       role: 'user',
       city: 'प्रयागराज',
       isVerified: true,
-      points: 100
+      points: 50
     };
 
     onLoginSuccess(normalUser);
@@ -165,7 +165,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
         role: 'admin',
         city: 'प्रयागराज (मुख्यालय)',
         isVerified: true,
-        points: 99999
+        points: 50
       };
       onLoginSuccess(adminUser);
       onClose();
@@ -374,7 +374,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
       role: 'user',
       city: 'प्रयागराज',
       isVerified: true,
-      points: 30,
+      points: 50,
       createdAt: nowIso,
       lastUsernameChangeDate: nowIso
     };

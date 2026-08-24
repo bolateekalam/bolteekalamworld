@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const Sidebar = ({ activeView, setActiveView, userRole, userProfile }) => {
+export const Sidebar = ({ activeView, setActiveView, userRole, userProfile, onOpenInstallApp }) => {
   const { t } = useLanguage();
   const usernameClean = (userProfile?.username || 'writer').replace(/^[@#]/, '');
 
@@ -81,6 +81,31 @@ export const Sidebar = ({ activeView, setActiveView, userRole, userProfile }) =>
             बोलती कलम
           </p>
         </div>
+
+        {/* 📲 PWA App Download Promo Card */}
+        {onOpenInstallApp && (
+          <button
+            onClick={onOpenInstallApp}
+            className="w-full p-3.5 bg-gradient-to-r from-[#0e2238] to-slate-900 hover:brightness-110 text-white rounded-2xl border border-amber-500/40 shadow-lg flex items-center justify-between gap-2 transition active:scale-95 cursor-pointer text-left group"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-sm shadow">
+                📲
+              </div>
+              <div>
+                <span className="font-bold text-xs text-amber-300 block">
+                  अपना ऐप डाउनलोड करें
+                </span>
+                <span className="text-[10px] text-slate-400 block">
+                  1-क्लिक में मोबाइल पर इंस्टॉल
+                </span>
+              </div>
+            </div>
+            <span className="text-xs text-amber-400 font-black group-hover:translate-x-1 transition">
+              →
+            </span>
+          </button>
+        )}
 
       </div>
     </aside>

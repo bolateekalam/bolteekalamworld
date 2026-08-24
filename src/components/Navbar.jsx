@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Feather, Search, PlusCircle, Bell, Sun, Moon, Globe, 
-  Shield, Check, Filter, User, LogIn, LogOut, ChevronDown, Sparkles, HelpCircle
+  Shield, Check, Filter, User, LogIn, LogOut, ChevronDown, Sparkles, HelpCircle, Smartphone 
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -27,7 +27,8 @@ export const Navbar = ({
   onOpenAuthModal,
   onLogout,
   onOpenMembershipCard,
-  onOpenYouTube
+  onOpenYouTube,
+  onOpenInstallApp
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -277,6 +278,26 @@ export const Navbar = ({
                     </span>
                   </button>
 
+                  {/* Option: अपना ऐप डाउनलोड करें (Install Mobile App) */}
+                  {onOpenInstallApp && (
+                    <button
+                      onClick={() => {
+                        onOpenInstallApp();
+                        setShowUserDropdown(false);
+                      }}
+                      aria-label="बोलती कलम मोबाइल ऐप इंस्टॉल करें"
+                      className="w-full text-left px-3 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-extrabold"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Smartphone className="w-4 h-4 text-emerald-600" />
+                        <span>📲 अपना ऐप डाउनलोड करें</span>
+                      </div>
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold shadow-sm">
+                        INSTALL
+                      </span>
+                    </button>
+                  )}
+
                   {/* Option 4: सहायता एवं सहायता केंद्र (Help) */}
                   <button
                     onClick={() => {
@@ -320,14 +341,26 @@ export const Navbar = ({
               )}
             </div>
           ) : (
-            <button
-              onClick={onOpenAuthModal}
-              aria-label="लॉगिन या नया खाता बनाएँ"
-              className="px-3 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow active:scale-95 transition"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>लॉगिन / नया खाता</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {onOpenInstallApp && (
+                <button
+                  onClick={onOpenInstallApp}
+                  aria-label="बोलती कलम ऐप इंस्टॉल करें"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-bold rounded-xl text-xs transition active:scale-95 cursor-pointer"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>ऐप इंस्टॉल</span>
+                </button>
+              )}
+              <button
+                onClick={onOpenAuthModal}
+                aria-label="लॉगिन या नया खाता बनाएँ"
+                className="px-3 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow active:scale-95 transition cursor-pointer"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>लॉगिन / नया खाता</span>
+              </button>
+            </div>
           )}
 
         </div>

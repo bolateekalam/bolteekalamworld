@@ -316,7 +316,12 @@ export const createPostInDB = async (postData, userId) => {
     const payload = {
       title: postData.title || 'बिना शीर्षक',
       category: postData.category || 'कविता',
-      content: encodedBody
+      content: encodedBody,
+      author_name: authorInfo.name,
+      author_username: authorInfo.username,
+      author_avatar: authorInfo.avatar,
+      author_email: authorInfo.email,
+      image_url: posterImg
     };
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -324,10 +329,23 @@ export const createPostInDB = async (postData, userId) => {
       payload.user_id = session.user.id;
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('posts')
       .insert([payload])
       .select();
+
+    // Graceful fallback if database schema does not have extra columns yet
+    if (error) {
+      const minPayload = {
+        title: postData.title || 'बिना शीर्षक',
+        category: postData.category || 'कविता',
+        content: encodedBody
+      };
+      if (payload.user_id) minPayload.user_id = payload.user_id;
+      const retryRes = await supabase.from('posts').insert([minPayload]).select();
+      data = retryRes.data;
+      error = retryRes.error;
+    }
 
     if (!error && data && data[0]) {
       const dbPost = {

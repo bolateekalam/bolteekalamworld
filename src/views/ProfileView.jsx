@@ -59,6 +59,7 @@ export const ProfileView = ({
 
   const userEmail = profile.email || 'user';
   const cleanUser = (profile.username || 'writer').replace(/^[@#]/, '');
+  const displayPoints = (typeof profile.points === 'number' && profile.points <= 250 && profile.points >= 0) ? profile.points : 50;
   const walletShareUrl = `https://www.bolateeworld.in/${cleanUser}/wallet`;
   const certificateShareUrl = `https://www.bolateeworld.in/${cleanUser}/certificate`;
 
@@ -435,7 +436,7 @@ export const ProfileView = ({
             >
               <div className="flex items-center justify-center gap-1 text-amber-600 dark:text-amber-400 font-bold text-sm sm:text-base group-hover:scale-105 transition">
                 <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
-                <span>{profile.points || 0}</span>
+                <span>{displayPoints}</span>
               </div>
               <p className="text-[10px] text-slate-500 font-semibold underline decoration-dotted truncate">
                 पॉइंट्स पासबुक ℹ️
@@ -509,7 +510,7 @@ export const ProfileView = ({
             }`}
           >
             <Wallet className="w-3.5 h-3.5 text-purple-500" />
-            <span>🪙 पॉइंट्स पासबुक ({profile.points || 0} Pts)</span>
+            <span>🪙 पॉइंट्स पासबुक ({displayPoints} Pts)</span>
           </button>
 
           <button
@@ -550,7 +551,7 @@ export const ProfileView = ({
               </h3>
             </div>
             <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-300 dark:border-amber-700">
-              कुल बैलेंस: {profile.points || 0} Pts
+              कुल बैलेंस: {displayPoints} Pts
             </span>
           </div>
 
@@ -706,49 +707,51 @@ export const ProfileView = ({
                 </div>
 
                 {/* 2. SECTION 1: Unlocked Certificates (Top Section) */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-lg">
-                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 className="text-sm sm:text-base font-bold font-rozha text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-5 shadow-lg w-full">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap gap-2">
+                    <h3 className="text-base sm:text-lg font-bold font-rozha text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                      <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       <span>🏆 आपके प्राप्त मानद सम्मान पत्र ({unlockedCerts.length})</span>
                     </h3>
-                    <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold text-xs rounded-full border border-emerald-300 dark:border-emerald-700">
+                    <span className="px-3.5 py-1 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold text-xs rounded-full border border-emerald-300 dark:border-emerald-700">
                       ✓ तुरंत डाउनलोड हेतु उपलब्ध
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className={`grid ${unlockedCerts.length === 1 ? 'grid-cols-1 max-w-2xl' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'} gap-4 sm:gap-6`}>
                     {unlockedCerts.map((cert) => (
                       <div 
                         key={cert.id}
-                        className="rounded-2xl p-4 border-2 border-[#0e2238] dark:border-amber-500/50 bg-[#fdfbf7] dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 transition flex flex-col justify-between gap-3 shadow-md hover:shadow-lg"
+                        className="rounded-3xl p-5 sm:p-6 border-2 border-[#0e2238] dark:border-amber-500/50 bg-[#fdfbf7] dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 transition flex flex-col justify-between gap-4 shadow-md hover:shadow-xl relative overflow-hidden"
                       >
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-400 flex items-center gap-1">
-                              <span>✓</span> {cert.badgeText}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-400 flex items-center gap-1.5 shadow-sm">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                              <span>{cert.badgeText}</span>
                             </span>
-                            <span className="text-xl">📜</span>
+                            <span className="text-2xl">📜</span>
                           </div>
 
-                          <h4 className="font-bold text-sm font-rozha text-[#0e2238] dark:text-amber-200">
+                          <h4 className="font-bold text-base sm:text-lg font-rozha text-[#0e2238] dark:text-amber-200 leading-snug">
                             {cert.title}
                           </h4>
 
-                          <p className="text-xs text-slate-600 dark:text-slate-300 font-serif leading-relaxed">
+                          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-serif leading-relaxed">
                             {cert.description}
                           </p>
                         </div>
 
-                        <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                          <span className="text-[10px] text-slate-500 font-mono">
+                        <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                          <span className="text-xs text-slate-500 font-mono font-bold">
                             {cert.certificateId}
                           </span>
 
                           <button
                             onClick={() => setSelectedCertToView(cert)}
-                            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0e2238] hover:bg-slate-900 text-amber-300 shadow flex items-center gap-1 transition cursor-pointer"
+                            className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-black bg-[#0e2238] hover:bg-slate-900 text-amber-300 shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-amber-500/30"
                           >
-                            <Sparkles className="w-3 h-3 text-amber-400" />
+                            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                             <span>देखें व डाउनलोड करें</span>
                           </button>
                         </div>
@@ -758,9 +761,9 @@ export const ProfileView = ({
                 </div>
 
                 {/* 3. SECTION 2: Upcoming / Locked Milestone Certificates (Bottom Section) */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-lg">
-                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 className="text-sm sm:text-base font-bold font-rozha text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-5 shadow-lg w-full">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap gap-2">
+                    <h3 className="text-base sm:text-lg font-bold font-rozha text-slate-700 dark:text-slate-300 flex items-center gap-2">
                       <Lock className="w-4 h-4 text-amber-500" />
                       <span>🔒 आगामी सम्मान पत्र ({lockedCerts.length})</span>
                     </h3>
@@ -769,22 +772,22 @@ export const ProfileView = ({
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                     {lockedCerts.map((cert) => (
                       <div 
                         key={cert.id}
-                        className="rounded-2xl p-4 border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 opacity-80 transition flex flex-col justify-between gap-3 shadow-sm"
+                        className="rounded-3xl p-4 sm:p-5 border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 opacity-85 transition flex flex-col justify-between gap-3 shadow-sm hover:opacity-100"
                       >
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300 flex items-center gap-1">
-                              <Lock className="w-3 h-3" />
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                              <Lock className="w-3 h-3 text-amber-500" />
                               <span>{cert.badgeText}</span>
                             </span>
-                            <span className="text-lg opacity-60">📜</span>
+                            <span className="text-xl opacity-60">📜</span>
                           </div>
 
-                          <h4 className="font-bold text-sm font-rozha text-slate-800 dark:text-slate-200">
+                          <h4 className="font-bold text-sm sm:text-base font-rozha text-slate-800 dark:text-slate-200">
                             {cert.title}
                           </h4>
 
@@ -793,14 +796,14 @@ export const ProfileView = ({
                           </p>
                         </div>
 
-                        <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                          <span className="text-[10px] text-slate-400 font-mono">
+                        <div className="pt-2.5 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                          <span className="text-[11px] text-slate-400 font-mono font-semibold">
                             {cert.category}
                           </span>
 
                           <button
                             onClick={() => setSelectedCertToView(cert)}
-                            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 transition flex items-center gap-1 cursor-pointer"
+                            className="w-full sm:w-auto px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition flex items-center justify-center gap-1 cursor-pointer"
                           >
                             <Lock className="w-3 h-3" />
                             <span>शर्तें देखें</span>
@@ -836,10 +839,47 @@ export const ProfileView = ({
 
                     <div className="bg-gradient-to-r from-amber-500 to-rose-600 text-white px-4 py-2.5 rounded-2xl text-center shadow w-full sm:w-auto">
                       <span className="text-[10px] uppercase font-bold block opacity-90">कुल उपलब्ध बैलेंस</span>
-                      <span className="text-xl font-black">{profile.points || 0} Points</span>
+                      <span className="text-xl font-black">{displayPoints} Points</span>
                     </div>
                   </div>
 
+
+                  {/* Summary Metric Cards */}
+                  {(() => {
+                    const totalFree = effectiveTransactions
+                      .filter(t => t.type === 'credit' && !t.reason?.toLowerCase().includes('रीचार्ज') && !t.reason?.toLowerCase().includes('recharge'))
+                      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+                    const totalPaid = effectiveTransactions
+                      .filter(t => t.type === 'credit' && (t.reason?.toLowerCase().includes('रीचार्ज') || t.reason?.toLowerCase().includes('recharge')))
+                      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+                    const totalSpent = effectiveTransactions
+                      .filter(t => t.type === 'debit')
+                      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+                    return (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
+                          <span className="text-[10px] font-extrabold uppercase block opacity-80">🎁 कुल फ्री कमाए गए</span>
+                          <span className="text-lg font-black font-rozha">+{totalFree} Pts</span>
+                          <p className="text-[10px] opacity-75 mt-0.5">वेलकम बोनस व दैनिक गतिविधियाँ</p>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-800 dark:text-blue-300">
+                          <span className="text-[10px] font-extrabold uppercase block opacity-80">💳 कुल रीचार्ज किए गए</span>
+                          <span className="text-lg font-black font-rozha">+{totalPaid} Pts</span>
+                          <p className="text-[10px] opacity-75 mt-0.5">₹10/₹20/₹30 UPI रीचार्ज पैक</p>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-300">
+                          <span className="text-[10px] font-extrabold uppercase block opacity-80">📤 कुल खर्च / बर्न हुए</span>
+                          <span className="text-lg font-black font-rozha">-{totalSpent} Pts</span>
+                          <p className="text-[10px] opacity-75 mt-0.5">HD पोस्टर्स व मंच प्रकाशन</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <div className="space-y-2.5">
                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -926,14 +966,14 @@ export const ProfileView = ({
       <PointsExplanationModal
         isOpen={showPointsModal}
         onClose={() => setShowPointsModal(false)}
-        points={profile.points || 0}
+        points={displayPoints}
       />
 
       {/* 6-Month Literary Membership Card Modal */}
       <LiteraryMembershipCardModal
         isOpen={showMembershipModal}
         onClose={() => setShowMembershipModal(false)}
-        userProfile={profile}
+        userProfile={{ ...profile, points: displayPoints }}
       />
 
       {/* Certificate Viewer / Generator Modal */}
@@ -942,8 +982,8 @@ export const ProfileView = ({
           isOpen={true}
           onClose={() => setSelectedCertToView(null)}
           certificateData={selectedCertToView}
-          userPoints={profile.points || 0}
-          userProfile={profile}
+          userPoints={displayPoints}
+          userProfile={{ ...profile, points: displayPoints }}
           totalUserPosts={myPostsCount}
           userStreak={currentStreak}
         />

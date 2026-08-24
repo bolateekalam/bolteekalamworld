@@ -18,7 +18,10 @@ import LiteraryMembershipCardModal from './components/LiteraryMembershipCardModa
 import YouTubeTaskModal from './components/YouTubeTaskModal';
 import ReferEarnModal from './components/ReferEarnModal';
 import AdminAuthModal from './components/AdminAuthModal';
+import SplashScreen from './components/SplashScreen';
+import PWAInstallModal from './components/PWAInstallModal';
 
+import { logUserActiveHeartbeat, checkAndTriggerInactivityNotification, requestNotificationPermission } from './lib/notificationService';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
@@ -49,6 +52,16 @@ import { Sparkles, Trophy, CheckCircle2 } from 'lucide-react';
 function AppContent() {
   const [activeView, setActiveView] = useState('feed');
   
+  // Splash Screen State (shown on fresh launch)
+  const [showSplash, setShowSplash] = useState(() => {
+    const hasSeen = sessionStorage.getItem('bolteekalam_splash_shown');
+    return !hasSeen;
+  });
+
+  // PWA Install Prompt State
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
   // Restore Active User Session from localStorage to prevent sudden logout on refresh!
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -153,15 +166,31 @@ function AppContent() {
       const profObj = savedProf ? JSON.parse(savedProf) : null;
 
       if (profObj || activeObj) {
-        return {
+        let cleanPoints = profObj?.points !== undefined ? profObj.points : (activeObj?.points !== undefined ? activeObj.points : 50);
+        // Security Sanity: If points are abnormally inflated (>250) from old buggy mock data, reset to valid 50 points
+        if (typeof cleanPoints !== 'number' || cleanPoints > 250 || cleanPoints < 0) {
+          cleanPoints = 50;
+        }
+
+        const sanitized = {
           ...profObj,
           ...activeObj,
+          points: cleanPoints,
           avatar: activeObj?.avatar || profObj?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
           name: activeObj?.name || profObj?.name || 'साहित्य साधक',
           username: activeObj?.username || profObj?.username || '@writer',
           city: activeObj?.city || profObj?.city || 'प्रयागराज',
           bio: activeObj?.bio || profObj?.bio || 'हिंदी साहित्य एवं काव्य का नया साधक।'
         };
+
+        try {
+          localStorage.setItem('bolteekalam_user_profile', JSON.stringify(sanitized));
+          if (activeObj) {
+            localStorage.setItem('bolteekalam_active_user', JSON.stringify({ ...activeObj, points: cleanPoints }));
+          }
+        } catch (e) {}
+
+        return sanitized;
       }
     } catch (e) {}
 
@@ -176,7 +205,7 @@ function AppContent() {
       bio: 'हिंदी साहित्य एवं काव्य का नया साधक। अभी अपनी पहली कविता पोस्ट करने जा रहा हूँ।',
       city: 'प्रयागराज',
       joined: 'अगस्त 2026',
-      points: 100,
+      points: 50,
       followers: 12,
       following: 5,
       streak: 3
@@ -259,7 +288,7 @@ function AppContent() {
     return 2;
   });
 
-  // Wallet Transactions History Ledger State (Persisted in localStorage, max 15 items displayed)
+  // Wallet Transactions History Ledger State (Cleaned & Deduplicated)
   const [walletTransactions, setWalletTransactions] = useState(() => {
     try {
       const saved = localStorage.getItem('bolteekalam_wallet_transactions');
@@ -416,6 +445,42 @@ function AppContent() {
     return () => {
       supabase.removeChannel(postsChannel);
       clearInterval(interval);
+    };
+  }, []);
+
+  // PWA Install Prompt, Inactivity Notification & Points Sanity Enforcement Effect
+  useEffect(() => {
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    // Heartbeat & 2-Day Inactivity Notification Check
+    logUserActiveHeartbeat();
+    checkAndTriggerInactivityNotification();
+
+    // Auto-request notification permission after 4 seconds of engagement
+    const permTimer = setTimeout(() => {
+      requestNotificationPermission();
+    }, 4000);
+
+    // Hard Sanity Check: If localStorage has legacy points > 100, force reset to 50
+    try {
+      const storedProf = localStorage.getItem('bolteekalam_user_profile');
+      if (storedProf) {
+        const p = JSON.parse(storedProf);
+        if (p && (typeof p.points !== 'number' || p.points > 100 || p.points < 0)) {
+          p.points = 50;
+          localStorage.setItem('bolteekalam_user_profile', JSON.stringify(p));
+          setUserProfile(prev => ({ ...prev, points: 50 }));
+        }
+      }
+    } catch (e) {}
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      clearTimeout(permTimer);
     };
   }, []);
 
@@ -985,7 +1050,7 @@ function AppContent() {
     const storedPhone = localStorage.getItem(`user_phone_${userEmail}`);
     const storedDob = localStorage.getItem(`user_dob_${userEmail}`);
 
-    let currentSavedPoints = 100;
+    let currentSavedPoints = 50;
     try {
       const savedProf = localStorage.getItem('bolteekalam_user_profile');
       if (savedProf) {
@@ -1017,7 +1082,12 @@ function AppContent() {
     // If new account signup, open the 6-Month Membership Card immediately!
     if (isDirectLogin === true) {
       setShowGlobalMembershipModal(true);
-      handleRewardPoints(20, 'नया खाता बनाने पर (Welcome Bonus)');
+      const bonusKey = `welcome_bonus_given_${userEmail}`;
+      const hasGottenBonus = localStorage.getItem(bonusKey) === 'true';
+      if (!hasGottenBonus) {
+        localStorage.setItem(bonusKey, 'true');
+        handleRewardPoints(50, '🎁 नया खाता बनाने पर (Welcome Bonus)');
+      }
     } else {
       const currentPath = (window.location.pathname || '/').toLowerCase();
       if (currentPath === '/profile' || window.location.hash === '#/profile') {
@@ -1054,7 +1124,7 @@ function AppContent() {
       localStorage.setItem(`user_dob_${userEmail}`, completedUser.birthday);
     }
 
-    let currentSavedPoints = 100;
+    let currentSavedPoints = 50;
     try {
       const savedProf = localStorage.getItem('bolteekalam_user_profile');
       if (savedProf) {
@@ -1571,6 +1641,7 @@ function AppContent() {
         userPoints={userProfile?.points || 0}
         onOpenMembershipCard={handleOpenMembershipCard}
         onOpenYouTube={handleYouTubeVisit}
+        onOpenInstallApp={() => setShowInstallModal(true)}
       />
 
       {/* Main Layout Container */}
@@ -1587,7 +1658,9 @@ function AppContent() {
           onOpenYouTube={handleYouTubeVisit}
           userPoints={userProfile?.points || 0}
           currentUser={currentUser}
+          userProfile={userProfile}
           onOpenAuthModal={() => setShowAuthModal(true)}
+          onOpenInstallApp={() => setShowInstallModal(true)}
         />
 
         {/* Middle Main Content View Area */}
@@ -1716,10 +1789,7 @@ function AppContent() {
                 (p.author?.username && userProfile?.username && p.author.username.trim().toLowerCase() === userProfile.username.trim().toLowerCase()) ||
                 p.author?.name?.includes('आप')
               )}
-              userProfile={{
-                ...(userProfile || {}),
-                points: Math.max(userProfile?.points || 0, 50 + ((posts || []).filter(p => p && (p.author?.id === currentUser?.email || p.author?.email === currentUser?.email || p.author?.id === 'user-me' || (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase()))).length * 10))
-              }}
+              userProfile={userProfile}
               walletTransactions={walletTransactions}
               initialTab={activeView === 'certificates' ? 'certificates' : profileInitialTab}
               onOpenMembershipCard={handleOpenMembershipCard}
@@ -1924,6 +1994,24 @@ function AppContent() {
             setShowPoetryChallengeModal(false);
             setPointsToast({ amount: 15, reason: 'कवि को चुनौती भेजी गई! 🔥' });
           }}
+        />
+      )}
+
+      {/* PWA Mobile App Download & Install Modal */}
+      <PWAInstallModal
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+        deferredPrompt={deferredPrompt}
+      />
+
+      {/* Startup Animated Logo Splash Screen */}
+      {showSplash && (
+        <SplashScreen 
+          onFinish={() => {
+            setShowSplash(false);
+            try { sessionStorage.setItem('bolteekalam_splash_shown', 'true'); } catch (e) {}
+          }} 
+          duration={2500}
         />
       )}
 

@@ -37,7 +37,13 @@
     <meta name="author" content="बोलती कलम (Bolti Kalam)" />
     <meta name="publisher" content="बोलती कलम (bolateeworld.in)" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="theme-color" content="#e11d48" />
+    <meta name="theme-color" content="#0e2238" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="बोलती कलम" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="canonical" href="https://www.bolateeworld.in/" />
 
     <!-- Language & Regional GEO Meta Tags -->
@@ -141,6 +147,17 @@
     <!-- End Google Tag Manager (noscript) -->
 
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            console.log('Bolti Kalam PWA ServiceWorker Registered:', reg.scope);
+          }).catch((err) => {
+            console.warn('Bolti Kalam PWA ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

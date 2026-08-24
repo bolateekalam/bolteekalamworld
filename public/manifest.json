@@ -1,0 +1,31 @@
+{
+  "short_name": "बोलती कलम",
+  "name": "बोलती कलम | Bolti Kalam — राष्ट्रीय डिजिटल साहित्यिक मंच",
+  "description": "भारत का प्रमुख बहुभाषी साहित्यिक, काव्य, शायरी एवं ओपन माइक डिजिटल मंच।",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#0a1828",
+  "theme_color": "#0e2238",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["books", "entertainment", "social"]
+}

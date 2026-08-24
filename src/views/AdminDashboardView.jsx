@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { 
   Shield, BarChart3, Users, FileText, CheckCircle2, XCircle, 
-  Flag, Trophy, Calendar, Bell, Cake, Award, Sparkles, RefreshCw, Trash2, Package, AlertTriangle, Crown, RefreshCcw, PlusCircle, Send, Edit3, UserCheck, Activity, Image, Upload, Phone, ShieldCheck 
+  Flag, Trophy, Calendar, Bell, Cake, Award, Sparkles, RefreshCw, Trash2, Package, AlertTriangle, Crown, RefreshCcw, PlusCircle, Send, Edit3, UserCheck, Activity, Image, Upload, Phone, ShieldCheck, Radio, Megaphone 
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { FESTIVAL_THEMES, detectCurrentAutoFestivalTheme } from '../data/festivalThemes';
+import { broadcastAdminNotification } from '../lib/notificationService';
 
 export const AdminDashboardView = ({ 
   posts = [], 
@@ -28,6 +29,12 @@ export const AdminDashboardView = ({
   const [activeTab, setActiveTab] = useState('weeklyJury');
   const [selectedFestivalKey, setSelectedFestivalKey] = useState(activeFestivalTheme?.id || 'auto');
   const [zoomedProofImage, setZoomedProofImage] = useState(null);
+
+  // Push Broadcaster Form State
+  const [notifTitle, setNotifTitle] = useState('🔴 बोलती कलम: विशेष काव्य पाठ LIVE');
+  const [notifBody, setNotifBody] = useState('बोलती कलम आधिकारिक यूट्यूब चैनल (@bolteekalam) पर विशेष काव्य सत्र शुरू हो चुका है। तुरंत जुड़ें!');
+  const [notifUrl, setNotifUrl] = useState('https://www.youtube.com/@bolteekalam');
+  const [broadcastSuccess, setBroadcastSuccess] = useState(false);
 
   // New Weekly Topic Form State
   const [newTopicTitle, setNewTopicTitle] = useState('15 अगस्त: स्वतंत्रता और मेरी कलम');
@@ -84,7 +91,7 @@ export const AdminDashboardView = ({
           lastActive: '🟢 सक्रिय लेखक',
           isVerified: true,
           postsCount: posts.filter(item => (item.author?.name === p.author?.name || item.authorName === p.authorName)).length,
-          points: (p.likes ? p.likes * 10 : 50) + 100
+          points: 50
         });
       }
     });
@@ -338,7 +345,9 @@ export const AdminDashboardView = ({
           { id: 'birthdays', label: '6. 🎂 जन्मदिन कार्ड जनरेटर', icon: Cake, badge: birthdayUsers.length },
           { id: 'moderation', label: '7. 🗑️ सामग्री नियंत्रण (Posts)', icon: Trash2, badge: posts.length },
           { id: 'flagged', label: '8. ⚠️ AI फ़्लैग्ड पोस्ट्स', icon: AlertTriangle, badge: flaggedPosts.length },
-          { id: 'kits', label: '9. 📦 पार्सल किट डिस्पैच', icon: Package, badge: kitShipments.filter(k => k.status === 'PENDING').length }
+          { id: 'kits', label: '9. 📦 पार्सल किट डिस्पैच', icon: Package, badge: kitShipments.filter(k => k.status === 'PENDING').length },
+          { id: 'pointsLedger', label: '10. 🪙 पॉइंट्स & रेवेन्यू ऑडिट', icon: BarChart3 },
+          { id: 'pushNotif', label: '11. 📢 पुश नोटिफिकेशन ब्रॉडकास्टर', icon: Bell }
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -941,6 +950,310 @@ export const AdminDashboardView = ({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tab 10: Points & Financial Audit View */}
+      {activeTab === 'pointsLedger' && (
+        <div className="space-y-6">
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 text-xs flex items-center justify-between flex-wrap gap-2">
+            <div className="space-y-0.5">
+              <span className="font-extrabold flex items-center gap-1.5 text-sm">
+                <BarChart3 className="w-4 h-4 text-amber-600" />
+                <span>पॉइंट्स टोकनॉमिक्स & वित्तीय ऑडिट (Financial Ledger)</span>
+              </span>
+              <p className="text-[11px] opacity-80">
+                फ्री पॉइंट्स वितरण, बर्न (खर्च) हुए पॉइंट्स एवं ₹ रीचार्ज रेवेन्यू का लाइव ब्योरा।
+              </p>
+            </div>
+            <span className="px-3 py-1 bg-amber-500 text-slate-950 font-black rounded-xl text-xs shadow">
+              💰 लाइव रेवेन्यू मॉनिटर
+            </span>
+          </div>
+
+          {/* Metric Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
+              <span className="text-xs text-slate-500 font-bold block">👥 कुल पंजीकृत लेखक</span>
+              <span className="text-2xl font-black text-slate-900 dark:text-slate-100">{registeredUsers.length}</span>
+              <p className="text-[11px] text-emerald-600 font-semibold">सक्रिय साहित्यिक यूज़र्स</p>
+            </div>
+
+            <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
+              <span className="text-xs text-emerald-600 font-bold block">🎁 फ्री पॉइंट्स बांटे गए</span>
+              <span className="text-2xl font-black text-emerald-600">
+                {registeredUsers.length * 50} Pts
+              </span>
+              <p className="text-[11px] text-slate-400">स्वागत बोनस (50 Pts/यूज़र)</p>
+            </div>
+
+            <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
+              <span className="text-xs text-rose-600 font-bold block">🔥 बर्न / खर्च हुए पॉइंट्स</span>
+              <span className="text-2xl font-black text-rose-600">
+                {posts.filter(p => p.imageUrl || p.image).length * 25} Pts
+              </span>
+              <p className="text-[11px] text-slate-400">HD पोस्टर्स & फीड प्रकाशन में</p>
+            </div>
+
+            <div className="p-5 rounded-3xl bg-gradient-to-tr from-amber-500 to-rose-600 text-white shadow-lg space-y-1">
+              <span className="text-xs font-bold block opacity-90">💳 कुल अनुमानित रीचार्ज रेवेन्यू</span>
+              <span className="text-2xl font-black">
+                ₹{Math.round((registeredUsers.reduce((sum, u) => sum + (u.points || 0), 0) / 50) * 10)}
+              </span>
+              <p className="text-[11px] opacity-80">UPI / PhonePe / GPay रीचार्ज</p>
+            </div>
+          </div>
+
+          {/* User-Wise Points Ledger Table */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
+              <span>लेखक-वार पॉइंट्स बैलेंस एवं गतिविधि ऑडिट</span>
+              <span className="text-xs text-slate-400 font-normal">कुल लेखक: {registeredUsers.length}</span>
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
+                    <th className="pb-3">लेखक प्रोफाइल</th>
+                    <th className="pb-3">ईमेल / फ़ोन</th>
+                    <th className="pb-3 text-center">रचनाएँ</th>
+                    <th className="pb-3 text-right">वर्तमान पॉइंट्स</th>
+                    <th className="pb-3 text-right">अनुमानित वैल्यू (₹)</th>
+                    <th className="pb-3 text-right">एडमिन एक्शन</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {registeredUsers.map(user => (
+                    <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                      <td className="py-3 flex items-center gap-2.5">
+                        <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover border border-amber-500" />
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-slate-100">{user.name}</p>
+                          <p className="text-[10px] text-slate-400">{user.username} • {user.city}</p>
+                        </div>
+                      </td>
+                      <td className="py-3 text-slate-600 dark:text-slate-300">
+                        <p>{user.email}</p>
+                        <p className="text-[10px] text-slate-400">{user.phone}</p>
+                      </td>
+                      <td className="py-3 text-center font-bold text-slate-800 dark:text-slate-200">
+                        {user.postsCount || 0}
+                      </td>
+                      <td className="py-3 text-right">
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-black">
+                          {user.points || 0} Pts
+                        </span>
+                      </td>
+                      <td className="py-3 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                        ₹{Math.round(((user.points || 0) / 50) * 10)}
+                      </td>
+                      <td className="py-3 text-right">
+                        <button
+                          onClick={() => {
+                            if (userProfile && (userProfile.email === user.email || user.id === 'u-me')) {
+                              setUserProfile(prev => ({ ...prev, points: 50 }));
+                              try {
+                                const p = JSON.parse(localStorage.getItem('bolteekalam_user_profile') || '{}');
+                                p.points = 50;
+                                localStorage.setItem('bolteekalam_user_profile', JSON.stringify(p));
+                              } catch (e) {}
+                            }
+                            alert(`${user.name} के पॉइंट्स को सुरक्षित 50 Pts पर रीसेट व सत्यापित कर दिया गया है!`);
+                          }}
+                          className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-[10px] shadow transition active:scale-95 cursor-pointer"
+                        >
+                          🔄 50 Pts रीसेट
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 11: Push Notification Broadcaster View */}
+      {activeTab === 'pushNotif' && (
+        <div className="space-y-6">
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-900 dark:text-rose-300 text-xs flex items-center justify-between flex-wrap gap-2">
+            <div className="space-y-0.5">
+              <span className="font-extrabold flex items-center gap-1.5 text-sm">
+                <Megaphone className="w-4 h-4 text-rose-600" />
+                <span>📢 लाइव पुश नोटिफिकेशन ब्रॉडकास्टर (Push Broadcast Center)</span>
+              </span>
+              <p className="text-[11px] opacity-80">
+                यूज़र्स के मोबाइल व ब्राउज़र पर सीधे लाइव यूट्यूब, इनएक्टिविटी और कविता अलर्ट भेजें।
+              </p>
+            </div>
+            <span className="px-3 py-1 bg-rose-600 text-white font-black rounded-xl text-xs shadow animate-pulse">
+              🔴 लाइव ब्रॉडकास्ट
+            </span>
+          </div>
+
+          {/* Quick 1-Click Broadcast Presets */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>त्वरित 1-क्लिक ब्रॉडकास्ट टेम्पलेट्स (Quick Presets)</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  setNotifTitle('🔴 बोलती कलम: विशेष काव्य पाठ LIVE');
+                  setNotifBody('बोलती कलम आधिकारिक यूट्यूब चैनल (@bolteekalam) पर विशेष काव्य सत्र शुरू हो चुका है। तुरंत जुड़ें!');
+                  setNotifUrl('https://www.youtube.com/@bolteekalam');
+                }}
+                className="p-3.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-left transition space-y-1 cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-red-600 dark:text-red-400 text-xs flex items-center gap-1">
+                    <span>🔴</span> यूट्यूब लाइव अलर्ट (YouTube Live)
+                  </span>
+                  <span className="text-[10px] text-slate-400 group-hover:text-red-500">क्लिक कर लोड करें →</span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 font-serif">
+                  "बोलती कलम आधिकारिक यूट्यूब चैनल पर विशेष काव्य सत्र लाइव शुरू हो चुका है। तुरंत जुड़ें!"
+                </p>
+              </button>
+
+              <button
+                onClick={() => {
+                  setNotifTitle('🔔 बोलती कलम: आपकी लेखनी की प्रतीक्षा है!');
+                  setNotifBody('आपने 2 दिन से मंच पर कविता नहीं लिखी! आज का नया शब्द देखें, कविता लिखें और अपनी स्ट्रीक जारी रखें।');
+                  setNotifUrl(window.location.origin);
+                }}
+                className="p-3.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-left transition space-y-1 cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-amber-600 dark:text-amber-400 text-xs flex items-center gap-1">
+                    <span>🔔</span> 2-दिन इनएक्टिविटी रिमाइंडर (48h Inactivity)
+                  </span>
+                  <span className="text-[10px] text-slate-400 group-hover:text-amber-500">क्लिक कर लोड करें →</span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 font-serif">
+                  "आपने 2 दिन से मंच पर कविता नहीं लिखी! आज का नया शब्द देखें और अपनी स्ट्रीक जारी रखें।"
+                </p>
+              </button>
+
+              <button
+                onClick={() => {
+                  setNotifTitle('🪈 दैनिक शब्द सामर्थ्य खेल अनलॉक (+5 Pts)');
+                  setNotifBody('आज का नया साहित्यिक शब्द और काव्य चुनौती उपलब्ध है। अभी खेलें और रिवॉर्ड पॉइंट्स पाएं!');
+                  setNotifUrl(`${window.location.origin}/daily-challenge`);
+                }}
+                className="p-3.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-left transition space-y-1 cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-1">
+                    <span>🪈</span> दैनिक शब्द चुनौती खेल (+5 Pts Game)
+                  </span>
+                  <span className="text-[10px] text-slate-400 group-hover:text-emerald-500">क्लिक कर लोड करें →</span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 font-serif">
+                  "आज का नया साहित्यिक शब्द और काव्य चुनौती उपलब्ध है। अभी खेलें और रिवॉर्ड पॉइंट्स पाएं!"
+                </p>
+              </button>
+
+              <button
+                onClick={() => {
+                  setNotifTitle('🏆 साप्ताहिक चुनौती परिणाम व सम्मान पत्र घोषित!');
+                  setNotifBody('बोलती कलम साप्ताहिक काव्य ज्यूरी के परिणाम जारी हो गए हैं। अपने सम्मान पत्र की जांच करें!');
+                  setNotifUrl(`${window.location.origin}/profile`);
+                }}
+                className="p-3.5 rounded-2xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-left transition space-y-1 cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-purple-600 dark:text-purple-400 text-xs flex items-center gap-1">
+                    <span>🏆</span> सम्मान पत्र व ज्यूरी परिणाम (Certificates)
+                  </span>
+                  <span className="text-[10px] text-slate-400 group-hover:text-purple-500">क्लिक कर लोड करें →</span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 font-serif">
+                  "बोलती कलम साप्ताहिक काव्य ज्यूरी के परिणाम जारी हो गए हैं। अपने सम्मान पत्र की जांच करें!"
+                </p>
+              </button>
+            </div>
+          </div>
+
+          {/* Custom Message Broadcast Form */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <Send className="w-4 h-4 text-rose-600" />
+              <span>कस्टम पुश नोटिफिकेशन संदेश लिखें व भेजें</span>
+            </h3>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  नोटिफिकेशन शीर्षक (Title):
+                </label>
+                <input
+                  type="text"
+                  value={notifTitle}
+                  onChange={(e) => setNotifTitle(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  placeholder="उदा. 🔴 बोलती कलम: विशेष काव्य पाठ LIVE"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  नोटिफिकेशन संदेश विवरण (Body Text):
+                </label>
+                <textarea
+                  rows={3}
+                  value={notifBody}
+                  onChange={(e) => setNotifBody(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  placeholder="यूज़र्स के फ़ोन व स्क्रीन पर दिखने वाला विस्तृत संदेश..."
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  क्लिक करने पर खुलने वाला लिंक (Target URL):
+                </label>
+                <input
+                  type="text"
+                  value={notifUrl}
+                  onChange={(e) => setNotifUrl(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono text-[11px]"
+                  placeholder="https://www.youtube.com/@bolteekalam"
+                />
+              </div>
+
+              {broadcastSuccess && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>पुश नोटिफिकेशन सभी यूज़र्स के डिवाइस पर सफलतापूर्वक ब्रॉडकास्ट हो गया!</span>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  if (!notifTitle.trim()) {
+                    alert('कृपया नोटिफिकेशन का शीर्षक दर्ज करें!');
+                    return;
+                  }
+                  broadcastAdminNotification({
+                    title: notifTitle,
+                    body: notifBody,
+                    url: notifUrl
+                  });
+                  setBroadcastSuccess(true);
+                  setTimeout(() => setBroadcastSuccess(false), 4000);
+                }}
+                className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:brightness-110 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+              >
+                <Megaphone className="w-4 h-4 text-amber-200" />
+                <span>📢 अभी तुरंत सभी यूज़र्स को पुश नोटिफिकेशन भेजें (Broadcast Now)</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
