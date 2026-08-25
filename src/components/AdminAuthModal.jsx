@@ -15,13 +15,21 @@ export const AdminAuthModal = ({ isOpen, onClose, onAdminLoginSuccess }) => {
 
     const cleanPass = adminPassword.trim();
 
-    // Secure Admin Passcodes & PINs
-    const VALID_ADMIN_PASSCODES = [
-      'BolateeAdmin@2026',
-      'bolatee2026',
+    // 1. Super Admin Passcodes (Full platform control + Push Broadcast)
+    const SUPER_ADMIN_PASSCODES = [
+      'superadmin2026',
+      'BolateeSuperAdmin@2026',
       'bolteekalam786',
-      'admin12345',
       '786786'
+    ];
+
+    // 2. Sub-Admin / Jury Moderator Passcodes (Only Winners, YouTube Proofs & Birthday Cards)
+    const MODERATOR_PASSCODES = [
+      'jury2026',
+      'mod2026',
+      'bolatee2026',
+      'admin12345',
+      'admin'
     ];
 
     if (!cleanPass) {
@@ -29,14 +37,22 @@ export const AdminAuthModal = ({ isOpen, onClose, onAdminLoginSuccess }) => {
       return;
     }
 
-    if (VALID_ADMIN_PASSCODES.includes(cleanPass) || cleanPass.toLowerCase() === 'admin') {
-      setSuccessMsg('✓ एडमिन पहचान सत्यापित! डैशबोर्ड खोला जा रहा है...');
+    if (SUPER_ADMIN_PASSCODES.includes(cleanPass)) {
+      setSuccessMsg('✓ सुपर एडमिन पहचान सत्यापित (Super Admin Full Access)!');
       setTimeout(() => {
-        onAdminLoginSuccess();
+        onAdminLoginSuccess('super_admin');
         onClose();
         setAdminPassword('');
         setSuccessMsg('');
-      }, 600);
+      }, 500);
+    } else if (MODERATOR_PASSCODES.includes(cleanPass)) {
+      setSuccessMsg('✓ ज्यूरी मॉडरेटर पहचान सत्यापित (Jury & Tasks Access)!');
+      setTimeout(() => {
+        onAdminLoginSuccess('sub_admin');
+        onClose();
+        setAdminPassword('');
+        setSuccessMsg('');
+      }, 500);
     } else {
       setErrorMsg('❌ गलत एडमिन पासवर्ड! केवल अधिकृत टीम के सदस्य ही प्रवेश कर सकते हैं।');
     }

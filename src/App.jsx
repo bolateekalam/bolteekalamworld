@@ -90,6 +90,14 @@ function AppContent() {
     'akashsingh@gmail.com'
   ];
 
+  const [adminRole, setAdminRole] = useState(() => {
+    try {
+      return sessionStorage.getItem('bolteekalam_admin_role') || 'super_admin';
+    } catch (e) {
+      return 'super_admin';
+    }
+  });
+
   const [userRole, setUserRole] = useState(() => {
     try {
       const isSessionAuth = sessionStorage.getItem('bolteekalam_admin_authenticated') === 'true';
@@ -668,7 +676,12 @@ function AppContent() {
           return;
         }
 
-        // 1. Direct Page Views Navigation Mapping
+        // 1. Direct Standard Page Views Mapping
+        if (rawPath === '/' || rawPath === '' || rawHash === '' || rawHash === '#') {
+          setActiveView('feed');
+          document.title = 'बोलती कलम (bolateeworld.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
+          return;
+        }
         if (rawPath.includes('/poetry-battle') || rawHash.includes('poetry-battle')) {
           setActiveView('battles');
           return;
@@ -710,20 +723,28 @@ function AppContent() {
           document.title = 'मेरे साहित्यिक सम्मान पत्र (E-Certificates) — बोलती वर्ल्ड | bolateeworld.in';
           return;
         }
-        if (rawPath === '/profile' || rawHash === '#/profile') {
+        if (rawPath === '/profile' || rawHash === '#/profile' || rawHash === '#profile') {
           setActiveView('profile');
           setProfileInitialTab('works');
           document.title = 'मेरी साहित्य प्रोफ़ाइल — बोलती वर्ल्ड | bolateeworld.in';
           return;
         }
+        if (rawPath.includes('/audio-stories') || rawHash.includes('audio-stories')) {
+          setActiveView('audioStories');
+          return;
+        }
+        if (rawPath.includes('/festival') || rawHash.includes('festival')) {
+          setActiveView('festival');
+          return;
+        }
 
-        // 2. Profile Deep Links: /profile/username or /username
+        // 2. Profile Deep Links: only if starts with /profile/ or /@ or #@
         let usernameQuery = '';
         if (rawPath.startsWith('/profile/')) {
           usernameQuery = rawPath.replace('/profile/', '').replace(/^@/, '').trim();
-        } else if (rawPath && rawPath.length > 1 && rawPath !== '/') {
+        } else if (rawPath.startsWith('/@')) {
           usernameQuery = decodeURIComponent(rawPath.replace(/^\/@?/, '')).trim();
-        } else if (rawHash && rawHash.length > 1) {
+        } else if (rawHash.startsWith('#@') || rawHash.startsWith('#/@')) {
           usernameQuery = decodeURIComponent(rawHash.replace(/^#\/?@?/, '')).trim();
         }
 
@@ -1872,8 +1893,8 @@ function AppContent() {
               youtubeProofs={youtubeProofs}
               onApproveProof={handleApproveYouTubeProof}
               onRejectProof={handleRejectYouTubeProof}
-              onPenaltyProof={handlePenaltyYouTubeProof}
-              onBanUserFromYouTube={handleBanUserFromYouTube}
+              adminRole={adminRole}
+              onExitAdmin={() => handleNavigateView('feed')}
             />
           )}
 
@@ -1913,10 +1934,19 @@ function AppContent() {
       {/* Modals & Dialogs */}
       <AdminAuthModal
         isOpen={showAdminAuthModal}
-        onClose={() => setShowAdminAuthModal(false)}
-        onAdminLoginSuccess={() => {
+        onClose={() => {
+          setShowAdminAuthModal(false);
+          if (activeView === 'admin' || window.location.pathname.includes('/admin')) {
+            handleNavigateView('feed');
+          }
+        }}
+        onAdminLoginSuccess={(role = 'super_admin') => {
+          setAdminRole(role);
+          try {
+            sessionStorage.setItem('bolteekalam_admin_role', role);
+            sessionStorage.setItem('bolteekalam_admin_authenticated', 'true');
+          } catch (e) {}
           setUserRole('admin');
-          try { sessionStorage.setItem('bolteekalam_admin_authenticated', 'true'); } catch (e) {}
           setActiveView('admin');
           try { history.pushState(null, '', '/admin'); } catch (e) {}
         }}
