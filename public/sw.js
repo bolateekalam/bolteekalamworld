@@ -100,10 +100,22 @@ self.addEventListener('notificationclick', (event) => {
           return client.focus();
         }
       }
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
-      }
-    })
-  );
+// 🔔 3. Handle Direct Message from Web App to show notification via Service Worker
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title, options } = event.data;
+    self.registration.showNotification(title || 'बोलती कलम 🪶', {
+      body: options?.body || 'नई साहित्यिक सूचना!',
+      icon: options?.icon || '/logo.png',
+      badge: options?.badge || '/logo.png',
+      vibrate: options?.vibrate || [200, 100, 200],
+      data: options?.data || { url: '/' },
+      actions: options?.actions || [
+        { action: 'open', title: 'ऐप खोलें 📲' }
+      ],
+      ...options
+    });
+  }
 });
+
 

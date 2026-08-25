@@ -18,10 +18,9 @@ export const MobileDrawer = ({ isOpen, onClose, activeView, setActiveView, onOpe
     { id: 'dailyChallenge', label: t('nav.dailyChallenge'), icon: Flame, badge: 'DAILY' },
     { id: 'competitions', label: t('nav.competitions'), icon: Trophy },
     { id: 'events', label: t('nav.events'), icon: Calendar },
-    { id: 'leaderboard', label: t('nav.leaderboard'), icon: Award },
+    { id: 'certificates', label: '📜 सम्मान पत्र', icon: Award, badge: 'UNLOCKED' },
     { id: 'magazine', label: t('nav.magazine'), icon: BookOpen },
-    { id: 'profile', label: t('nav.profile'), icon: User },
-    ...(userRole === 'admin' ? [{ id: 'admin', label: t('nav.admin'), icon: Shield }] : [])
+    { id: 'profile', label: t('nav.profile'), icon: User }
   ];
 
   return (

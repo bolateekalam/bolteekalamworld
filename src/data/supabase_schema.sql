@@ -96,8 +96,20 @@ CREATE TABLE IF NOT EXISTS public.challenge_submissions (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 7. NOTIFICATIONS TABLE (For Cloud Push Broadcasts & Storage across all devices)
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  url TEXT DEFAULT '/',
+  type TEXT DEFAULT 'broadcast',
+  target_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  is_global BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ========================================================
--- 7. ENABLE ROW LEVEL SECURITY (RLS) ON ALL TABLES
+-- 8. ENABLE ROW LEVEL SECURITY (RLS) ON ALL TABLES
 -- (Resolves Supabase Security Warning: "RLS is disabled")
 -- ========================================================
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -106,6 +118,7 @@ ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.weekly_challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenge_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- ========================================================
 -- 8. POLICIES SETUP (SAFE PUBLIC READ + PROTECTED WRITES)
@@ -162,8 +175,12 @@ CREATE POLICY "Allow Manage Challenges" ON public.weekly_challenges FOR ALL USIN
 DROP POLICY IF EXISTS "Allow Public Read Submissions" ON public.challenge_submissions;
 CREATE POLICY "Allow Public Read Submissions" ON public.challenge_submissions FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "Allow Insert Submissions" ON public.challenge_submissions;
-CREATE POLICY "Allow Insert Submissions" ON public.challenge_submissions FOR INSERT WITH CHECK (true);
+-- G. NOTIFICATIONS POLICIES
+DROP POLICY IF EXISTS "Allow Public Read Notifications" ON public.notifications;
+CREATE POLICY "Allow Public Read Notifications" ON public.notifications FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow Insert Notifications" ON public.notifications;
+CREATE POLICY "Allow Insert Notifications" ON public.notifications FOR INSERT WITH CHECK (true);
 
 -- ========================================================
 -- 9. SUPABASE REALTIME REPLICATION (For Live Sync)
@@ -175,6 +192,13 @@ BEGIN
     WHERE pubname = 'supabase_realtime' AND tablename = 'posts'
   ) THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.posts;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'notifications'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
   END IF;
 END $$;
 

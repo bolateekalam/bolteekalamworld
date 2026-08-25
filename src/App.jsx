@@ -21,7 +21,13 @@ import AdminAuthModal from './components/AdminAuthModal';
 import SplashScreen from './components/SplashScreen';
 import PWAInstallModal from './components/PWAInstallModal';
 
-import { logUserActiveHeartbeat, checkAndTriggerInactivityNotification, requestNotificationPermission } from './lib/notificationService';
+import { 
+  logUserActiveHeartbeat, 
+  checkAndTriggerInactivityNotification, 
+  requestNotificationPermission,
+  fetchCloudBroadcastNotifications,
+  subscribeToCloudNotifications
+} from './lib/notificationService';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
@@ -478,8 +484,48 @@ function AppContent() {
       }
     } catch (e) {}
 
+    // Real-time Push & In-app Notification Listener
+    const handleNewPushNotification = (event) => {
+      const entry = event.detail;
+      if (entry) {
+        setNotificationsList(prev => [entry, ...prev.filter(i => i.id !== entry.id)].slice(0, 30));
+        setUnreadNotifications(prev => prev + 1);
+      }
+    };
+    window.addEventListener('bolteekalam_new_notification', handleNewPushNotification);
+
+    // 1. Fetch Cloud Stored Notifications from Supabase (Guarantees all mobile & desktop users have stored notifications)
+    fetchCloudBroadcastNotifications().then(cloudNotifs => {
+      if (cloudNotifs && cloudNotifs.length > 0) {
+        setNotificationsList(prev => {
+          const existingIds = new Set(prev.map(n => String(n.id)));
+          const newItems = cloudNotifs.filter(c => !existingIds.has(String(c.id)));
+          const merged = [...newItems, ...prev].slice(0, 30);
+          try {
+            localStorage.setItem('bolteekalam_notifications_v1', JSON.stringify(merged));
+          } catch (e) {}
+          return merged;
+        });
+      }
+    });
+
+    // 2. Subscribe to Real-time Broadcast Push Notifications across all devices nationwide
+    subscribeToCloudNotifications((incomingNotif) => {
+      if (incomingNotif) {
+        setNotificationsList(prev => {
+          const updated = [incomingNotif, ...prev.filter(i => i.id !== incomingNotif.id)].slice(0, 30);
+          try {
+            localStorage.setItem('bolteekalam_notifications_v1', JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
+        setUnreadNotifications(prev => prev + 1);
+      }
+    });
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('bolteekalam_new_notification', handleNewPushNotification);
       clearTimeout(permTimer);
     };
   }, []);
@@ -567,6 +613,10 @@ function AppContent() {
       } else if (viewId === 'posterStudio') {
         history.pushState(null, '', '/studio');
         document.title = 'कवि इमेज़ पोस्टर Studio — बोलती कलम | bolateeworld.in';
+      } else if (viewId === 'certificates') {
+        setProfileInitialTab('certificates');
+        history.pushState(null, '', '/certificates');
+        document.title = 'मेरे साहित्यिक सम्मान पत्र (E-Certificates) — बोलती कलम | bolateeworld.in';
       } else if (viewId === 'festival') {
         history.pushState(null, '', '/festival');
         document.title = 'साहित्यिक पर्व विशेषांक — बोलती कलम | bolateeworld.in';

@@ -40,6 +40,13 @@ export const ProfileView = ({
   const [showMembershipModal, setShowMembershipModal] = useState(false);
   const [selectedCertToView, setSelectedCertToView] = useState(null);
 
+  // Sync active tab when navigated from outside (e.g. Certificates sidebar/widget)
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
   const profile = userProfile || {
     name: 'साहित्य साधक',
     email: 'writer@bolteekalam.com',
@@ -294,7 +301,7 @@ export const ProfileView = ({
   const handleOpenCertificatesTab = () => {
     setActiveTab('certificates');
     try {
-      window.history.pushState(null, '', `/${cleanUser}/certificate`);
+      window.history.pushState(null, '', '/certificates');
     } catch (e) {}
   };
 
