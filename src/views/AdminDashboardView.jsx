@@ -35,8 +35,8 @@ export const AdminDashboardView = ({
 
   // Push Broadcaster Form State
   const [notifTitle, setNotifTitle] = useState('🔴 बोलती कलम: विशेष काव्य पाठ LIVE');
-  const [notifBody, setNotifBody] = useState('बोलती कलम आधिकारिक यूट्यूब चैनल (@bolteekalam) पर विशेष काव्य सत्र शुरू हो चुका है। तुरंत जुड़ें!');
-  const [notifUrl, setNotifUrl] = useState('https://www.youtube.com/@bolteekalam');
+  const [notifBody, setNotifBody] = useState('बोलती कलम आधिकारिक यूट्यूब चैनल (@bolateekalam) पर विशेष काव्य सत्र शुरू हो चुका है। तुरंत जुड़ें!');
+  const [notifUrl, setNotifUrl] = useState('https://www.youtube.com/@bolateekalam');
   const [broadcastSuccess, setBroadcastSuccess] = useState(false);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
 
@@ -578,8 +578,8 @@ export const AdminDashboardView = ({
             <button
               onClick={() => {
                 setNotifTitle('🔴 बोलती कलम: विशेष काव्य पाठ LIVE');
-                setNotifBody('बोलती कलम आधिकारिक यूट्यूब चैनल (@bolteekalam) पर विशेष काव्य सत्र शुरू हो चुका है। तुरंत जुड़ें!');
-                setNotifUrl('https://www.youtube.com/@bolteekalam');
+                setNotifBody('बोलती कलम आधिकारिक यूट्यूब चैनल (@bolateekalam) पर विशेष काव्य सत्र शुरू हो चुका है। तुरंत जुड़ें!');
+                setNotifUrl('https://www.youtube.com/@bolateekalam');
               }}
               className="p-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-left transition cursor-pointer"
             >

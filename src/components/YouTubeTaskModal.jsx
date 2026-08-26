@@ -41,7 +41,7 @@ export const YouTubeTaskModal = ({
   );
 
   const handleOpenYouTubeVideo = () => {
-    window.open('https://www.youtube.com/@bolteekalam', '_blank');
+    window.open('https://www.youtube.com/@bolateekalam', '_blank');
   };
 
   const handleImageUpload = (e) => {

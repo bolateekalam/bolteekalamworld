@@ -81,14 +81,14 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
         </button>
       </div>
 
-      {/* 2. 🔴 Official YouTube Channel Widget (@bolteekalam) */}
+      {/* 2. 🔴 Official YouTube Channel Widget (@bolateekalam) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-rose-600 font-bold text-xs">
             <YouTubeIcon className="w-4 h-4 text-red-600" />
             <span className="text-slate-900 dark:text-slate-100">बोलती कलम यूट्यूब</span>
           </div>
-          <span className="text-[10px] text-slate-400 font-semibold">@bolteekalam</span>
+          <span className="text-[10px] text-slate-400 font-semibold">@bolateekalam</span>
         </div>
 
         <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -96,13 +96,13 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
         </p>
 
         <a
-          href="https://www.youtube.com/@bolteekalam"
+          href="https://www.youtube.com/@bolateekalam"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow cursor-pointer"
         >
           <YouTubeIcon className="w-3.5 h-3.5" />
-          <span>YouTube चैनल देखें (@bolteekalam)</span>
+          <span>YouTube चैनल देखें (@bolateekalam)</span>
         </a>
       </div>
 

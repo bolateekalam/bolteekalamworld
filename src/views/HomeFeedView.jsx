@@ -143,7 +143,7 @@ export const HomeFeedView = ({
             type="button"
             onClick={() => {
               if (onYouTubeVisit) onYouTubeVisit();
-              else window.open('https://www.youtube.com/@bolteekalam', '_blank');
+              else window.open('https://www.youtube.com/@bolateekalam', '_blank');
             }}
             className="flex-1 sm:flex-initial px-3.5 py-2 bg-white text-red-700 hover:bg-red-50 font-extrabold rounded-2xl text-xs shadow transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
           >

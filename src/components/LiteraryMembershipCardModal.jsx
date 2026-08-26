@@ -320,7 +320,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
 
     ctx.fillStyle = '#f1f5f9';
     ctx.font = '18px serif';
-    ctx.fillText('आधिकारिक यूट्यूब चैनल (@bolteekalam) द्वारा विशेष काव्य गोष्ठियाँ एवं लाइव पाठ प्रसारित होते हैं।', 195, 818);
+    ctx.fillText('आधिकारिक यूट्यूब चैनल (@bolateekalam) द्वारा विशेष काव्य गोष्ठियाँ एवं लाइव पाठ प्रसारित होते हैं।', 195, 818);
 
     // 7. Compact Authentic Digital Verification Seal Box (Y = 880 to 1175, Height = 295)
     ctx.fillStyle = '#fffbeb';
@@ -562,7 +562,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
               बोलती कलम एक राष्ट्रीय डिजिटल साहित्यिक मंच है, जो साहित्य प्रेमियों और रचनाकारों को एक साझा मंच पर लाकर रचनात्मक अभिव्यक्ति को नई पहचान देता है।
             </p>
             <p className="text-[11px] text-amber-200 font-medium pt-1 border-t border-amber-500/30">
-              आधिकारिक यूट्यूब चैनल (<strong className="text-white">@bolteekalam</strong>) द्वारा विशेष काव्य गोष्ठियाँ प्रसारित की जाती हैं।
+              आधिकारिक यूट्यूब चैनल (<strong className="text-white">@bolateekalam</strong>) द्वारा विशेष काव्य गोष्ठियाँ प्रसारित की जाती हैं।
             </p>
           </div>
 

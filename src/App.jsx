@@ -1049,7 +1049,7 @@ function AppContent() {
   };
 
   const handleYouTubeVisit = () => {
-    window.open('https://www.youtube.com/@bolteekalam', '_blank');
+    window.open('https://www.youtube.com/@bolateekalam', '_blank');
     if (currentUser) {
       const visitedKey = `yt_visited_${currentUser.email || 'user'}`;
       if (!localStorage.getItem(visitedKey)) {
@@ -1625,7 +1625,7 @@ function AppContent() {
 
   const handleSubscribeYouTube = () => {
     handleRewardPoints(20, 'यूट्यूब चैनल सब्सक्राइब करने पर');
-    window.open('https://www.youtube.com/@bolteekalam', '_blank');
+    window.open('https://www.youtube.com/@bolateekalam', '_blank');
   };
 
   const handlePublishPosterPost = (posterData) => {

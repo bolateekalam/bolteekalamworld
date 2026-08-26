@@ -62,16 +62,16 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
     {
       id: 'youtube',
       name: 'बोलती कलम YouTube चैनल',
-      desc: '@bolteekalam (वीडियो एवं काव्य गोष्ठी)',
+      desc: '@bolateekalam (वीडियो एवं काव्य गोष्ठी)',
       icon: YouTubeIcon,
       color: 'bg-red-600 text-white shadow-red-900/20',
       textColor: 'text-red-600 dark:text-red-400',
-      link: 'https://www.youtube.com/@bolteekalam'
+      link: 'https://www.youtube.com/@bolateekalam'
     },
     {
       id: 'instagram',
       name: 'Instagram अकाउंट',
-      desc: '@bolteekalam (दैनिक शायरी व अपडेट्स)',
+      desc: '@bolateekalam (दैनिक शायरी व अपडेट्स)',
       icon: InstagramIcon,
       color: 'bg-gradient-to-tr from-amber-500 via-rose-600 to-purple-600 text-white shadow-rose-900/20',
       textColor: 'text-rose-500',
@@ -80,7 +80,7 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
     {
       id: 'facebook',
       name: 'Facebook पेज',
-      desc: '@bolteekalamofficial (साहित्यिक समुदाय)',
+      desc: '@bolateekalamofficial (साहित्यिक समुदाय)',
       icon: FacebookIcon,
       color: 'bg-blue-700 text-white shadow-blue-900/20',
       textColor: 'text-blue-600',
