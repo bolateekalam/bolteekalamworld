@@ -2139,14 +2139,11 @@ class ErrorBoundary extends React.Component {
 
           <button
             onClick={() => {
-              try {
-                localStorage.clear();
-              } catch (e) {}
               window.location.href = '/';
             }}
-            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg transition active:scale-95"
+            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-lg transition active:scale-95 cursor-pointer"
           >
-            🔄 रीफ्रेश करें (Clear Local Storage & Reset App)
+            🔄 मुख्य पृष्ठ पर वापस जाएं (Home)
           </button>
         </div>
       );

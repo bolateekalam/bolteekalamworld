@@ -3,7 +3,7 @@ import {
   User, ShieldCheck, Flame, BookOpen, Bookmark, Award, Trophy,
   Eye, Heart, Sparkles, MapPin, Calendar, Share2, Copy, Check, 
   Gift, Lock, Package, Edit3, Send, Phone, Mail, UserPlus, UserCheck, Archive,
-  ArrowUpRight, ArrowDownRight, History, ExternalLink, AlertCircle, ChevronRight, Wallet, Download, Clock
+  ArrowUpRight, ArrowDownRight, History, ExternalLink, AlertCircle, ChevronRight, Wallet, Download, Clock, CheckCircle2
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import PostCard from '../components/PostCard';
