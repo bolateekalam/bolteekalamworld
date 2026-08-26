@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Bell, Heart, MessageSquare, UserPlus, Cake, Trophy, 
-  Calendar, Megaphone, CheckCircle2, X, Send, Sparkles, AlertCircle
+  Calendar, Megaphone, CheckCircle2, X, Send, AlertCircle
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   getNotificationPermission, 
-  requestNotificationPermission, 
-  sendTestNotification 
+  requestNotificationPermission 
 } from '../lib/notificationService';
-import PushNotificationStatusModal from './PushNotificationStatusModal';
 
 export const NotificationDrawer = ({ onClose, notifications = [], unreadNotifications, setUnreadNotifications, onClearNotifications }) => {
   const { t } = useLanguage();
   const [permissionStatus, setPermissionStatus] = useState('default');
-  const [isSendingTest, setIsSendingTest] = useState(false);
-  const [testSentSuccess, setTestSentSuccess] = useState(false);
-  const [showPushModal, setShowPushModal] = useState(false);
 
   useEffect(() => {
     setPermissionStatus(getNotificationPermission());
@@ -30,20 +25,9 @@ export const NotificationDrawer = ({ onClose, notifications = [], unreadNotifica
   const handleEnableNotifications = async () => {
     const perm = await requestNotificationPermission();
     setPermissionStatus(perm);
-    if (perm === 'granted') {
-      handleSendTest();
-    }
-  };
-
-  const handleSendTest = async () => {
-    setIsSendingTest(true);
-    const success = await sendTestNotification();
-    setIsSendingTest(false);
-    if (success) {
-      setPermissionStatus('granted');
-      setTestSentSuccess(true);
-      setTimeout(() => setTestSentSuccess(false), 3500);
-    }
+    try {
+      localStorage.setItem('bolteekalam_push_decision_done', 'true');
+    } catch (e) {}
   };
 
   return (
@@ -76,60 +60,33 @@ export const NotificationDrawer = ({ onClose, notifications = [], unreadNotifica
         </div>
       </div>
 
-      {/* Push Notification Permission & Test Trigger Strip with Popup Trigger */}
-      <div 
-        onClick={() => setShowPushModal(true)}
-        className="p-3 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-rose-500/10 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-rose-500/15 transition"
-      >
-        <div className="flex items-center justify-between gap-2">
+      {/* Push Notification Status Indicator (Clean & Minimal - No Test Buttons for Users) */}
+      {permissionStatus !== 'granted' && (
+        <div className="p-3 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-rose-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-base animate-bounce">🔔</span>
+            <span className="text-base">🔔</span>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1">
-                <span>{permissionStatus === 'granted'
-                  ? 'पुश नोटिफिकेशन सक्रिय 🟢'
-                  : permissionStatus === 'denied'
-                  ? 'नोटिफिकेशन ब्लॉक है ⚠️'
-                  : 'साहित्यिक अलर्ट सक्षम करें'}</span>
+              <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
+                {permissionStatus === 'denied' ? 'नोटिफिकेशन ब्लॉक है ⚠️' : 'काव्य सूचनाएं सक्षम करें'}
               </p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                {permissionStatus === 'granted'
-                  ? 'काव्य गोष्ठी व लाइव अपडेट्स'
-                  : permissionStatus === 'denied'
-                  ? 'ब्राउज़र सेटिंग में अनुमति दें'
-                  : 'दैनिक शब्द व ज्यूरी परिणाम पाएं'}
+                {permissionStatus === 'denied' ? 'ब्राउज़र सेटिंग में अनुमति दें' : 'दैनिक शब्द व ज्यूरी परिणाम सीधे पाएं'}
               </p>
             </div>
           </div>
 
-          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+          {permissionStatus !== 'denied' && (
             <button
               type="button"
-              onClick={() => setShowPushModal(true)}
-              className="px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 active:scale-95 text-white font-bold rounded-xl text-[10px] shadow transition flex items-center gap-1 cursor-pointer"
+              onClick={handleEnableNotifications}
+              className="px-3 py-1.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 active:scale-95 text-white font-bold rounded-xl text-[10px] shadow transition flex items-center gap-1 cursor-pointer shrink-0"
             >
-              <Sparkles className="w-3 h-3 text-amber-200" />
-              <span>पॉपअप खोलें / टेस्ट अलर्ट 📲</span>
+              <Bell className="w-3 h-3" />
+              <span>चालू करें 🔔</span>
             </button>
-          </div>
+          )}
         </div>
-
-        {testSentSuccess && (
-          <div className="mt-2 p-1.5 bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-emerald-700 dark:text-emerald-300 text-[10px] font-bold flex items-center gap-1.5 animate-in fade-in">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>✓ टेस्ट पुश नोटिफिकेशन आपके डिवाइस पर भेज दिया गया!</span>
-          </div>
-        )}
-      </div>
-
-      {/* Push Notification Status & Test Alert Dedicated Popup */}
-      <PushNotificationStatusModal
-        isOpen={showPushModal}
-        onClose={() => {
-          setShowPushModal(false);
-          setPermissionStatus(getNotificationPermission());
-        }}
-      />
+      )}
 
       {/* Notifications List */}
       <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">

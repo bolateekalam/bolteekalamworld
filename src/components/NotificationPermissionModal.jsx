@@ -6,23 +6,30 @@ import {
   sendTestNotification 
 } from '../lib/notificationService';
 
+const DECISION_KEY = 'bolteekalam_push_decision_done';
+
 export const NotificationPermissionModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEnabling, setIsEnabling] = useState(false);
 
   useEffect(() => {
-    // Only show if browser supports notifications, not already granted/denied, and not prompted recently
+    // Only show if browser supports notifications, not already granted/denied, and never decided before
     try {
       if (typeof window === 'undefined' || !('Notification' in window)) return;
       
       const perm = getNotificationPermission();
-      const dismissed = localStorage.getItem('bolteekalam_notif_prompt_dismissed');
+      const hasDecided = localStorage.getItem(DECISION_KEY) === 'true';
       
-      if (perm === 'default' && !dismissed) {
-        // Gentle delay after engagement
+      // If already granted or already decided by user, never ask again
+      if (perm === 'granted' || hasDecided) {
+        return;
+      }
+      
+      if (perm === 'default') {
+        // Show after 2.5s on first visit or app install
         const timer = setTimeout(() => {
           setIsOpen(true);
-        }, 3500);
+        }, 2500);
         return () => clearTimeout(timer);
       }
     } catch (e) {}
@@ -32,20 +39,21 @@ export const NotificationPermissionModal = () => {
     setIsEnabling(true);
     try {
       const perm = await requestNotificationPermission();
+      localStorage.setItem(DECISION_KEY, 'true');
+      localStorage.setItem('bolteekalam_notif_prompt_dismissed', 'true');
+      
       if (perm === 'granted') {
         await sendTestNotification();
       }
     } catch (e) {}
     setIsEnabling(false);
     setIsOpen(false);
-    try {
-      localStorage.setItem('bolteekalam_notif_prompt_dismissed', 'true');
-    } catch (e) {}
   };
 
   const handleDismiss = () => {
     setIsOpen(false);
     try {
+      localStorage.setItem(DECISION_KEY, 'true');
       localStorage.setItem('bolteekalam_notif_prompt_dismissed', 'true');
     } catch (e) {}
   };
