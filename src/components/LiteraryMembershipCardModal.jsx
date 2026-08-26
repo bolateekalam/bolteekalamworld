@@ -96,25 +96,25 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
     });
   };
 
-  // High-Resolution 1080x1520 Canvas PNG Generator with Clean Symmetry & Authentic Verification Seal
+  // High-Resolution 1080x1350 Canvas PNG Generator with Clean Symmetry & Authentic Verification Seal (4:5 Aspect Ratio)
   const generateCanvasPNG = async () => {
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
-    canvas.height = 1520;
+    canvas.height = 1350;
     const ctx = canvas.getContext('2d');
 
     // 1. Outer Background & Borders
     ctx.fillStyle = '#fdfbf7';
-    ctx.fillRect(0, 0, 1080, 1520);
+    ctx.fillRect(0, 0, 1080, 1350);
 
     // Ornate Dual Border
     ctx.strokeStyle = '#0e2238';
-    ctx.lineWidth = 14;
-    ctx.strokeRect(22, 22, 1036, 1476);
+    ctx.lineWidth = 12;
+    ctx.strokeRect(20, 20, 1040, 1310);
 
     ctx.strokeStyle = '#d97706';
-    ctx.lineWidth = 3.5;
-    ctx.strokeRect(36, 36, 1008, 1448);
+    ctx.lineWidth = 3;
+    ctx.strokeRect(32, 32, 1016, 1286);
 
     // Subtle Gold Corner Accents
     const drawCornerOrnament = (x, y, flipX, flipY) => {
@@ -124,77 +124,77 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.fillStyle = '#d97706';
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.lineTo(24, 0);
-      ctx.lineTo(0, 24);
+      ctx.lineTo(22, 0);
+      ctx.lineTo(0, 22);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
     };
 
-    drawCornerOrnament(42, 42, false, false);
-    drawCornerOrnament(1038, 42, true, false);
-    drawCornerOrnament(42, 1478, false, true);
-    drawCornerOrnament(1038, 1478, true, true);
+    drawCornerOrnament(38, 38, false, false);
+    drawCornerOrnament(1042, 38, true, false);
+    drawCornerOrnament(38, 1312, false, true);
+    drawCornerOrnament(1042, 1312, true, true);
 
     const [logoImgObj, userImgObj] = await Promise.all([
       safeLoadImage('/logo.png'),
       safeLoadImage(userAvatar)
     ]);
 
-    // 2. Top Header Section (Y = 60 to 130)
+    // 2. Top Header Section (Y = 48 to 118)
     if (logoImgObj) {
-      ctx.drawImage(logoImgObj, 60, 58, 80, 80);
+      ctx.drawImage(logoImgObj, 58, 48, 72, 72);
     } else {
       ctx.fillStyle = '#d97706';
       ctx.beginPath();
-      ctx.arc(100, 98, 38, 0, Math.PI * 2);
+      ctx.arc(94, 84, 34, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#0e2238';
-      ctx.font = 'bold 36px serif';
+      ctx.font = 'bold 32px serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🪶', 100, 110);
+      ctx.fillText('🪶', 94, 95);
     }
 
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0e2238';
-    ctx.font = 'bold 40px serif';
-    ctx.fillText('बोलती कलम', 155, 95);
+    ctx.font = 'bold 36px serif';
+    ctx.fillText('बोलती कलम', 142, 82);
     
     ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 18px sans-serif';
-    ctx.fillText('bolateeworld.in • राष्ट्रीय डिजिटल साहित्यिक मंच', 155, 126);
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('bolateeworld.in • राष्ट्रीय डिजिटल साहित्यिक मंच', 142, 110);
 
     // Membership ID Box (Top Right)
     ctx.fillStyle = '#0e2238';
-    ctx.fillRect(710, 60, 310, 52);
+    ctx.fillRect(725, 48, 295, 46);
     ctx.strokeStyle = '#d97706';
     ctx.lineWidth = 2;
-    ctx.strokeRect(710, 60, 310, 52);
+    ctx.strokeRect(725, 48, 295, 46);
 
     ctx.fillStyle = '#fef3c7';
-    ctx.font = 'bold 19px monospace';
-    ctx.fillText(`क्रमांक: ${membershipId}`, 725, 93);
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText(`क्रमांक: ${membershipId}`, 738, 78);
 
     ctx.textAlign = 'right';
     ctx.fillStyle = '#475569';
-    ctx.font = 'italic bold 16px serif';
-    ctx.fillText('“शब्दों से संवाद, विचारों से परिवर्तन”', 1020, 134);
+    ctx.font = 'italic bold 15px serif';
+    ctx.fillText('“शब्दों से संवाद, विचारों से परिवर्तन”', 1020, 114);
 
-    // Center Navy Ribbon Banner (Y = 155)
+    // Center Navy Ribbon Banner (Y = 130 to 170)
     ctx.fillStyle = '#0e2238';
-    ctx.fillRect(60, 155, 960, 46);
+    ctx.fillRect(58, 130, 964, 40);
     ctx.strokeStyle = '#d97706';
     ctx.lineWidth = 1.5;
-    ctx.strokeRect(60, 155, 960, 46);
+    ctx.strokeRect(58, 130, 964, 40);
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 20px serif';
-    ctx.fillText('◆ राष्ट्रीय 6-माह डिजिटल साहित्यिक सदस्यता पहचान पत्र ◆', 540, 185);
+    ctx.font = 'bold 18px serif';
+    ctx.fillText('◆ राष्ट्रीय 6-माह डिजिटल साहित्यिक सदस्यता पहचान पत्र ◆', 540, 156);
 
-    // 3. User Avatar Photo (Large & Prominent, Y = 230 to 390)
-    const avatarY = 300;
-    const avatarRadius = 75;
+    // 3. User Avatar Photo (Prominent & Centered, Y = 180 to 310)
+    const avatarY = 245;
+    const avatarRadius = 62;
 
     if (userImgObj) {
       ctx.save();
@@ -205,15 +205,15 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.restore();
 
       ctx.strokeStyle = '#0e2238';
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.arc(540, avatarY, avatarRadius + 1, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.strokeStyle = '#d97706';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.arc(540, avatarY, avatarRadius + 6, 0, Math.PI * 2);
+      ctx.arc(540, avatarY, avatarRadius + 5, 0, Math.PI * 2);
       ctx.stroke();
     } else {
       ctx.fillStyle = '#0e2238';
@@ -221,191 +221,185 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
       ctx.arc(540, avatarY, avatarRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#fde68a';
-      ctx.font = 'bold 56px serif';
-      ctx.fillText(userName.charAt(0) || 'क', 540, avatarY + 20);
+      ctx.font = 'bold 48px serif';
+      ctx.fillText(userName.charAt(0) || 'क', 540, avatarY + 16);
     }
 
     // 4. Member Name & Username with Generous Spacing
     ctx.fillStyle = '#0e2238';
-    ctx.font = 'bold 44px serif';
-    ctx.fillText(userName, 540, 425);
+    ctx.font = 'bold 38px serif';
+    ctx.fillText(userName, 540, 345);
 
     ctx.fillStyle = '#d97706';
-    ctx.font = 'bold 22px sans-serif';
-    ctx.fillText(`@${cleanUsername}`, 540, 460);
+    ctx.font = 'bold 19px sans-serif';
+    ctx.fillText(`@${cleanUsername}`, 540, 375);
 
     // Single-line Certification Tagline
     ctx.fillStyle = '#0e2238';
-    ctx.font = 'bold 18px serif';
-    ctx.fillText('बोलती कलम राष्ट्रीय डिजिटल मंच प्रमाणित करता है कि उपरोक्त रचनाकार हमारे अधिकृत 6-माह डिजिटल सदस्य हैं।', 540, 495);
+    ctx.font = 'bold 16px serif';
+    ctx.fillText('बोलती कलम राष्ट्रीय डिजिटल मंच प्रमाणित करता है कि उपरोक्त रचनाकार हमारे अधिकृत 6-माह डिजिटल सदस्य हैं।', 540, 408);
 
     // Verified Badge Pill
     const badgeText = isExpired 
       ? '⚠️ सदस्यता समाप्त (EXPIRED — 6 माह पूर्ण)' 
       : '✔ 100% निःशुल्क आजीवन साहित्यिक सदस्य';
-    ctx.font = 'bold 16px sans-serif';
-    const badgeWidth = ctx.measureText(badgeText).width + 36;
+    ctx.font = 'bold 15px sans-serif';
+    const badgeWidth = ctx.measureText(badgeText).width + 32;
     const badgeX = 540 - badgeWidth / 2;
 
     ctx.fillStyle = isExpired ? '#fee2e2' : '#f1f5f9';
-    ctx.fillRect(badgeX, 520, badgeWidth, 32);
+    ctx.fillRect(badgeX, 428, badgeWidth, 30);
     ctx.strokeStyle = isExpired ? '#ef4444' : '#0e2238';
     ctx.lineWidth = 2;
-    ctx.strokeRect(badgeX, 520, badgeWidth, 32);
+    ctx.strokeRect(badgeX, 428, badgeWidth, 30);
 
     ctx.fillStyle = isExpired ? '#b91c1c' : '#0e2238';
-    ctx.fillText(badgeText, 540, 542);
+    ctx.fillText(badgeText, 540, 448);
 
-    // 5. Clean 2-Column Date & Validity Row (Spacious & Balanced, Y = 575 to 665)
+    // 5. Clean 2-Column Date & Validity Row (Y = 472 to 552, Height = 80)
     ctx.fillStyle = '#f8fafc';
-    ctx.fillRect(60, 575, 960, 90);
+    ctx.fillRect(58, 472, 964, 80);
     ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(60, 575, 960, 90);
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(58, 472, 964, 80);
 
     // Divider
     ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(540, 585);
-    ctx.lineTo(540, 655);
+    ctx.moveTo(540, 480);
+    ctx.lineTo(540, 544);
     ctx.stroke();
 
     // Left Col: Issued Date
     ctx.textAlign = 'center';
     ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('📅 सदस्यता जारी तिथि', 300, 610);
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText('📅 सदस्यता जारी तिथि', 300, 502);
     ctx.fillStyle = '#0e2238';
-    ctx.font = 'bold 24px serif';
-    ctx.fillText(startDateStr, 300, 645);
+    ctx.font = 'bold 22px serif';
+    ctx.fillText(startDateStr, 300, 534);
 
     // Right Col: Validity
     ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('⏳ सदस्यता वैधता अवधि (6 माह)', 780, 610);
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText('⏳ सदस्यता वैधता अवधि (6 माह)', 780, 502);
     ctx.fillStyle = isExpired ? '#dc2626' : '#d97706';
-    ctx.font = 'bold 24px serif';
-    ctx.fillText(`${endDateStr} (सक्रिय)`, 780, 645);
+    ctx.font = 'bold 22px serif';
+    ctx.fillText(`${endDateStr} (सक्रिय)`, 780, 534);
 
-    // 6. Grand Navy Mission Box (Y = 690 to 930)
+    // 6. Grand Navy Mission Box (Y = 566 to 765, Height = 199)
     ctx.fillStyle = '#0e2238';
-    ctx.fillRect(60, 690, 960, 240);
+    ctx.fillRect(58, 566, 964, 199);
     ctx.strokeStyle = '#d97706';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(60, 690, 960, 240);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(58, 566, 964, 199);
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#fbbf24';
-    ctx.font = 'bold 26px serif';
-    ctx.fillText('✦ बोलती कलम राष्ट्रीय डिजिटल साहित्यिक मंच ✦', 540, 732);
+    ctx.font = 'bold 22px serif';
+    ctx.fillText('✦ बोलती कलम राष्ट्रीय डिजिटल साहित्यिक मंच ✦', 540, 602);
 
     if (logoImgObj) {
-      ctx.drawImage(logoImgObj, 95, 755, 95, 95);
+      ctx.drawImage(logoImgObj, 88, 626, 75, 75);
     } else {
       ctx.fillStyle = '#fef3c7';
-      ctx.font = 'bold 44px serif';
-      ctx.fillText('🪶', 145, 815);
+      ctx.font = 'bold 36px serif';
+      ctx.fillText('🪶', 125, 672);
     }
 
     ctx.textAlign = 'left';
     ctx.fillStyle = '#f1f5f9';
-    ctx.font = '20px serif';
-    ctx.fillText('बोलती कलम एक राष्ट्रीय डिजिटल साहित्यिक मंच है, जो साहित्य प्रेमियों और नवोदित', 215, 775);
-    ctx.fillText('रचनाकारों को एक साझा मंच पर लाकर शब्दों की शक्ति को नई पहचान प्रदान करता है।', 215, 808);
+    ctx.font = '17px serif';
+    ctx.fillText('बोलती कलम एक राष्ट्रीय डिजिटल साहित्यिक मंच है, जो साहित्य प्रेमियों और नवोदित', 185, 642);
+    ctx.fillText('रचनाकारों को एक साझा मंच पर लाकर शब्दों की शक्ति को नई पहचान प्रदान करता है।', 185, 672);
 
     ctx.fillStyle = '#fde68a';
-    ctx.font = 'bold 20px serif';
-    ctx.fillText('हमारा उद्देश्य हिंदी भाषा, साहित्य एवं नव-रचनात्मकता को नई ऊँचाइयों तक पहुँचाना है।', 215, 850);
+    ctx.font = 'bold 17.5px serif';
+    ctx.fillText('हमारा उद्देश्य हिंदी भाषा, साहित्य एवं नव-रचनात्मकता को नई ऊँचाइयों तक पहुँचाना है।', 185, 708);
 
     ctx.fillStyle = '#f1f5f9';
-    ctx.font = '19px serif';
-    ctx.fillText('आधिकारिक यूट्यूब चैनल (@bolteekalam) द्वारा विशेष काव्य गोष्ठियाँ एवं लाइव पाठ प्रसारित होते हैं।', 215, 890);
+    ctx.font = '16.5px serif';
+    ctx.fillText('आधिकारिक यूट्यूब चैनल (@bolteekalam) द्वारा विशेष काव्य गोष्ठियाँ एवं लाइव पाठ प्रसारित होते हैं।', 185, 742);
 
-    // 7. Compact Authentic Digital Verification Seal Box (Y = 955 to 1255)
+    // 7. Compact Authentic Digital Verification Seal Box (Y = 780 to 1025, Height = 245)
     ctx.fillStyle = '#fffbeb';
-    ctx.fillRect(60, 955, 960, 275);
+    ctx.fillRect(58, 780, 964, 245);
     ctx.strokeStyle = '#f59e0b';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(60, 955, 960, 275);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(58, 780, 964, 245);
 
     ctx.textAlign = 'left';
     ctx.fillStyle = '#854d0e';
-    ctx.font = 'bold 24px serif';
-    ctx.fillText('🛡️ राष्ट्रीय डिजिटल सुरक्षा एवं प्रमाणन मुहर', 95, 1005);
+    ctx.font = 'bold 21px serif';
+    ctx.fillText('🛡️ राष्ट्रीय डिजिटल सुरक्षा एवं प्रमाणन मुहर', 90, 822);
 
     ctx.fillStyle = '#713f12';
-    ctx.font = '18px sans-serif';
-    ctx.fillText('यह सदस्यता पहचान पत्र बोलती कलम साहित्यिक मंच द्वारा', 95, 1045);
-    ctx.fillText('पूर्णतः अधिकृत, पंजीकृत एवं डिजिटल रूप से सत्यापित है।', 95, 1077);
+    ctx.font = '16.5px sans-serif';
+    ctx.fillText('यह सदस्यता पहचान पत्र बोलती कलम साहित्यिक मंच द्वारा', 90, 856);
+    ctx.fillText('पूर्णतः अधिकृत, पंजीकृत एवं डिजिटल रूप से सत्यापित है।', 90, 884);
 
     ctx.fillStyle = '#b45309';
-    ctx.font = 'bold 16px monospace';
-    ctx.fillText(`सत्यापन लिंक: bolateeworld.in/profile/${cleanUsername}`, 95, 1125);
-    ctx.fillText(`सुरक्षा टोकन: BK-SEC-${membershipId}-VERIFIED`, 95, 1160);
+    ctx.font = 'bold 15px monospace';
+    ctx.fillText(`सत्यापन लिंक: bolateeworld.in/profile/${cleanUsername}`, 90, 930);
+    ctx.fillText(`सुरक्षा टोकन: BK-SEC-${membershipId}-VERIFIED`, 90, 962);
 
     // Center-Right Official Circular Stamp
-    const stampCenterX = 820;
-    const stampCenterY = 1090;
-    const stampR = 90;
+    const stampCenterX = 825;
+    const stampCenterY = 902;
+    const stampR = 75;
 
     ctx.strokeStyle = '#b91c1c';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3.5;
     ctx.beginPath();
     ctx.arc(stampCenterX, stampCenterY, stampR, 0, Math.PI * 2);
     ctx.stroke();
 
     ctx.strokeStyle = '#b91c1c';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([5, 4]);
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([4, 3]);
     ctx.beginPath();
-    ctx.arc(stampCenterX, stampCenterY, stampR - 8, 0, Math.PI * 2);
+    ctx.arc(stampCenterX, stampCenterY, stampR - 6, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
 
     ctx.strokeStyle = '#b91c1c';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(stampCenterX, stampCenterY, stampR - 15, 0, Math.PI * 2);
+    ctx.arc(stampCenterX, stampCenterY, stampR - 12, 0, Math.PI * 2);
     ctx.stroke();
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#b91c1c';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.fillText('★ BOLTI KALAM OFFICIAL SEAL ★', stampCenterX, stampCenterY - 45);
+    ctx.font = 'bold 10.5px sans-serif';
+    ctx.fillText('★ BOLTI KALAM OFFICIAL SEAL ★', stampCenterX, stampCenterY - 38);
 
-    ctx.font = 'bold 30px serif';
-    ctx.fillText('🪶', stampCenterX, stampCenterY - 10);
+    ctx.font = 'bold 24px serif';
+    ctx.fillText('🪶', stampCenterX, stampCenterY - 8);
 
     ctx.fillStyle = '#b91c1c';
-    ctx.fillRect(stampCenterX - 65, stampCenterY + 12, 130, 26);
+    ctx.fillRect(stampCenterX - 55, stampCenterY + 10, 110, 22);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 13px sans-serif';
-    ctx.fillText('VERIFIED 2026', stampCenterX, stampCenterY + 30);
+    ctx.font = 'bold 11.5px sans-serif';
+    ctx.fillText('VERIFIED 2026', stampCenterX, stampCenterY + 26);
 
     ctx.fillStyle = '#b91c1c';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('डिजिटल प्रमाणिक', stampCenterX, stampCenterY + 55);
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('डिजिटल प्रमाणिक', stampCenterX, stampCenterY + 46);
 
-    // 8. Signatures Footer (Y = 1255, H = 60)
+    // 8. Signatures Footer (Y = 1042, H = 56)
     ctx.fillStyle = '#0e2238';
-    ctx.fillRect(60, 1255, 960, 60);
+    ctx.fillRect(58, 1042, 964, 56);
 
     ctx.textAlign = 'left';
     ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 18px sans-serif';
-    ctx.fillText('बोलती कलम (bolateeworld.in) — राष्ट्रीय साहित्यिक मंच', 90, 1292);
+    ctx.font = 'bold 17px sans-serif';
+    ctx.fillText('बोलती कलम (bolateeworld.in) — राष्ट्रीय साहित्यिक मंच', 88, 1076);
 
     ctx.textAlign = 'right';
     ctx.fillStyle = '#fde68a';
-    ctx.font = 'bold 19px serif';
-    ctx.fillText('✍️ प्रमाणित: संस्थापक संजय राय (Sanjay Rai)', 990, 1292);
-
-    // 9. Bottom Equal Footnote
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 15px sans-serif';
-    ctx.fillText('अखिल भारतीय डिजिटल साहित्य संवर्धन परिषद • राष्ट्रीय साहित्यिक समन्वय • bolateeworld.in', 540, 1365);
+    ctx.font = 'bold 18px serif';
+    ctx.fillText('✍️ प्रमाणित: संस्थापक संजय राय (Sanjay Rai)', 988, 1076);
 
     return canvas;
   };
