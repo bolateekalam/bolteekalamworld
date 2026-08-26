@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Shield, Trophy, Bell, Cake, Sparkles, CheckCircle2, XCircle, 
   Crown, RefreshCcw, PlusCircle, Send, Edit3, ShieldCheck, Megaphone,
-  X, Eye, ArrowLeft, LogOut
+  X, Eye, ArrowLeft, LogOut, Users, Trash2, Key, UserCheck, Lock, Mail
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { FESTIVAL_THEMES, detectCurrentAutoFestivalTheme } from '../data/festivalThemes';
@@ -48,6 +48,23 @@ export const AdminDashboardView = ({
   // Custom Birthday Card Creator Form State
   const [customName, setCustomName] = useState('');
   const [customCity, setCustomCity] = useState('');
+
+  // Sub-Admin / Moderator Management State (Exclusive to Super Admin)
+  const [moderatorList, setModeratorList] = useState(() => {
+    try {
+      const stored = localStorage.getItem('bolteekalam_authorized_moderators_list');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return [
+      { id: 'm1', name: 'ज्यूरी मॉडरेटर 1', email: 'jury@bolteekalam.com', password: 'jury2026', role: 'Jury & Tasks', created: '25 अगस्त 2026' },
+      { id: 'm2', name: 'टास्क मॉडरेटर 2', email: 'mod@bolteekalam.com', password: 'mod2026', role: 'Tasks Only', created: '25 अगस्त 2026' }
+    ];
+  });
+
+  const [newModName, setNewModName] = useState('');
+  const [newModEmail, setNewModEmail] = useState('');
+  const [newModPassword, setNewModPassword] = useState('');
+  const [modSuccessMsg, setModSuccessMsg] = useState('');
 
   // Derive weekly submissions dynamically from live posts in database
   const weeklySubmissions = React.useMemo(() => {
@@ -133,6 +150,43 @@ export const AdminDashboardView = ({
     });
   };
 
+  // Create Moderator Handler (Super Admin)
+  const handleCreateModerator = (e) => {
+    e.preventDefault();
+    if (!newModName.trim() || !newModEmail.trim() || !newModPassword.trim()) return;
+
+    const newMod = {
+      id: `mod_${Date.now()}`,
+      name: newModName.trim(),
+      email: newModEmail.trim().toLowerCase(),
+      password: newModPassword.trim(),
+      role: 'Jury & Tasks',
+      created: new Date().toLocaleDateString('hi-IN')
+    };
+
+    const updated = [newMod, ...moderatorList];
+    setModeratorList(updated);
+    try {
+      localStorage.setItem('bolteekalam_authorized_moderators_list', JSON.stringify(updated));
+    } catch (err) {}
+
+    setNewModName('');
+    setNewModEmail('');
+    setNewModPassword('');
+    setModSuccessMsg(`✓ नया ज्यूरी एडमिन (${newMod.name}) सफलतापूर्वक बना दिया गया!`);
+    setTimeout(() => setModSuccessMsg(''), 4000);
+  };
+
+  // Delete Moderator Handler (Super Admin)
+  const handleDeleteModerator = (id) => {
+    if (!window.confirm('क्या आप सचमुच इस मॉडरेटर का एक्सेस हटाना चाहते हैं?')) return;
+    const updated = moderatorList.filter(m => m.id !== id);
+    setModeratorList(updated);
+    try {
+      localStorage.setItem('bolteekalam_authorized_moderators_list', JSON.stringify(updated));
+    } catch (err) {}
+  };
+
   const currentTopicDisplay = weeklyChallenge?.topic || weeklyChallenge?.title || 'साप्ताहिक काव्य चुनौती';
 
   // Define Clean Sub-Tabs (Strictly Filtered based on Role)
@@ -142,7 +196,8 @@ export const AdminDashboardView = ({
     { id: 'birthdays', label: '3. 🎂 जन्मदिन कार्ड', icon: Cake, badge: birthdayUsers.length },
     ...(isSuperAdmin ? [
       { id: 'pushNotif', label: '4. 📢 पुश ब्रॉडकास्टर', icon: Bell, badgeColor: 'bg-rose-500' },
-      { id: 'festivals', label: '5. 🎨 फेस्टिवल थीम', icon: Sparkles }
+      { id: 'moderators', label: '5. 👥 मॉडरेटर खाता प्रबंधन', icon: Users, badge: moderatorList.length },
+      { id: 'festivals', label: '6. 🎨 फेस्टिवल थीम', icon: Sparkles }
     ] : [])
   ];
 
@@ -171,7 +226,7 @@ export const AdminDashboardView = ({
             </h1>
             <p className="text-xs text-rose-200/80 mt-0.5 font-tiro">
               {isSuperAdmin 
-                ? 'सभी प्रमुख अधिकार सक्रिय: ज्यूरी परिणाम, यूट्यूब टास्क, जन्मदिन कार्ड, व पुश ब्रॉडकास्ट।'
+                ? 'सभी प्रमुख अधिकार सक्रिय: ज्यूरी परिणाम, यूट्यूब टास्क, जन्मदिन कार्ड, पुश ब्रॉडकास्ट व मॉडरेटर प्रबंधन।'
                 : 'सीमित अधिकार सक्रिय: केवल साप्ताहिक ज्यूरी परिणाम, यूट्यूब सत्यापन व जन्मदिन कार्ड।'}
             </p>
           </div>
@@ -630,7 +685,122 @@ export const AdminDashboardView = ({
       )}
 
       {/* ========================================================= */}
-      {/* TAB 5: 🎨 GLOBAL FESTIVAL THEMES (SUPER ADMIN ONLY) */}
+      {/* TAB 5: 👥 SUB-ADMIN & MODERATOR ACCOUNTS (SUPER ADMIN ONLY) */}
+      {/* ========================================================= */}
+      {isSuperAdmin && activeTab === 'moderators' && (
+        <div className="space-y-5">
+          <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-900 dark:text-purple-300 text-xs flex items-center justify-between flex-wrap gap-2">
+            <div className="space-y-0.5">
+              <span className="font-extrabold flex items-center gap-1.5 text-sm">
+                <Users className="w-4 h-4 text-purple-600" />
+                <span>👥 ज्यूरी व सब-एडमिन खाता प्रबंधन (Sub-Admin / Moderator Credentials)</span>
+              </span>
+              <p className="text-[11px] opacity-80">
+                सुपर एडमिन के रूप में आप यहाँ से अपने सहायकों / ज्यूरी सदस्यों के लिए नया ईमेल और पासवर्ड बना सकते हैं या हटा सकते हैं।
+              </p>
+            </div>
+          </div>
+
+          {/* Create New Moderator Form */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <PlusCircle className="w-4 h-4 text-rose-600" />
+              <span>नया ज्यूरी / टास्क मॉडरेटर जोड़ें (Add New Sub-Admin)</span>
+            </h4>
+
+            {modSuccessMsg && (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>{modSuccessMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateModerator} className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">मॉडरेटर का नाम:</label>
+                <input
+                  type="text"
+                  value={newModName}
+                  onChange={(e) => setNewModName(e.target.value)}
+                  placeholder="उदा. राहुल वर्मा (ज्यूरी)"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-bold"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">लॉगिन ईमेल ID:</label>
+                <input
+                  type="email"
+                  value={newModEmail}
+                  onChange={(e) => setNewModEmail(e.target.value)}
+                  placeholder="उदा. rahul@bolteekalam.com"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-mono"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">गुप्त पासवर्ड (Password):</label>
+                <input
+                  type="text"
+                  value={newModPassword}
+                  onChange={(e) => setNewModPassword(e.target.value)}
+                  placeholder="उदा. rahul2026"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-mono"
+                  required
+                />
+              </div>
+
+              <div className="sm:col-span-3">
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-rose-600 hover:from-purple-700 hover:to-rose-700 text-white font-bold rounded-2xl text-xs shadow transition active:scale-95 cursor-pointer"
+                >
+                  ✓ नया मॉडरेटर खाता बनाएं व अधिकार दें
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Active Moderators List */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-3">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-emerald-600" />
+              <span>सक्रिय अधिकृत मॉडरेटर्स सूची ({moderatorList.length})</span>
+            </h4>
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              {moderatorList.map((mod) => (
+                <div key={mod.id} className="py-3 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{mod.name}</span>
+                      <span className="px-2 py-0.5 bg-purple-500/10 text-purple-600 rounded-md font-bold text-[10px]">
+                        {mod.role}
+                      </span>
+                    </div>
+                    <p className="text-slate-500 font-mono text-[11px]">
+                      Email: <strong className="text-slate-700 dark:text-slate-300">{mod.email}</strong> • Pass: <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{mod.password}</code>
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handleDeleteModerator(mod.id)}
+                    className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition cursor-pointer"
+                    title="मॉडरेटर हटाएं"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 6: 🎨 GLOBAL FESTIVAL THEMES (SUPER ADMIN ONLY) */}
       {/* ========================================================= */}
       {isSuperAdmin && activeTab === 'festivals' && (
         <div className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border border-amber-500/40 rounded-3xl p-6 shadow-xl space-y-4 text-white">

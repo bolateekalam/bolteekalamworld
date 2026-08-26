@@ -18,6 +18,7 @@ import LiteraryMembershipCardModal from './components/LiteraryMembershipCardModa
 import YouTubeTaskModal from './components/YouTubeTaskModal';
 import ReferEarnModal from './components/ReferEarnModal';
 import AdminAuthModal from './components/AdminAuthModal';
+import NotificationPermissionModal from './components/NotificationPermissionModal';
 import SplashScreen from './components/SplashScreen';
 import PWAInstallModal from './components/PWAInstallModal';
 
@@ -2083,6 +2084,9 @@ function AppContent() {
         onClose={() => setShowInstallModal(false)}
         deferredPrompt={deferredPrompt}
       />
+
+      {/* Automatic In-App Push Notification Permission Prompt */}
+      <NotificationPermissionModal />
 
       {/* Startup Animated Logo Splash Screen */}
       {showSplash && (
