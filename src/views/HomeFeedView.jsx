@@ -341,9 +341,7 @@ export const HomeFeedView = ({
                     src="/logo.png" 
                     alt="बोलती कलम" 
                     className="w-full h-full object-contain" 
-                    onError={(e) => { e.target.style.display = 'none'; }}
                   />
-                  <span className="text-2xl font-bold">🪶</span>
                 </div>
               </div>
               <span className="absolute -bottom-1.5 -right-1.5 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[9px] font-black uppercase shadow">
