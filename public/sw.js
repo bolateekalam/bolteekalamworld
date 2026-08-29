@@ -1,5 +1,5 @@
-// Bolti Kalam PWA Service Worker with Background Push Notifications (Zomato-style)
-const CACHE_NAME = 'bolti-kalam-pwa-v2';
+// Bolti Kalam PWA Service Worker with Zomato-style Background Push Notifications
+const CACHE_NAME = 'bolti-kalam-pwa-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -48,11 +48,11 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// 🔔 1. Handle Background Push Notifications (When App is Closed / Locked Screen)
+// 🔔 1. Handle Background Push Notifications (When App is Closed / In Background)
 self.addEventListener('push', (event) => {
   let data = {
     title: 'बोलती कलम 🪶',
-    body: 'आज का दैनिक काव्य शब्द व नई गोष्ठी प्रारंभ हो चुकी है!',
+    body: 'आज का नया काव्य शब्द व दैनिक प्रतियोगिता शुरू हो चुकी है! ऐप खोलें 📲',
     icon: '/logo.png',
     badge: '/logo.png',
     url: '/'
@@ -73,7 +73,9 @@ self.addEventListener('push', (event) => {
     body: data.body,
     icon: data.icon || '/logo.png',
     badge: data.badge || '/logo.png',
-    vibrate: [200, 100, 200],
+    vibrate: [200, 100, 200, 100, 200],
+    tag: data.tag || `bolteekalam-push-${Date.now()}`,
+    renotify: true,
     data: {
       url: data.url || '/'
     },
@@ -87,7 +89,7 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// 🔔 2. Handle Notification Click (Open App or Target URL)
+// 🔔 2. Handle Notification Click (Focus open tab or Open App)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
@@ -97,9 +99,19 @@ self.addEventListener('notificationclick', (event) => {
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
+          if ('navigate' in client && targetUrl !== '/') {
+            client.navigate(targetUrl);
+          }
           return client.focus();
         }
       }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
 // 🔔 3. Handle Direct Message from Web App to show notification via Service Worker
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
@@ -109,6 +121,8 @@ self.addEventListener('message', (event) => {
       icon: options?.icon || '/logo.png',
       badge: options?.badge || '/logo.png',
       vibrate: options?.vibrate || [200, 100, 200],
+      tag: options?.tag || `bk-notif-${Date.now()}`,
+      renotify: true,
       data: options?.data || { url: '/' },
       actions: options?.actions || [
         { action: 'open', title: 'ऐप खोलें 📲' }

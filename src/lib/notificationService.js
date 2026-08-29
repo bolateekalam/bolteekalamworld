@@ -182,14 +182,16 @@ export const logUserActiveHeartbeat = () => {
   try {
     const now = Date.now();
     localStorage.setItem(LAST_ACTIVE_KEY, now.toString());
-    localStorage.removeItem(INACTIVITY_NOTIF_SENT_KEY);
   } catch (e) {}
 };
 
-// 7. Automatic Inactivity Check (e.g. 2 Days / 48h Inactivity Notification)
+// 7. Zomato-Style Catchy Re-engagement & Inactivity Notification Engine
 export const checkAndTriggerInactivityNotification = () => {
   try {
-    if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') return;
+    if (typeof window === 'undefined') return;
+
+    const perm = getNotificationPermission();
+    if (perm !== 'granted') return;
 
     const lastActiveStr = localStorage.getItem(LAST_ACTIVE_KEY);
     if (!lastActiveStr) {
@@ -199,19 +201,45 @@ export const checkAndTriggerInactivityNotification = () => {
 
     const lastActiveTime = parseInt(lastActiveStr, 10);
     const now = Date.now();
-    const twoDaysMs = 48 * 60 * 60 * 1000; // 48 Hours
+    const diffHours = (now - lastActiveTime) / (1000 * 60 * 60);
 
-    const alreadySent = localStorage.getItem(INACTIVITY_NOTIF_SENT_KEY);
+    const lastNotifStage = localStorage.getItem('bolteekalam_last_inactivity_stage') || '0';
 
-    if (now - lastActiveTime > twoDaysMs && !alreadySent) {
-      sendBrowserNotification('✍️ बोलती कलम: आपकी लेखनी की प्रतीक्षा है!', {
-        body: 'आप 2 दिन से मंच पर नहीं आए हैं! आज का नया शब्द देखें, कविता लिखें और अपनी स्ट्रीक जारी रखें।',
-        tag: 'bolteekalam-inactivity',
+    // 1. Stage 1: 18 - 24 Hours Inactive (Daily Word & Writing Prompt)
+    if (diffHours >= 18 && diffHours < 36 && lastNotifStage !== 'stage1') {
+      sendBrowserNotification('✍️ आपकी कलम क्यों खामोश है? 🪶', {
+        body: 'आज का दैनिक काव्य शब्द जारी हो चुका है! बोलती कलम खोलकर अपनी नई रचना लिखें और दाद पाएं।',
+        tag: 'bolteekalam-zomato-stage1',
         data: { url: window.location.origin }
       });
-      localStorage.setItem(INACTIVITY_NOTIF_SENT_KEY, 'true');
+      localStorage.setItem('bolteekalam_last_inactivity_stage', 'stage1');
+      return;
     }
-  } catch (e) {}
+
+    // 2. Stage 2: 36 - 60 Hours Inactive (Streak & Habit Loss Warning)
+    if (diffHours >= 36 && diffHours < 72 && lastNotifStage !== 'stage2') {
+      sendBrowserNotification('🔥 अरे रे! आपकी काव्य स्ट्रीक टूटने वाली है!', {
+        body: 'लगातार सक्रिय रहने की स्ट्रीक न खोएं ⏱️ सिर्फ 2 मिनट बोलती कलम ऐप खोलकर अपनी स्ट्रीक सुरक्षित करें।',
+        tag: 'bolteekalam-zomato-stage2',
+        data: { url: window.location.origin }
+      });
+      localStorage.setItem('bolteekalam_last_inactivity_stage', 'stage2');
+      return;
+    }
+
+    // 3. Stage 3: 72+ Hours Inactive (Milestone Certificate & Literary Passbook)
+    if (diffHours >= 72 && lastNotifStage !== 'stage3') {
+      sendBrowserNotification('📜 आपका मानद सम्मान पत्र इंतज़ार में है! 🏆', {
+        body: 'बोलती कलम राष्ट्रीय मंच पर आपका डिजिटल E-Certificate तैयार है! ऐप खोलें और सम्मान पत्र देखें।',
+        tag: 'bolteekalam-zomato-stage3',
+        data: { url: `${window.location.origin}/certificates` }
+      });
+      localStorage.setItem('bolteekalam_last_inactivity_stage', 'stage3');
+      return;
+    }
+  } catch (e) {
+    console.warn('Inactivity notification check notice:', e);
+  }
 };
 
 // 8. Global Real-time Broadcast Channel for Live Mobile & Desktop Push

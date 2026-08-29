@@ -53,23 +53,27 @@ export const Navbar = ({
         {/* Brand Logo & Title */}
         <div 
           onClick={() => setActiveView('feed')}
-          className="flex items-center gap-2.5 cursor-pointer shrink-0 group"
+          className="flex items-center gap-3 cursor-pointer shrink-0 group select-none"
         >
-          <img 
-            src="/logo.png" 
-            alt="BOLATEE WORLD" 
-            className="h-10 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform" 
-          />
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-rose-600 rounded-full blur-[2px] opacity-70 group-hover:opacity-100 transition-opacity" />
+            <img 
+              src="/logo.png" 
+              alt="बोलती कलम" 
+              className="relative h-10 sm:h-12 w-auto object-contain rounded-full bg-slate-950 p-0.5 border border-amber-400 group-hover:scale-105 transition-transform" 
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          </div>
           <div className="hidden sm:block">
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-rozha text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-none">
+            <div className="flex items-center gap-2">
+              <h1 className="font-rozha text-lg sm:text-xl font-black tracking-tight text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-amber-200 dark:via-amber-300 dark:to-amber-100 leading-none drop-shadow-sm">
                 बोलती कलम
               </h1>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-gradient-to-r from-rose-500 via-rose-600 to-amber-600 text-white rounded-full uppercase tracking-wider shadow flex items-center gap-1">
+              <span className="px-2 py-0.5 text-[9px] font-black bg-gradient-to-r from-amber-500 to-rose-600 text-white rounded-full uppercase tracking-wider shadow-sm flex items-center gap-0.5">
                 <span>राष्ट्रीय मंच</span>
               </span>
             </div>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-tiro">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-serif">
               राष्ट्रीय डिजिटल साहित्यिक मंच
             </p>
           </div>

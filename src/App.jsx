@@ -18,7 +18,7 @@ import LiteraryMembershipCardModal from './components/LiteraryMembershipCardModa
 import YouTubeTaskModal from './components/YouTubeTaskModal';
 import ReferEarnModal from './components/ReferEarnModal';
 import AdminAuthModal from './components/AdminAuthModal';
-import NotificationPermissionModal from './components/NotificationPermissionModal';
+import NotificationPermissionBanner from './components/NotificationPermissionBanner';
 import SplashScreen from './components/SplashScreen';
 import PWAInstallModal from './components/PWAInstallModal';
 
@@ -49,6 +49,7 @@ import SearchResultsView from './views/SearchResultsView';
 import PosterStudioView from './views/PosterStudioView';
 import AudioStoriesView from './views/AudioStoriesView';
 import FestivalView from './views/FestivalView';
+import CertificateView from './views/CertificateView';
 
 import { mockPosts, mockDailyChallenge, mockPoetryBattle } from './data/mockPosts';
 import { mockCompetitions } from './data/mockCompetitions';
@@ -623,7 +624,6 @@ function AppContent() {
         history.pushState(null, '', '/studio');
         document.title = 'कवि इमेज़ पोस्टर Studio — बोलती कलम | bolateeworld.in';
       } else if (viewId === 'certificates') {
-        setProfileInitialTab('certificates');
         history.pushState(null, '', '/certificates');
         document.title = 'मेरे साहित्यिक सम्मान पत्र (E-Certificates) — बोलती कलम | bolateeworld.in';
       } else if (viewId === 'festival') {
@@ -720,8 +720,7 @@ function AppContent() {
         }
         if (rawPath.includes('/certificate') || rawHash.includes('certificate')) {
           setActiveView('certificates');
-          setProfileInitialTab('certificates');
-          document.title = 'मेरे साहित्यिक सम्मान पत्र (E-Certificates) — बोलती वर्ल्ड | bolateeworld.in';
+          document.title = 'मेरे साहित्यिक सम्मान पत्र (E-Certificates) — बोलती कलम | bolateeworld.in';
           return;
         }
         if (rawPath === '/profile' || rawHash === '#/profile' || rawHash === '#profile') {
@@ -1851,7 +1850,22 @@ function AppContent() {
             <AudioStoriesView setActiveView={handleNavigateView} />
           )}
 
-          {(activeView === 'profile' || activeView === 'certificates') && (
+          {activeView === 'certificates' && (
+            <CertificateView
+              userProfile={userProfile}
+              setActiveView={handleNavigateView}
+              totalUserPosts={posts.filter(p => 
+                p.author?.id === currentUser?.email || 
+                p.author?.email === currentUser?.email ||
+                p.author?.id === 'user-me' ||
+                (p.author?.name && userProfile?.name && p.author.name.trim().toLowerCase() === userProfile.name.trim().toLowerCase())
+              ).length}
+              userStreak={userProfile?.streak || 3}
+              userPoints={userProfile?.points || 50}
+            />
+          )}
+
+          {activeView === 'profile' && (
             <ProfileView
               posts={posts.filter(p => 
                 p.author?.id === currentUser?.email || 
@@ -1863,7 +1877,7 @@ function AppContent() {
               )}
               userProfile={userProfile}
               walletTransactions={walletTransactions}
-              initialTab={activeView === 'certificates' ? 'certificates' : profileInitialTab}
+              initialTab={profileInitialTab}
               onOpenMembershipCard={handleOpenMembershipCard}
               onRechargePoints={handleRechargePoints}
               onOpenCertificate={openCertificateModal}
@@ -2085,8 +2099,8 @@ function AppContent() {
         deferredPrompt={deferredPrompt}
       />
 
-      {/* Automatic In-App Push Notification Permission Prompt */}
-      <NotificationPermissionModal />
+      {/* Automatic In-App Push Notification Permission Banner (Non-intrusive & Permanent until dismissed) */}
+      <NotificationPermissionBanner />
 
       {/* Startup Animated Logo Splash Screen */}
       {showSplash && (
