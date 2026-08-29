@@ -1777,6 +1777,7 @@ function AppContent() {
               onOpenYouTubeTask={handleOpenYouTubeTask}
               onYouTubeVisit={handleYouTubeVisit}
               userProfile={userProfile}
+              currentUser={currentUser}
               requireAuth={requireAuth}
               setActiveView={handleNavigateView}
               activeFestivalTheme={activeFestivalTheme}

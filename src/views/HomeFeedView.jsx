@@ -28,6 +28,7 @@ export const HomeFeedView = ({
   onOpenYouTubeTask,
   onYouTubeVisit,
   userProfile,
+  currentUser,
   requireAuth,
   activeFestivalTheme,
   authorProfileMap
