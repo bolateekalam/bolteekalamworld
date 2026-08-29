@@ -803,7 +803,7 @@ function AppContent() {
       window.removeEventListener('popstate', handleHashRoute);
       window.removeEventListener('hashchange', handleHashRoute);
     };
-  }, [posts]);
+  }, []);
 
   const handleOpenPoetryChallenge = (targetAuthor) => {
     setPoetryChallengeTarget(targetAuthor);

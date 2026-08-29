@@ -803,22 +803,38 @@ export const HomeFeedView = ({
 
                 <div className="pt-2 border-t border-white/15 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 font-bold">
+                    <button
+                      onClick={() => onLikePost && onLikePost(post)}
+                      className="flex items-center gap-1 font-bold hover:scale-105 transition cursor-pointer"
+                    >
                       ❤️ {post.likes || 12}
-                    </span>
+                    </button>
                     <span className="flex items-center gap-1 font-bold text-slate-300">
                       💬 {post.comments?.length || 0}
                     </span>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      if (setActiveView) setActiveView('posterStudio');
-                    }}
-                    className="px-3 py-1.5 bg-white hover:bg-amber-100 text-slate-950 font-bold rounded-xl text-[11px] shadow flex items-center gap-1 transition cursor-pointer"
-                  >
-                    <span>📸 HD पोस्टर बनाएं</span>
-                  </button>
+                  {(() => {
+                    const isOwnPost = (currentUser && (post.author?.username === currentUser?.username || post.author?.email === currentUser?.email)) ||
+                                      (userProfile && (post.author?.username === userProfile?.username || post.author?.name === userProfile?.name));
+                    if (isOwnPost) {
+                      return (
+                        <button
+                          onClick={() => {
+                            if (setActiveView) setActiveView('posterStudio');
+                          }}
+                          className="px-3 py-1.5 bg-white hover:bg-amber-100 text-slate-950 font-bold rounded-xl text-[11px] shadow flex items-center gap-1 transition cursor-pointer"
+                        >
+                          <span>📸 HD पोस्टर बनाएं</span>
+                        </button>
+                      );
+                    }
+                    return (
+                      <span className="text-[10px] text-amber-200/90 font-serif">
+                        बोलती कलम प्रमाणित
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
             );
