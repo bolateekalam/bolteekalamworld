@@ -53,9 +53,7 @@ export const PWAInstallModal = ({ isOpen, onClose, deferredPrompt }) => {
               src="/logo.png" 
               alt="Bolti Kalam Logo" 
               className="w-full h-full object-contain rounded-xl" 
-              onError={(e) => { e.target.style.display = 'none'; }} 
             />
-            <span className="text-xl font-bold text-[#0e2238]">🪶</span>
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-base sm:text-lg font-black font-rozha text-slate-900 dark:text-slate-100 truncate">

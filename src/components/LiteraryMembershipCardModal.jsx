@@ -496,9 +496,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
                   src="/logo.png" 
                   alt="Logo" 
                   className="w-full h-full object-contain rounded-full" 
-                  onError={(e) => { e.target.style.display = 'none'; }} 
                 />
-                <span className="text-xl font-bold text-[#0e2238]">🪶</span>
               </div>
               <div>
                 <h4 className="text-lg sm:text-xl font-black font-rozha text-[#0e2238] leading-tight">बोलती कलम</h4>

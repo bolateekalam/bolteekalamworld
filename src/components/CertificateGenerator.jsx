@@ -463,8 +463,7 @@ export const CertificateGenerator = ({
           {/* Top Logo Emblem */}
           <div className="flex justify-center">
             <div className="w-14 h-14 rounded-full bg-white text-[#0e2238] flex items-center justify-center shadow-md border-2 border-amber-400 p-1">
-              <img src="/logo.png" alt="Bolti Kalam Logo" className="w-full h-full object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
-              <span className="text-xl font-bold">🪶</span>
+              <img src="/logo.png" alt="Bolti Kalam Logo" className="w-full h-full object-contain" />
             </div>
           </div>
 
