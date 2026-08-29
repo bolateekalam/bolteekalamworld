@@ -404,42 +404,42 @@ export const CertificateView = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 animate-in fade-in duration-300">
       
-      {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+      {/* Top Header Bar (100% Responsive Header & Switcher Row) */}
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-4 space-y-3">
         <div className="flex items-center gap-3">
           {setActiveView && (
             <button
               onClick={() => setActiveView('feed')}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer flex items-center gap-1.5 text-xs font-bold"
+              className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shrink-0 shadow-sm"
               title="मुख्य पृष्ठ पर वापस जाएं"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">होम (Home)</span>
+              <span>होम (Home)</span>
             </button>
           )}
-          <div>
-            <h1 className="text-lg sm:text-2xl font-black font-rozha text-[#0e2238] dark:text-amber-300 flex items-center gap-2">
-              <Award className="w-6 h-6 text-amber-500 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-2xl font-black font-rozha text-[#0e2238] dark:text-amber-300 flex items-center gap-2 truncate">
+              <Award className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 shrink-0" />
               <span>साहित्यिक सम्मान पत्र (E-Certificate)</span>
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-serif">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-serif truncate">
               लेखक: <strong className="text-slate-800 dark:text-slate-200">{userName}</strong> (@{cleanUsername}) • bolateeworld.in
             </p>
           </div>
         </div>
 
-        {/* Certificate Switcher Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
+        {/* Certificate Switcher Pills (Dedicated Scrollable Row) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-1">
           {certificatesList.map((cert) => (
             <button
               key={cert.id}
               onClick={() => setSelectedCert(cert)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 shadow-sm ${
                 selectedCert.id === cert.id
                   ? 'bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <span>📜</span>
