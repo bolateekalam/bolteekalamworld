@@ -895,10 +895,8 @@ function AppContent() {
   };
 
   const handleAddCommentToPost = (postId, commentObj) => {
-    if (!currentUser) {
-      setShowAuthModal(true);
-      return;
-    }
+    const effectiveUser = currentUser || userProfile || { name: 'साहित्य साधक', username: '@writer' };
+    
     // Save to persistent localStorage comments map
     try {
       const storedCommentsMap = localStorage.getItem('bolteekalam_saved_comments_v1');

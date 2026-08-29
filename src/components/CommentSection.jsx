@@ -4,10 +4,16 @@ import { useLanguage } from '../context/LanguageContext';
 
 export const CommentSection = ({ comments = [], userProfile, onAddComment, onReportComment, authorProfileMap }) => {
   const { t } = useLanguage();
-  const [commentList, setCommentList] = useState(comments);
+  const [commentList, setCommentList] = useState(comments || []);
   const [newCommentText, setNewCommentText] = useState('');
   const [replyingToId, setReplyingToId] = useState(null);
   const [replyText, setReplyText] = useState('');
+
+  React.useEffect(() => {
+    if (Array.isArray(comments)) {
+      setCommentList(comments);
+    }
+  }, [comments]);
 
   const handleSendComment = (e) => {
     e.preventDefault();
@@ -17,7 +23,7 @@ export const CommentSection = ({ comments = [], userProfile, onAddComment, onRep
       id: `c-${Date.now()}`,
       author: userProfile?.name || 'साहित्य साधक',
       authorEmail: userProfile?.email || '',
-      authorUsername: userProfile?.username || '',
+      authorUsername: userProfile?.username || '@writer',
       authorId: userProfile?.email || 'user-me',
       avatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
       content: newCommentText.trim(),
@@ -28,7 +34,7 @@ export const CommentSection = ({ comments = [], userProfile, onAddComment, onRep
       replies: []
     };
 
-    setCommentList([added, ...commentList]);
+    setCommentList(prev => [added, ...(prev || [])]);
     if (onAddComment) onAddComment(added);
     setNewCommentText('');
   };

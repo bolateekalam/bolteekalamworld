@@ -169,8 +169,32 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').then((reg) => {
             console.log('Bolti Kalam PWA ServiceWorker Registered:', reg.scope);
+            
+            // Check for updates on every page load
+            reg.update();
+
+            reg.onupdatefound = () => {
+              const installingWorker = reg.installing;
+              if (installingWorker) {
+                installingWorker.onstatechange = () => {
+                  if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('New Bolti Kalam version detected! Refreshing app...');
+                    window.location.reload();
+                  }
+                };
+              }
+            };
           }).catch((err) => {
-            console.warn('Bolti Kalam PWA ServiceWorker registration failed:', err);
+            console.warn('Bolti Kalam PWA ServiceWorker registration notice:', err);
+          });
+
+          // Reload when new worker takes control
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+              refreshing = true;
+              window.location.reload();
+            }
           });
         });
       }

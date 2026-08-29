@@ -1,5 +1,5 @@
-// Bolti Kalam PWA Service Worker with Zomato-style Background Push Notifications
-const CACHE_NAME = 'bolti-kalam-pwa-v3';
+// Bolti Kalam PWA Service Worker with Zomato-style Background Push Notifications & Immediate Auto-Update
+const CACHE_NAME = 'bolti-kalam-pwa-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -12,7 +12,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('PWA Cache Assets warning:', err);
+        console.warn('PWA Cache Assets notice:', err);
       });
     })
   );
@@ -37,14 +37,35 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+
+  // 🚀 Network-First for HTML navigation and JS/CSS chunks to ensure desktop & mobile PWA app always gets fresh code
+  if (event.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.includes('/assets/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate for images / static assets
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
+    caches.match(event.request).then((cached) => {
+      const fetchPromise = fetch(event.request).then((networkRes) => {
+        if (networkRes && networkRes.status === 200) {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkRes.clone()));
+        }
+        return networkRes;
+      }).catch(() => cached);
+      return cached || fetchPromise;
+    })
   );
 });
 
