@@ -945,24 +945,29 @@ export const PosterStudioView = ({
               )}
             </div>
 
-            {/* 🎨 Quick Layout Switcher inside Modal for Instant Live Preview */}
-            <div className="space-y-1.5 p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
-              <span className="text-[11px] font-bold text-amber-300 block">
-                🎨 लेआउट स्टाइल बदलें (Live Switch):
-              </span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            {/* 🎨 Interactive Layout Switcher inside Modal for Instant Live Preview */}
+            <div className="space-y-2 p-3.5 rounded-2xl bg-slate-950/80 border-2 border-amber-500/30 shadow-inner">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-amber-300 flex items-center gap-1.5">
+                  <Layers className="w-4 h-4 text-amber-400" />
+                  <span>🎨 यहाँ से लेआउट बदलकर देखें (Live Switch):</span>
+                </span>
+                <span className="text-[10px] text-slate-400">4 क्रिएटिव स्टाइल</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {PHOTO_LAYOUTS.map(layout => (
                   <button
                     key={layout.id}
                     onClick={() => setSelectedPhotoLayout(layout.id)}
-                    className={'py-2 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ' + (
+                    className={'py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-1 cursor-pointer text-center ' + (
                       selectedPhotoLayout === layout.id
-                        ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-300 font-black'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg ring-2 ring-amber-300 font-black scale-[1.02]'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 hover:border-amber-400/50'
                     )}
                   >
-                    <span>{layout.icon}</span>
-                    <span className="text-[11px] truncate">{layout.name.split(' ')[0]}</span>
+                    <span className="text-base">{layout.icon}</span>
+                    <span className="text-[11px] leading-tight font-extrabold">{layout.name}</span>
                   </button>
                 ))}
               </div>
