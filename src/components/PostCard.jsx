@@ -205,12 +205,12 @@ export const PostCard = ({
               {isFollowing ? (
                 <>
                   <UserCheck className="w-3.5 h-3.5" />
-                  <span>{t('actions.following')}</span>
+                  <span>{t('actions.following') !== 'actions.following' ? t('actions.following') : 'फॉलो कर रहे हैं'}</span>
                 </>
               ) : (
                 <>
                   <UserPlus className="w-3.5 h-3.5" />
-                  <span>{t('actions.follow')}</span>
+                  <span>{t('actions.follow') !== 'actions.follow' ? t('actions.follow') : 'फॉलो करें'}</span>
                 </>
               )}
             </button>

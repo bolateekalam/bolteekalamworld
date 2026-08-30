@@ -287,15 +287,15 @@ export const CertificateGenerator = ({
     const titleY = 760;
     const roleY = 785;
 
-    // 1. Sanjay Rai
+    // 1. Bolatee Board
     ctx.fillStyle = '#0f172a';
-    ctx.font = 'italic bold 22px serif';
-    ctx.fillText('Sanjay Rai', 130, signY);
+    ctx.font = 'italic bold 20px serif';
+    ctx.fillText('Bolatee Kalam', 120, signY);
     ctx.font = 'bold 15px serif';
-    ctx.fillText('संजय राय "साईं"', 130, titleY);
+    ctx.fillText('बोलती कलम मंडल', 120, titleY);
     ctx.fillStyle = '#64748b';
     ctx.font = '13px sans-serif';
-    ctx.fillText('संस्थापक', 150, roleY);
+    ctx.fillText('साहित्यिक परिषद', 130, roleY);
 
     // 2. Sandeep Sharma
     ctx.fillStyle = '#0f172a';
@@ -541,9 +541,9 @@ export const CertificateGenerator = ({
           {/* 5 Signatures Grid (Responsive & Balanced) */}
           <div className="pt-3 border-t border-slate-300 grid grid-cols-5 gap-1 text-center text-[10px]">
             <div className="space-y-0.5">
-              <span className="font-serif italic font-bold text-slate-800 block text-[11px] truncate">Sanjay Rai</span>
-              <span className="font-bold text-slate-900 block text-[10px] truncate">संजय राय</span>
-              <span className="text-[9px] text-slate-500 block truncate">संस्थापक</span>
+              <span className="font-serif italic font-bold text-slate-800 block text-[11px] truncate">Bolatee Kalam</span>
+              <span className="font-bold text-slate-900 block text-[10px] truncate">बोलती कलम</span>
+              <span className="text-[9px] text-slate-500 block truncate">साहित्यिक परिषद</span>
             </div>
 
             <div className="space-y-0.5">

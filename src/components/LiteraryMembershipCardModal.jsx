@@ -399,7 +399,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
     ctx.textAlign = 'right';
     ctx.fillStyle = '#fde68a';
     ctx.font = 'bold 19.5px serif';
-    ctx.fillText('✍️ प्रमाणित: संस्थापक संजय राय (Sanjay Rai)', 985, 1234);
+    ctx.fillText('✍️ प्रमाणित: बोलती कलम आधिकारिक साहित्यिक मंडल', 985, 1234);
 
     return canvas;
   };
@@ -591,7 +591,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
           {/* Signatures Footer */}
           <div className="flex items-center justify-between p-2.5 bg-[#0e2238] text-white rounded-xl text-xs flex-wrap gap-2">
             <span className="text-[11px] text-slate-300 font-medium">बोलती कलम (bolateeworld.in)</span>
-            <span className="font-bold font-rozha text-amber-300 text-xs sm:text-sm">✍️ प्रमाणित: संस्थापक संजय राय</span>
+            <span className="font-bold font-rozha text-amber-300 text-xs sm:text-sm">✍️ प्रमाणित: बोलती कलम आधिकारिक मंडल</span>
           </div>
 
         </div>

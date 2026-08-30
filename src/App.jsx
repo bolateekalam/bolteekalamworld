@@ -146,13 +146,14 @@ function AppContent() {
         return combined.filter(p => {
           if (!p || !p.id) return false;
           const pId = String(p.id);
+          if (pId === 'post-media-1' || p.author?.username === '@akash_cofounder' || p.author?.name?.includes('सह-संस्थापक') || p.author?.name?.includes('डिजिटल मीडिया')) return false;
           if (seenIds.has(pId)) return false;
           seenIds.add(pId);
           return true;
         });
       }
     } catch (e) {}
-    return mockPosts;
+    return mockPosts.filter(p => p && p.id !== 'post-media-1' && p.author?.username !== '@akash_cofounder');
   });
 
   // Weekly Challenge Global State
@@ -289,7 +290,7 @@ function AppContent() {
       {
         id: 102,
         type: 'comment',
-        title: 'संजय राय: "अद्भुत रचना!"',
+        title: 'काजल शर्मा: "अद्भुत रचना!"',
         desc: 'आपकी पोस्ट पर नया कमेंट प्राप्त हुआ।',
         time: '25 मिनट पहले',
         isUnread: true
@@ -321,8 +322,7 @@ function AppContent() {
   const authorProfileMap = React.useMemo(() => {
     const map = {};
 
-    map['sanjayrai'] = { name: 'संजय राय (संस्थापक)', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300' };
-    map['sanjayrai_founder'] = { name: 'संजय राय (संस्थापक)', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300' };
+    map['bolateeworld'] = { name: 'बोलती कलम (आधिकारिक)', avatar: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=300' };
 
     (posts || []).forEach(p => {
       const emailKey = p.author?.email ? p.author.email.toLowerCase().trim() : null;
@@ -356,6 +356,23 @@ function AppContent() {
 
     return map;
   }, [posts, userProfile, currentUser]);
+
+  // Purge legacy mock cofounder data from localStorage on mount
+  useEffect(() => {
+    try {
+      ['bolteekalam_global_shared_public_posts_v2', 'bolteekalam_user_created_posts', 'bolti_kalam_posts'].forEach(key => {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) {
+            const cleaned = arr.filter(p => p && p.id !== 'post-media-1' && p.author?.username !== '@akash_cofounder' && !p.author?.name?.includes('डिजिटल मीडिया') && !p.author?.name?.includes('सह-संस्थापक'));
+            localStorage.setItem(key, JSON.stringify(cleaned));
+          }
+        }
+      });
+      setPosts(prev => prev.filter(p => p && p.id !== 'post-media-1' && p.author?.username !== '@akash_cofounder' && !p.author?.name?.includes('डिजिटल मीडिया') && !p.author?.name?.includes('सह-संस्थापक')));
+    } catch (e) {}
+  }, []);
 
   // Load Posts from Supabase PostgreSQL Database on Mount & Listen to Supabase Realtime WebSocket
   useEffect(() => {
@@ -435,7 +452,7 @@ function AppContent() {
               return !dbIds.has(pIdStr) && !dbIds.has(cleanId) && !mergedDbFingerprints.has(fp);
             });
 
-            const finalPosts = [...unsyncedLocalPosts, ...mergedDbPosts];
+            const finalPosts = [...unsyncedLocalPosts, ...mergedDbPosts].filter(p => p && p.id !== 'post-media-1' && p.author?.username !== '@akash_cofounder' && !p.author?.name?.includes('डिजिटल मीडिया') && !p.author?.name?.includes('सह-संस्थापक'));
             try {
               localStorage.setItem('bolteekalam_global_shared_public_posts_v2', JSON.stringify(finalPosts));
             } catch (e) {}
@@ -759,13 +776,6 @@ function AppContent() {
             document.title = `${matchedPost.author.name} (@${usernameQuery}) — बोलती कलम`;
           } else {
             const mockWritersByUsername = {
-              'sanjayrai': {
-                name: 'संजय राय (संस्थापक)',
-                username: '@sanjayrai',
-                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
-                city: 'प्रयागराज',
-                bio: 'बोलती कलम साहित्य मंच के संस्थापक एवं वरिष्ठ साहित्यकार।'
-              },
               'bolateeworld': {
                 name: 'बोलती कलम (आधिकारिक)',
                 username: '@bolateeworld',

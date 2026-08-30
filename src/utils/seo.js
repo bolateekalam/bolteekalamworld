@@ -13,7 +13,7 @@ export const updatePageSEO = ({ title, description, canonicalUrl, ogImage }) => 
   }
 
   // 2. Update Meta Description
-  const defaultDesc = 'बोलती कलम (bolateeworld.in) - भारत का प्रमुख बहुभाषी डिजिटल साहित्यिक मंच। संस्थापक संजय राय के मार्गदर्शन में हिंदी कविताएँ, कहानियाँ, शायरी, ग़ज़ल पढ़ें और 6-माह नि:शुल्क सदस्यता कार्ड प्राप्त करें।';
+  const defaultDesc = 'बोलती कलम (bolateeworld.in) - भारत का प्रमुख बहुभाषी डिजिटल साहित्यिक मंच। हिंदी कविताएँ, कहानियाँ, शायरी, ग़ज़ल पढ़ें, लिखें और 6-माह नि:शुल्क सदस्यता कार्ड प्राप्त करें।';
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) {
     metaDesc.setAttribute('content', description || defaultDesc);

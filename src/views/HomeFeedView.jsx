@@ -40,7 +40,7 @@ export const HomeFeedView = ({
   // Interactive Duel Voting State in Feed
   const [duelVotes, setDuelVotes] = useState({ poetA: 64, poetB: 36, userVoted: null });
   
-  const publicActivePosts = posts.filter(p => !p.isArchived);
+  const publicActivePosts = posts.filter(p => p && !p.isArchived && p.id !== 'post-media-1' && p.author?.username !== '@akash_cofounder' && !p.author?.name?.includes('डिजिटल मीडिया') && !p.author?.name?.includes('सह-संस्थापक'));
 
   // Category Filtered
   const categoryFiltered = selectedCategory === 'all' 

@@ -37,7 +37,7 @@ export const PoetryBattleChallengeModal = ({
 
     // Default fallback real authors if list empty
     if (list.size === 0) {
-      list.set('संजय राय (संस्थापक)', { name: 'संजय राय (संस्थापक)', username: '@sanjayrai_founder' });
+      list.set('बोलती कलम (आधिकारिक)', { name: 'बोलती कलम (आधिकारिक)', username: '@bolateeworld' });
       list.set('अनामिका अंबर (कवयित्री)', { name: 'अनामिका अंबर (कवयित्री)', username: '@anamika_amber' });
     }
 
@@ -45,7 +45,7 @@ export const PoetryBattleChallengeModal = ({
   }, [registeredUsers, posts, currentUser]);
 
   const [selectedOpponentName, setSelectedOpponentName] = useState(
-    targetAuthor?.name || realUsersList[0]?.name || 'संजय राय (संस्थापक)'
+    targetAuthor?.name || realUsersList[0]?.name || 'बोलती कलम (आधिकारिक)'
   );
   const [battleTopic, setBattleTopic] = useState('80वाँ स्वतंत्रता दिवस — 1-on-1 काव्य संग्राम');
   const [poemTitle, setPoemTitle] = useState('');

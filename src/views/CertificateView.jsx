@@ -330,7 +330,7 @@ export const CertificateView = ({
     // 9. Signatures (5 Dignitaries)
     const signColX = [200, 400, 600, 800, 1000];
     const dignitaryData = [
-      { eng: 'Sanjay Rai', hi: 'संजय राय', role: 'संस्थापक' },
+      { eng: 'Bolatee Kalam', hi: 'बोलती कलम', role: 'साहित्यिक परिषद' },
       { eng: 'Sandeep Sharma', hi: 'संदीप शर्मा', role: 'उपाध्यक्ष' },
       { eng: 'R. D. Gautam', hi: 'आर.डी. गौतम', role: 'उपाध्यक्ष' },
       { eng: 'Pushpa Pathak', hi: 'पुष्पा पाठक', role: 'संरक्षक' },
@@ -536,9 +536,9 @@ export const CertificateView = ({
         {/* 5 Signatures Grid */}
         <div className="pt-4 border-t border-slate-300 grid grid-cols-5 gap-1 text-center text-[10px] sm:text-xs">
           <div className="space-y-0.5">
-            <span className="font-serif italic font-bold text-slate-800 block text-[11px] sm:text-xs truncate">Sanjay Rai</span>
-            <span className="font-bold text-slate-900 block text-[10px] sm:text-xs truncate">संजय राय</span>
-            <span className="text-[9px] text-slate-500 block truncate">संस्थापक</span>
+            <span className="font-serif italic font-bold text-slate-800 block text-[11px] sm:text-xs truncate">Bolatee Kalam</span>
+            <span className="font-bold text-slate-900 block text-[10px] sm:text-xs truncate">बोलती कलम</span>
+            <span className="text-[9px] text-slate-500 block truncate">साहित्यिक परिषद</span>
           </div>
 
           <div className="space-y-0.5">

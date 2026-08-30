@@ -13,23 +13,23 @@ export const mockCategories = [
 
 export const mockPosts = [
   {
-    id: 'post-founder-1',
+    id: 'post-official-1',
     author: {
-      id: 'author-sanjayrai',
-      name: 'संजय राय (संस्थापक)',
-      username: '@sanjayrai_founder',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
-      badge: 'founder',
+      id: 'author-bolatee',
+      name: 'बोलती कलम (आधिकारिक मंच)',
+      username: '@bolateeworld',
+      avatar: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=200',
+      badge: 'official',
       city: 'प्रयागराज',
       followers: 1250,
       isFollowing: true
     },
     title: 'बोलती कलम की साहित्यिक दुनिया में आपका हार्दिक स्वागत है!',
     category: 'lekh',
-    content: `शब्द ही चेतना हैं और शब्द ही संस्कृति के सच्चे संवाहक हैं। 'बोलती कलम' की इस पावन साहित्यिक दुनिया में आप सभी कवियों, लेखकों व साहित्यप्रेमी पाठकों का मैं, संजय राय (संस्थापक), हृदय से स्वागत करता हूँ।
+    content: `शब्द ही चेतना हैं और शब्द ही संस्कृति के सच्चे संवाहक हैं। 'बोलती कलम' की इस पावन साहित्यिक दुनिया में आप सभी कवियों, लेखकों व साहित्यप्रेमी पाठकों का हार्दिक स्वागत है।
 
 हमारा संकल्प हर उस रचनाकार को एक निडर व स्वतंत्र मंच प्रदान करना है, जिसकी लेखनी में समाज को नई दिशा देने का सामर्थ्य है। आइए मिलकर साहित्य के इस महायज्ञ में अपनी पंक्तियों की आहुति दें!`,
-    tags: ['संस्थापकसंदेश', 'बोलतीकलम', 'संजयराय', 'स्वागत'],
+    tags: ['साहित्यमंच', 'बोलतीकलम', 'हिंदीसाहित्य', 'स्वागत'],
     likes: 540,
     isLiked: true,
     bookmarks: 180,
@@ -60,8 +60,8 @@ export const mockPoetryBattle = {
   endsIn: '08:15:00',
   poet1: {
     id: 'poet-a',
-    name: 'संजय राय (संस्थापक)',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
+    name: 'डॉ. कुमार विश्वास (कवि)',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200',
     title: 'माटी का स्वाभिमान (वीर रस)',
     lines: `रणचंडी का आह्वान सुनो, संहार धनुष पर बाण सुनो!
 अरि शीश काटने आये हैं, भारत माँ का स्वाभिमान सुनो!!

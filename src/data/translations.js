@@ -17,6 +17,13 @@ export const translations = {
       createPost: "नई रचना लिखें",
       referEarn: "रेफ़र एवं अर्न"
     },
+    actions: {
+      follow: "फॉलो करें",
+      following: "फॉलो कर रहे हैं",
+      share: "शेयर करें",
+      like: "पसंद",
+      save: "सहेजें"
+    },
     profile: {
       editProfile: "प्रोफ़ाइल संपादित करें",
       name: "पूरा नाम",
@@ -221,6 +228,13 @@ export const translations = {
       profile: "My Profile",
       createPost: "Write New Post",
       referEarn: "Refer & Earn"
+    },
+    actions: {
+      follow: "Follow",
+      following: "Following",
+      share: "Share",
+      like: "Like",
+      save: "Save"
     },
     profile: {
       editProfile: "Edit Profile",

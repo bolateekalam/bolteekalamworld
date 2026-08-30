@@ -310,7 +310,7 @@ export const EditProfileModal = ({ isOpen, onClose, userProfile, onSaveProfile }
                         ? 'border-rose-500 ring-1 ring-rose-500/30'
                         : 'border-slate-200 dark:border-slate-700'
                     }`}
-                    placeholder="उदा. kajal या sanjayrai"
+                    placeholder="उदा. akash_kavi या writer_kavi"
                     required
                   />
                 </div>
