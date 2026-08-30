@@ -501,26 +501,39 @@ export const PosterStudioView = ({
     setSharing(true);
     try {
       const canvas = await generatePosterCanvas();
-      const shareText = '📜 bolateeworld.in पर मेरा नया 4:5 कवि पोस्टर: "' + title + '" by ' + fixedAuthorName;
+      const displayTitle = title.trim() || 'मेरी रचना';
+      const displayContent = content.trim() || '';
+      const shareText = '📜 *' + displayTitle + '*\n\n"' + displayContent + '"\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BoltiKalam';
       
       canvas.toBlob(async (blob) => {
         if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], 'poster.png', { type: 'image/png' })] })) {
           try {
             await navigator.share({
               files: [new File([blob], 'poster.png', { type: 'image/png' })],
-              title: title,
+              title: displayTitle,
               text: shareText
             });
             setSharing(false);
             return;
           } catch (e) {}
         }
-        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText + '\nhttps://bolateeworld.in'), '_blank');
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText), '_blank');
         setSharing(false);
       }, 'image/png');
     } catch (e) {
       setSharing(false);
     }
+  };
+
+  // Handle Copy Formatted Poem & Website Link Caption
+  const handleCopyCaption = () => {
+    const displayTitle = title.trim() || 'आपकी रचना का शीर्षक';
+    const displayContent = content.trim() || 'यहाँ आपकी कविता / शायरी की पंक्तियाँ प्रदर्शित होंगी।';
+    const captionText = '✨ *' + displayTitle + '* ✨\n\n' + displayContent + '\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolti Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BoltiKalam #HindiPoetry #Poetry #WritersCommunity';
+
+    navigator.clipboard.writeText(captionText);
+    setCopiedCaption(true);
+    setTimeout(() => setCopiedCaption(false), 3000);
   };
 
   // Handle Publish Directly to Feed
@@ -859,6 +872,14 @@ export const PosterStudioView = ({
             </button>
 
             <button
+              onClick={handleCopyCaption}
+              className="w-full py-3 px-4 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-900 dark:text-amber-200 font-bold rounded-2xl text-xs sm:text-sm border border-amber-300 dark:border-amber-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+            >
+              <Check className={'w-4 h-4 ' + (copiedCaption ? 'text-emerald-600' : 'text-amber-600')} />
+              <span>{copiedCaption ? '✓ कविता व वेबसाइट लिंक कॉपी हुआ!' : '📋 कविता + वेबसाइट लिंक कॉपी करें'}</span>
+            </button>
+
+            <button
               onClick={handlePublishToFeed}
               disabled={downloading}
               className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-800 dark:text-indigo-300 font-bold rounded-2xl text-xs sm:text-sm border border-indigo-300 dark:border-indigo-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
@@ -934,7 +955,15 @@ export const PosterStudioView = ({
                 className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <Download className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>{downloading ? 'डाउनलोड हो रहा है...' : '📥 HD पोस्टर डाउनलोड करें (Free PNG)'}</span>
+                <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें (Free PNG)'}</span>
+              </button>
+
+              <button
+                onClick={handleCopyCaption}
+                className="w-full py-2.5 px-3 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 font-bold rounded-2xl text-xs border border-amber-700 shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+              >
+                <Check className={'w-3.5 h-3.5 ' + (copiedCaption ? 'text-emerald-400' : 'text-amber-400')} />
+                <span>{copiedCaption ? '✓ कविता व वेबसाइट लिंक कॉपी हुआ!' : '📋 कविता + वेबसाइट लिंक कॉपी करें'}</span>
               </button>
 
               <div className="grid grid-cols-2 gap-2">
