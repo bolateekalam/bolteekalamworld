@@ -877,7 +877,7 @@ export const PosterStudioView = ({
               className="w-full py-3 px-4 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-900 dark:text-amber-200 font-bold rounded-2xl text-xs sm:text-sm border border-amber-300 dark:border-amber-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
             >
               <Check className={'w-4 h-4 ' + (copiedCaption ? 'text-emerald-600' : 'text-amber-600')} />
-              <span>{copiedCaption ? '✓ कविता व वेबसाइट लिंक कॉपी हुआ!' : '📋 कविता + वेबसाइट लिंक कॉपी करें'}</span>
+              <span>{copiedCaption ? '✓ कॉपी हुआ!' : '📋 कविता लिंक कॉपी करें'}</span>
             </button>
 
             <button
@@ -886,7 +886,7 @@ export const PosterStudioView = ({
               className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-800 dark:text-indigo-300 font-bold rounded-2xl text-xs sm:text-sm border border-indigo-300 dark:border-indigo-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
               <Feather className="w-4 h-4 text-indigo-600 shrink-0" />
-              <span>मंच पर HD पोस्टर प्रकाशित करें</span>
+              <span>मंच पर प्रकाशित करें</span>
             </button>
           </div>
 
@@ -901,7 +901,7 @@ export const PosterStudioView = ({
           className="w-full py-3.5 px-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-2xl flex items-center justify-center gap-2 border border-white/20 active:scale-95 transition cursor-pointer"
         >
           <Eye className="w-4 h-4 text-amber-300" />
-          <span>👁️ बड़ा पोस्टर प्रिव्यू & डाउनलोड देखें</span>
+          <span>👁️ बड़ा प्रिव्यू & डाउनलोड</span>
         </button>
       </div>
 
@@ -916,9 +916,9 @@ export const PosterStudioView = ({
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 <div>
                   <h3 className="text-base font-bold font-rozha text-amber-200">
-                    HD कवि पोस्टर प्रिव्यू
+                    HD पोस्टर प्रिव्यू
                   </h3>
-                  <span className="text-[10px] text-slate-400">बोलती कलम डिजिटल प्रमाणन</span>
+                  <span className="text-[10px] text-slate-400">बोलती कलम डिजिटल</span>
                 </div>
               </div>
 
@@ -945,6 +945,29 @@ export const PosterStudioView = ({
               )}
             </div>
 
+            {/* 🎨 Quick Layout Switcher inside Modal for Instant Live Preview */}
+            <div className="space-y-1.5 p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
+              <span className="text-[11px] font-bold text-amber-300 block">
+                🎨 लेआउट स्टाइल बदलें (Live Switch):
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                {PHOTO_LAYOUTS.map(layout => (
+                  <button
+                    key={layout.id}
+                    onClick={() => setSelectedPhotoLayout(layout.id)}
+                    className={'py-2 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ' + (
+                      selectedPhotoLayout === layout.id
+                        ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-300 font-black'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                    )}
+                  >
+                    <span>{layout.icon}</span>
+                    <span className="text-[11px] truncate">{layout.name.split(' ')[0]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Modal Action Buttons */}
             <div className="space-y-2 pt-1">
               <button
@@ -956,7 +979,7 @@ export const PosterStudioView = ({
                 className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <Download className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें (Free PNG)'}</span>
+                <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें'}</span>
               </button>
 
               <button
