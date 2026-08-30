@@ -128,6 +128,7 @@ export const PosterStudioView = ({
   const [sharing, setSharing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [copiedCaption, setCopiedCaption] = useState(false);
 
   const fileInputRef = useRef(null);
 
