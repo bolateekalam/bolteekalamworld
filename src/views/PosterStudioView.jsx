@@ -575,10 +575,10 @@ export const PosterStudioView = ({
       </div>
 
       {/* 2-Column Studio Grid: Controls on Left, Live 4:5 Preview on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         
-        {/* Left Controls (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
+        {/* Left Controls (7 cols on XL screens, full width on laptop/tablet) */}
+        <div className="xl:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
           
           {/* 1. Photo Selection & Upload */}
           <div className="p-3.5 sm:p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
@@ -590,7 +590,7 @@ export const PosterStudioView = ({
               {uploadedPhotoUrl ? (
                 <button
                   onClick={() => setUploadedPhotoUrl(null)}
-                  className="text-[10px] text-rose-600 font-bold hover:underline"
+                  className="text-[10px] text-rose-600 font-bold hover:underline cursor-pointer"
                 >
                   प्रोफ़ाइल फोटो पर रीसेट करें
                 </button>
@@ -645,7 +645,7 @@ export const PosterStudioView = ({
                   onClick={() => setSelectedPhotoLayout(layout.id)}
                   className={'p-3 rounded-2xl border text-left transition cursor-pointer ' + (
                     selectedPhotoLayout === layout.id
-                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-400/40 font-bold'
+                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-400/40 font-bold shadow-sm'
                       : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
                   )}
                 >
@@ -659,25 +659,25 @@ export const PosterStudioView = ({
             </div>
           </div>
 
-          {/* 3. Color Palettes (Fully Responsive Non-Truncating Grid) */}
+          {/* 3. Color Palettes (Never Truncated - Full Beautiful Hindi Labels) */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <Palette className="w-4 h-4 text-rose-600" />
               <span>3. रंग एवं थीम पैलेट (Theme Palette)</span>
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {THEMES.map(t => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedThemeId(t.id)}
-                  className={'px-2.5 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between gap-1 shadow-sm ' + (
+                  className={'px-3 py-2.5 rounded-2xl border text-xs font-bold transition cursor-pointer flex items-center justify-between gap-1.5 shadow-sm text-left ' + (
                     selectedThemeId === t.id
-                      ? 'border-amber-500 ring-2 ring-amber-500/40'
+                      ? 'border-amber-500 ring-2 ring-amber-500/40 shadow scale-[1.02]'
                       : 'border-slate-200 dark:border-slate-700 hover:scale-[1.02]'
                   )}
                   style={{ backgroundColor: t.bg2, color: t.title }}
                 >
-                  <span className="whitespace-nowrap overflow-hidden text-ellipsis">{t.name}</span>
+                  <span className="text-xs font-bold leading-snug">{t.name}</span>
                   {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0" />}
                 </button>
               ))}
@@ -720,13 +720,13 @@ export const PosterStudioView = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFontSizeRatio('medium')}
-                className={'px-3 py-1 rounded-xl text-xs font-bold ' + (fontSizeRatio === 'medium' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
+                className={'px-3 py-1 rounded-xl text-xs font-bold cursor-pointer ' + (fontSizeRatio === 'medium' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
               >
                 मध्यम (Medium)
               </button>
               <button
                 onClick={() => setFontSizeRatio('large')}
-                className={'px-3 py-1 rounded-xl text-xs font-bold ' + (fontSizeRatio === 'large' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
+                className={'px-3 py-1 rounded-xl text-xs font-bold cursor-pointer ' + (fontSizeRatio === 'large' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
               >
                 बड़ा (Large)
               </button>
@@ -735,15 +735,15 @@ export const PosterStudioView = ({
 
         </div>
 
-        {/* Right Live 4:5 Canvas Preview (5 cols, sticky on desktop) */}
-        <div className="lg:col-span-5 lg:sticky lg:top-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 text-center">
+        {/* Right Live 4:5 Canvas Preview (5 cols on XL, sticky) */}
+        <div className="xl:col-span-5 xl:sticky xl:top-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 text-center">
           
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <Eye className="w-4 h-4 text-emerald-500" />
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-2">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 whitespace-nowrap">
+              <Eye className="w-4 h-4 text-emerald-500 shrink-0" />
               <span>लाइव 4:5 पोस्टर प्रिव्यू</span>
             </span>
-            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800 whitespace-nowrap">
               1080x1350px HD
             </span>
           </div>
@@ -777,10 +777,10 @@ export const PosterStudioView = ({
 
           <button
             onClick={() => previewUrl && setShowPreviewModal(true)}
-            className="w-full py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer border border-slate-200 dark:border-slate-700"
+            className="w-full py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-200 dark:border-slate-700"
           >
-            <Eye className="w-3.5 h-3.5 text-amber-500" />
-            <span>🔍 बड़ा HD प्रिव्यू पॉपअप खोलें</span>
+            <Eye className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>बड़ा HD प्रिव्यू पॉपअप खोलें</span>
           </button>
 
           {/* Action Buttons (100% Padded & Responsive) */}
@@ -791,7 +791,7 @@ export const PosterStudioView = ({
               className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
               <Download className="w-4 h-4 text-amber-300 shrink-0" />
-              <span>{downloading ? 'डाउनलोड हो रहा है...' : '📥 HD पोस्टर डाउनलोड करें (Free PNG)'}</span>
+              <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें (Free PNG)'}</span>
             </button>
 
             <button
@@ -800,7 +800,7 @@ export const PosterStudioView = ({
               className="w-full py-3 px-4 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 font-bold rounded-2xl text-xs sm:text-sm border border-emerald-300 dark:border-emerald-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
               <Share2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>📲 WhatsApp पर शेयर करें</span>
+              <span>WhatsApp पर शेयर करें</span>
             </button>
 
             <button
@@ -809,7 +809,7 @@ export const PosterStudioView = ({
               className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-800 dark:text-indigo-300 font-bold rounded-2xl text-xs sm:text-sm border border-indigo-300 dark:border-indigo-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
               <Feather className="w-4 h-4 text-indigo-600 shrink-0" />
-              <span>📝 मंच पर HD पोस्टर प्रकाशित करें</span>
+              <span>मंच पर HD पोस्टर प्रकाशित करें</span>
             </button>
           </div>
 
@@ -818,7 +818,7 @@ export const PosterStudioView = ({
       </div>
 
       {/* Mobile Sticky Quick Preview Trigger */}
-      <div className="lg:hidden sticky bottom-4 z-30 pt-2">
+      <div className="xl:hidden sticky bottom-4 z-30 pt-2">
         <button
           onClick={() => previewUrl && setShowPreviewModal(true)}
           className="w-full py-3.5 px-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-2xl flex items-center justify-center gap-2 border border-white/20 active:scale-95 transition cursor-pointer"
