@@ -589,14 +589,11 @@ export const PosterStudioView = ({
         </div>
       </div>
 
-      {/* 2-Column Studio Grid: Controls on Left, Live Preview on Right */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      {/* Studio Card: Clean full-width creation studio */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
         
-        {/* Left Controls (7 cols on XL screens, full width on laptop/tablet) */}
-        <div className="xl:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
-          
-          {/* 1. Photo Selection & Upload */}
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
+        {/* 1. Photo Selection & Upload */}
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
                 <Camera className="w-4 h-4 text-indigo-600" />
@@ -802,108 +799,47 @@ export const PosterStudioView = ({
             </div>
           </div>
 
-        </div>
-
-        {/* Right Live Canvas Preview (5 cols on XL, sticky) */}
-        <div className="xl:col-span-5 xl:sticky xl:top-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 text-center">
-          
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-2">
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 whitespace-nowrap">
-              <Eye className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>लाइव पोस्टर प्रिव्यू</span>
-            </span>
-            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800 whitespace-nowrap">
-              HD क्वालिटी
-            </span>
-          </div>
-
-          {/* Preview Canvas Container (Click to Open Popup) */}
-          <div 
-            onClick={() => previewUrl && setShowPreviewModal(true)}
-            className="group relative mx-auto rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-300 dark:border-slate-700 bg-slate-950 flex items-center justify-center aspect-[4/5] max-w-[340px] sm:max-w-[380px] w-full cursor-pointer transition hover:scale-[1.01]"
-            title="बड़ा HD प्रिव्यू देखने के लिए क्लिक करें"
-          >
-            {previewUrl ? (
-              <>
-                <img 
-                  src={previewUrl} 
-                  alt="Poster Preview" 
-                  className="w-full h-full object-contain"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-1.5 text-white backdrop-blur-[2px]">
-                  <Eye className="w-8 h-8 text-amber-300 animate-bounce" />
-                  <span className="text-xs font-black bg-slate-950/80 px-3 py-1 rounded-full border border-amber-400">
-                    🔍 बड़ा प्रिव्यू देखें (Popup)
-                  </span>
-                </div>
-              </>
-            ) : (
-              <div className="p-8 text-slate-400 text-xs font-bold">
-                पोस्टर तैयार हो रहा है...
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={() => previewUrl && setShowPreviewModal(true)}
-            className="w-full py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-200 dark:border-slate-700"
-          >
-            <Eye className="w-4 h-4 text-amber-500 shrink-0" />
-            <span>बड़ा HD प्रिव्यू पॉपअप खोलें</span>
-          </button>
-
-          {/* Action Buttons (100% Padded & Responsive) */}
-          <div className="space-y-2.5 pt-1">
+          {/* 🌟 Master Action Button: Open HD Preview & Layout Switcher Modal */}
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
             <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              onClick={() => setShowPreviewModal(true)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-amber-500 via-rose-600 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-black rounded-2xl text-sm sm:text-base shadow-xl flex items-center justify-center gap-2.5 transition active:scale-98 cursor-pointer"
             >
-              <Download className="w-4 h-4 text-amber-300 shrink-0" />
-              <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें'}</span>
+              <Eye className="w-5 h-5 text-amber-200 shrink-0 animate-pulse" />
+              <span>👁️ HD पोस्टर प्रिव्यू देखें & लेआउट बदलें</span>
             </button>
 
-            <button
-              onClick={handleWhatsAppShare}
-              disabled={sharing}
-              className="w-full py-3 px-4 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 font-bold rounded-2xl text-xs sm:text-sm border border-emerald-300 dark:border-emerald-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
-            >
-              <Share2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>WhatsApp पर शेयर करें</span>
-            </button>
+            {/* Secondary Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-2xl text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <Download className="w-4 h-4 text-amber-300 shrink-0" />
+                <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड'}</span>
+              </button>
 
-            <button
-              onClick={handleCopyCaption}
-              className="w-full py-3 px-4 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-900 dark:text-amber-200 font-bold rounded-2xl text-xs sm:text-sm border border-amber-300 dark:border-amber-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-            >
-              <Check className={'w-4 h-4 ' + (copiedCaption ? 'text-emerald-600' : 'text-amber-600')} />
-              <span>{copiedCaption ? '✓ कॉपी हुआ!' : '📋 कविता लिंक कॉपी करें'}</span>
-            </button>
+              <button
+                onClick={handleWhatsAppShare}
+                disabled={sharing}
+                className="py-3 px-4 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 font-bold rounded-2xl text-xs border border-emerald-300 dark:border-emerald-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <Share2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>WhatsApp शेयर</span>
+              </button>
 
-            <button
-              onClick={handlePublishToFeed}
-              disabled={downloading}
-              className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-800 dark:text-indigo-300 font-bold rounded-2xl text-xs sm:text-sm border border-indigo-300 dark:border-indigo-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
-            >
-              <Feather className="w-4 h-4 text-indigo-600 shrink-0" />
-              <span>मंच पर प्रकाशित करें</span>
-            </button>
+              <button
+                onClick={handleCopyCaption}
+                className="py-3 px-4 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-900 dark:text-amber-200 font-bold rounded-2xl text-xs border border-amber-300 dark:border-amber-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+              >
+                <Check className={'w-4 h-4 ' + (copiedCaption ? 'text-emerald-600' : 'text-amber-600')} />
+                <span>{copiedCaption ? '✓ कॉपी हुआ!' : 'कैप्शन कॉपी करें'}</span>
+              </button>
+            </div>
           </div>
 
         </div>
-
-      </div>
-
-      {/* Mobile Sticky Quick Preview Trigger */}
-      <div className="xl:hidden sticky bottom-4 z-30 pt-2">
-        <button
-          onClick={() => previewUrl && setShowPreviewModal(true)}
-          className="w-full py-3.5 px-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-2xl flex items-center justify-center gap-2 border border-white/20 active:scale-95 transition cursor-pointer"
-        >
-          <Eye className="w-4 h-4 text-amber-300" />
-          <span>👁️ बड़ा प्रिव्यू & डाउनलोड</span>
-        </button>
-      </div>
 
       {/* 🌟 Fullscreen / Large Poster Preview Popup Modal */}
       {showPreviewModal && (
