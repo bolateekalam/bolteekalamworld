@@ -54,7 +54,7 @@ export const FestivalView = ({ setActiveView, activeFestivalTheme }) => {
           <div className="p-5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-2 text-indigo-900 dark:text-indigo-300">
             <div className="text-3xl">🪶</div>
             <h3 className="font-extrabold text-sm">मोरपंख & दिव्य स्वर्ण बॉर्डर</h3>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400">अपनी फोटो के साथ जन्माष्टमी का भव्य HD पोस्टर 4:5 साइज़ में बनाएँ।</p>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400">अपनी फोटो के साथ जन्माष्टमी का भव्य HD पोस्टर बनाएँ।</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2 text-amber-900 dark:text-amber-300">

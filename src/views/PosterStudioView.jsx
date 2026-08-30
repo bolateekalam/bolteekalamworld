@@ -571,13 +571,13 @@ export const PosterStudioView = ({
         <div className="space-y-1 text-center sm:text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-400/30">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>कवि पोस्टर Studio (4:5 HD)</span>
+            <span>कवि पोस्टर Studio (HD)</span>
           </div>
           <h2 className="text-xl sm:text-3xl font-black font-rozha text-amber-200">
             कवि इमेज़ पोस्टर बनाएँ
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 font-serif">
-            अपनी फोटो और रचना के साथ 4 आकर्षक लेआउट में 4:5 HD पोस्टर तैयार करें।
+            अपनी फोटो और रचना के साथ 4 आकर्षक लेआउट में HD पोस्टर तैयार करें।
           </p>
         </div>
 
@@ -588,7 +588,7 @@ export const PosterStudioView = ({
         </div>
       </div>
 
-      {/* 2-Column Studio Grid: Controls on Left, Live 4:5 Preview on Right */}
+      {/* 2-Column Studio Grid: Controls on Left, Live Preview on Right */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         
         {/* Left Controls (7 cols on XL screens, full width on laptop/tablet) */}
@@ -650,7 +650,6 @@ export const PosterStudioView = ({
                 <Layers className="w-4 h-4 text-amber-500" />
                 <span>2. फोटो लेआउट डिज़ाइन चुनें (4 क्रिएटिव विकल्प)</span>
               </span>
-              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">4:5 साइज़</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PHOTO_LAYOUTS.map(layout => (
@@ -804,16 +803,16 @@ export const PosterStudioView = ({
 
         </div>
 
-        {/* Right Live 4:5 Canvas Preview (5 cols on XL, sticky) */}
+        {/* Right Live Canvas Preview (5 cols on XL, sticky) */}
         <div className="xl:col-span-5 xl:sticky xl:top-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 text-center">
           
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-2">
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 whitespace-nowrap">
               <Eye className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>लाइव 4:5 पोस्टर प्रिव्यू</span>
+              <span>लाइव पोस्टर प्रिव्यू</span>
             </span>
             <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800 whitespace-nowrap">
-              1080x1350px HD
+              HD क्वालिटी
             </span>
           </div>
 
@@ -860,7 +859,7 @@ export const PosterStudioView = ({
               className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
               <Download className="w-4 h-4 text-amber-300 shrink-0" />
-              <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें (Free PNG)'}</span>
+              <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें'}</span>
             </button>
 
             <button
@@ -901,11 +900,11 @@ export const PosterStudioView = ({
           className="w-full py-3.5 px-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-2xl flex items-center justify-center gap-2 border border-white/20 active:scale-95 transition cursor-pointer"
         >
           <Eye className="w-4 h-4 text-amber-300" />
-          <span>👁️ 4:5 पोस्टर प्रिव्यू & डाउनलोड पॉपअप देखें</span>
+          <span>👁️ बड़ा पोस्टर प्रिव्यू & डाउनलोड देखें</span>
         </button>
       </div>
 
-      {/* 🌟 Fullscreen / Large 4:5 Poster Preview Popup Modal */}
+      {/* 🌟 Fullscreen / Large Poster Preview Popup Modal */}
       {showPreviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto text-white">
@@ -916,9 +915,9 @@ export const PosterStudioView = ({
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 <div>
                   <h3 className="text-base font-bold font-rozha text-amber-200">
-                    4:5 HD कवि पोस्टर प्रिव्यू
+                    HD कवि पोस्टर प्रिव्यू
                   </h3>
-                  <span className="text-[10px] text-slate-400">1080x1350px • बोलती कलम डिजिटल प्रमाणन</span>
+                  <span className="text-[10px] text-slate-400">बोलती कलम डिजिटल प्रमाणन</span>
                 </div>
               </div>
 

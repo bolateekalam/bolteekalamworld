@@ -270,11 +270,11 @@ export const HomeFeedView = ({
       ctx.textAlign = 'center';
       ctx.fillStyle = '#64748b';
       ctx.font = '18px sans-serif';
-      ctx.fillText('बोलती कलम ऐप • bolateeworld.in (4:5 HD)', 540, 1260);
+      ctx.fillText('बोलती कलम ऐप • bolateeworld.in (HD)', 540, 1260);
 
       // Download image
       const link = document.createElement('a');
-      link.download = 'BolateeKalam_Poster_4_5_' + Date.now() + '.png';
+      link.download = 'BolateeKalam_Poster_' + Date.now() + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
 
@@ -506,7 +506,7 @@ export const HomeFeedView = ({
                 className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <Download className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                <span>{generatingStatusImg ? 'पोस्टर तैयार हो रहा है...' : '4:5 HD काव्य पोस्टर बनाएं (PNG)'}</span>
+                <span>{generatingStatusImg ? 'पोस्टर तैयार हो रहा है...' : 'काव्य पोस्टर डाउनलोड करें'}</span>
               </button>
 
               <button
@@ -521,7 +521,7 @@ export const HomeFeedView = ({
             {statusImageSuccess && (
               <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" />
-                <span>4:5 HD काव्य पोस्टर डाउनलोड हुआ!</span>
+                <span>काव्य पोस्टर डाउनलोड हुआ!</span>
               </span>
             )}
 
