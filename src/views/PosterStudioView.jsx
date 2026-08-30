@@ -549,7 +549,7 @@ export const PosterStudioView = ({
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-in fade-in duration-300">
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-5 sm:space-y-6 animate-in fade-in duration-300">
       
       {/* Studio Header */}
       <div className="p-5 sm:p-7 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -567,21 +567,21 @@ export const PosterStudioView = ({
         </div>
 
         {/* User Points Badge */}
-        <div className="p-3 px-5 rounded-2xl bg-white/10 backdrop-blur-md border border-amber-400/30 text-amber-300 text-center shrink-0">
+        <div className="p-3 px-5 rounded-2xl bg-white/10 backdrop-blur-md border border-amber-400/30 text-amber-300 text-center shrink-0 shadow-inner">
           <span className="text-[10px] text-slate-300 uppercase block font-bold">रिवॉर्ड वॉलेट</span>
           <span className="text-xl sm:text-2xl font-black">{userPoints} Pts</span>
         </div>
       </div>
 
       {/* 2-Column Studio Grid: Controls on Left, Live 4:5 Preview on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
         
         {/* Left Controls (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
           
           {/* 1. Photo Selection & Upload */}
-          <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
                 <Camera className="w-4 h-4 text-indigo-600" />
                 <span>1. कवि की फोटो (Photo Selection)</span>
@@ -658,7 +658,7 @@ export const PosterStudioView = ({
             </div>
           </div>
 
-          {/* 3. Color Palettes */}
+          {/* 3. Color Palettes (Fully Responsive Non-Truncating Grid) */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <Palette className="w-4 h-4 text-rose-600" />
@@ -669,21 +669,21 @@ export const PosterStudioView = ({
                 <button
                   key={t.id}
                   onClick={() => setSelectedThemeId(t.id)}
-                  className={'p-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ' + (
+                  className={'px-2.5 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between gap-1 shadow-sm ' + (
                     selectedThemeId === t.id
-                      ? 'border-amber-500 ring-2 ring-amber-500/40 shadow-sm'
-                      : 'border-slate-200 dark:border-slate-700'
+                      ? 'border-amber-500 ring-2 ring-amber-500/40'
+                      : 'border-slate-200 dark:border-slate-700 hover:scale-[1.02]'
                   )}
                   style={{ backgroundColor: t.bg2, color: t.title }}
                 >
-                  <span className="truncate pr-1">{t.name}</span>
+                  <span className="whitespace-nowrap overflow-hidden text-ellipsis">{t.name}</span>
                   {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0" />}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* 4. Title Input (No Pre-filled junk) */}
+          {/* 4. Title Input */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
               <span>अपनी रचना का शीर्षक (Title) <span className="text-rose-600">*</span></span>
@@ -698,7 +698,7 @@ export const PosterStudioView = ({
             />
           </div>
 
-          {/* 5. Poetry Content Input (No Pre-filled junk) */}
+          {/* 5. Poetry Content Input */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
               <span>कविता / शायरी की पंक्तियाँ (Poetry Lines) <span className="text-rose-600">*</span></span>
@@ -734,19 +734,21 @@ export const PosterStudioView = ({
 
         </div>
 
-        {/* Right Live 4:5 Canvas Preview (5 cols) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-4 text-center">
+        {/* Right Live 4:5 Canvas Preview (5 cols, sticky on desktop) */}
+        <div className="lg:col-span-5 lg:sticky lg:top-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 text-center">
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <Eye className="w-4 h-4 text-emerald-500" />
               <span>लाइव 4:5 पोस्टर प्रिव्यू</span>
             </span>
-            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold">1080x1350px HD</span>
+            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+              1080x1350px HD
+            </span>
           </div>
 
           {/* Preview Canvas Container */}
-          <div className="relative mx-auto rounded-2xl overflow-hidden shadow-xl border border-slate-300 dark:border-slate-700 bg-slate-950 flex items-center justify-center aspect-[4/5] max-h-[500px]">
+          <div className="relative mx-auto rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-300 dark:border-slate-700 bg-slate-950 flex items-center justify-center aspect-[4/5] max-w-[340px] sm:max-w-[380px] w-full">
             {previewUrl ? (
               <img 
                 src={previewUrl} 
@@ -760,33 +762,33 @@ export const PosterStudioView = ({
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons (100% Padded & Responsive) */}
           <div className="space-y-2.5 pt-2">
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 text-amber-300 shrink-0" />
               <span>{downloading ? 'डाउनलोड हो रहा है...' : '📥 HD पोस्टर डाउनलोड करें (Free PNG)'}</span>
             </button>
 
             <button
               onClick={handleWhatsAppShare}
               disabled={sharing}
-              className="w-full py-2.5 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 font-bold rounded-2xl text-xs border border-emerald-300 dark:border-emerald-800/60 shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              className="w-full py-3 px-4 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 font-bold rounded-2xl text-xs sm:text-sm border border-emerald-300 dark:border-emerald-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>📲 WhatsApp स्टेटस पर शेयर करें</span>
+              <Share2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>📲 WhatsApp पर शेयर करें</span>
             </button>
 
             <button
               onClick={handlePublishToFeed}
               disabled={downloading}
-              className="w-full py-2.5 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-800 dark:text-indigo-300 font-bold rounded-2xl text-xs border border-indigo-300 dark:border-indigo-800/60 shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-800 dark:text-indigo-300 font-bold rounded-2xl text-xs sm:text-sm border border-indigo-300 dark:border-indigo-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
             >
-              <Feather className="w-3.5 h-3.5 text-indigo-600" />
-              <span>मंच पर HD पोस्टर प्रकाशित करें</span>
+              <Feather className="w-4 h-4 text-indigo-600 shrink-0" />
+              <span>📝 मंच पर HD पोस्टर प्रकाशित करें</span>
             </button>
           </div>
 
