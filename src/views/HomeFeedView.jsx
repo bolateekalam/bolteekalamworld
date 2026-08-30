@@ -441,7 +441,7 @@ export const HomeFeedView = ({
                   {featuredPoem.title || 'अनुपम काव्य रचना'}
                 </h3>
                 <p className="text-xs text-slate-400 font-serif">
-                  विधा: <strong className="text-amber-400">{featuredPoem.category || 'कविता'}</strong> • रचनाकार: <strong className="text-white">{featuredPoem.author?.name || 'साहित्य साधक'}</strong>
+                  विधा: <strong className="text-amber-400">{featuredPoem.category === 'lekh' ? 'लेख (Article)' : (featuredPoem.category || 'कविता')}</strong> • रचनाकार: <strong className="text-white">{featuredPoem.author?.name || 'साहित्य साधक'}</strong>
                 </p>
               </div>
 
@@ -463,15 +463,15 @@ export const HomeFeedView = ({
 
             {/* Decorative Quote Text */}
             <div className="relative p-4 sm:p-5 rounded-2xl bg-black/40 border border-amber-500/20 text-slate-100 font-tiro text-xs sm:text-sm leading-relaxed italic">
-              <Quote className="w-7 h-7 text-amber-400/20 absolute top-2 left-2 pointer-events-none" />
-              <p className="relative z-10 whitespace-pre-line pl-3">
+              <Quote className="w-6 h-6 text-amber-400/15 absolute top-3 left-3 pointer-events-none" />
+              <p className="relative z-10 whitespace-pre-line pl-6">
                 {featuredPoem.content?.slice(0, 240)}
                 {featuredPoem.content?.length > 240 && '...'}
               </p>
             </div>
           </div>
 
-          {/* Masterpiece Actions: 9:16 WhatsApp Status Image Generator Button */}
+          {/* Masterpiece Actions: 4:5 Poster Generator Button */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
             
             <div className="flex items-center gap-2 flex-wrap">
@@ -490,10 +490,10 @@ export const HomeFeedView = ({
               <button
                 onClick={handleGenerateWhatsAppStatusImage}
                 disabled={generatingStatusImg}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
-                <Download className="w-3.5 h-3.5 text-amber-300" />
-                <span>{generatingStatusImg ? 'पोस्टर तैयार हो रहा है...' : '📲 4:5 HD काव्य पोस्टर बनाएं (PNG)'}</span>
+                <Download className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                <span>{generatingStatusImg ? 'पोस्टर तैयार हो रहा है...' : '4:5 HD काव्य पोस्टर बनाएं (PNG)'}</span>
               </button>
             </div>
 
