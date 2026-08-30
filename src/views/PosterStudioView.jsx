@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Download, Upload, Check, 
-  Palette, Send, Eye, X,
-  LayoutGrid, BookOpen, Share2, Smartphone, 
-  Monitor, Square, Flame, RefreshCw, Feather, CheckCircle2,
-  Camera, Image as ImageIcon, UserCheck, Layers
+  Palette, Eye, X, Share2, Feather, 
+  Camera, Layers, ChevronDown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -108,14 +106,13 @@ export const PosterStudioView = ({
   onPublishPosterPost,
   requireAuth
 }) => {
-  // Dedicated Standard 4:5 Aspect Ratio (1080x1350)
+  // Standard 1080x1350 High-Definition Canvas
   const width = 1080;
   const height = 1350;
 
   const [selectedPhotoLayout, setSelectedPhotoLayout] = useState('circleAvatar');
   const [selectedThemeId, setSelectedThemeId] = useState('darkVelvet');
   
-  // Clean initial inputs (no prefilled dummy text)
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   
@@ -180,7 +177,67 @@ export const PosterStudioView = ({
     });
   };
 
-  // Draw 4:5 Poster Canvas
+  // 🌟 Anti-Stretch Center Cover Image Drawer
+  const drawCoverImage = (ctx, img, dx, dy, dWidth, dHeight, radius = 0) => {
+    if (!img || !img.width || !img.height) return;
+    const imgRatio = img.width / img.height;
+    const targetRatio = dWidth / dHeight;
+    let sx, sy, sWidth, sHeight;
+
+    if (imgRatio > targetRatio) {
+      // Image is wider than target container -> crop horizontal sides
+      sHeight = img.height;
+      sWidth = img.height * targetRatio;
+      sx = (img.width - sWidth) / 2;
+      sy = 0;
+    } else {
+      // Image is taller than target container -> crop vertical top/bottom
+      sWidth = img.width;
+      sHeight = img.width / targetRatio;
+      sx = 0;
+      sy = (img.height - sHeight) / 2;
+    }
+
+    ctx.save();
+    if (radius) {
+      ctx.beginPath();
+      if (Array.isArray(radius)) {
+        ctx.roundRect(dx, dy, dWidth, dHeight, radius);
+      } else if (typeof radius === 'number' && radius > 0) {
+        ctx.roundRect(dx, dy, dWidth, dHeight, radius);
+      }
+      ctx.closePath();
+      ctx.clip();
+    }
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    ctx.restore();
+  };
+
+  // 🌟 Anti-Stretch Circular Avatar Drawer
+  const drawCircularAvatar = (ctx, img, cx, cy, radius, strokeColor = '#fbbf24', strokeWidth = 4) => {
+    if (!img || !img.width || !img.height) return;
+    const size = Math.min(img.width, img.height);
+    const sx = (img.width - size) / 2;
+    const sy = (img.height - size) / 2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, sx, sy, size, size, cx - radius, cy - radius, radius * 2, radius * 2);
+    ctx.restore();
+
+    if (strokeColor && strokeWidth) {
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = strokeWidth;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  };
+
+  // Draw HD Poster Canvas
   const generatePosterCanvas = async () => {
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -194,7 +251,7 @@ export const PosterStudioView = ({
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // 2. Borders
+    // 2. Borders & Ornaments
     ctx.strokeStyle = currentTheme.border;
     ctx.lineWidth = 8;
     ctx.strokeRect(32, 32, width - 64, height - 64);
@@ -203,28 +260,29 @@ export const PosterStudioView = ({
     ctx.lineWidth = 2;
     ctx.strokeRect(44, 44, width - 88, height - 88);
 
-    // Load photo
+    // Load user photo safely
     const photoImg = await safeLoadImage(effectivePhotoUrl);
 
-    // 3. Render according to chosen Photo Layout Style
+    // 3. Render According to Selected Photo Layout
     if (selectedPhotoLayout === 'circleAvatar') {
       // ⭕ LAYOUT 1: Circle Avatar
       ctx.fillStyle = currentTheme.title;
-      ctx.font = 'bold 34px serif';
+      ctx.font = 'bold 32px serif';
       ctx.textAlign = 'center';
       ctx.fillText('बोलती कलम • bolateeworld.in', width / 2, 110);
 
       // Title
       const displayTitle = title.trim() || 'आपकी रचना का शीर्षक';
       ctx.fillStyle = currentTheme.title;
-      ctx.font = 'bold 52px serif';
+      ctx.font = 'bold 50px serif';
       ctx.fillText(displayTitle, width / 2, 210);
 
+      // Title Underline
       ctx.strokeStyle = currentTheme.border;
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(width / 2 - 180, 245);
-      ctx.lineTo(width / 2 + 180, 245);
+      ctx.moveTo(width / 2 - 160, 245);
+      ctx.lineTo(width / 2 + 160, 245);
       ctx.stroke();
 
       // Poetry Lines
@@ -232,9 +290,9 @@ export const PosterStudioView = ({
       ctx.fillStyle = currentTheme.text;
       const isLarge = fontSizeRatio === 'large';
       ctx.font = isLarge ? '42px serif' : '36px serif';
-      const lineGap = isLarge ? 78 : 68;
+      const lineGap = isLarge ? 80 : 70;
 
-      let startY = 350;
+      let startY = 360;
       lines.forEach((line) => {
         if (line.trim()) {
           ctx.fillText(line, width / 2, startY);
@@ -245,51 +303,46 @@ export const PosterStudioView = ({
       // Bottom Circle Avatar + Author Badge
       const footerY = height - 160;
       if (photoImg) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(width / 2, footerY - 40, 65, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(photoImg, width / 2 - 65, footerY - 105, 130, 130);
-        ctx.restore();
-
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(width / 2, footerY - 40, 65, 0, Math.PI * 2);
-        ctx.stroke();
+        drawCircularAvatar(ctx, photoImg, width / 2, footerY - 40, 70, currentTheme.border, 4);
       }
 
       ctx.textAlign = 'center';
       ctx.fillStyle = currentTheme.title;
       ctx.font = 'bold 36px serif';
-      ctx.fillText('✍️ ' + fixedAuthorName, width / 2, footerY + 55);
+      ctx.fillText('✍️ ' + fixedAuthorName, width / 2, footerY + 60);
 
       ctx.fillStyle = currentTheme.text;
       ctx.font = '22px sans-serif';
-      ctx.fillText('@' + fixedAuthorUsername + ' • प्रमाणित साहित्यकार', width / 2, footerY + 90);
+      ctx.fillText('@' + fixedAuthorUsername + ' • प्रमाणित साहित्यकार', width / 2, footerY + 95);
 
     } else if (selectedPhotoLayout === 'wideCard') {
       // 🔲 LAYOUT 2: Wide Card at Bottom
       ctx.fillStyle = currentTheme.title;
-      ctx.font = 'bold 34px serif';
+      ctx.font = 'bold 32px serif';
       ctx.textAlign = 'center';
       ctx.fillText('बोलती कलम • राष्ट्रीय साहित्यिक मंच', width / 2, 110);
 
       // Title
       const displayTitle = title.trim() || 'आपकी रचना का शीर्षक';
       ctx.fillStyle = currentTheme.title;
-      ctx.font = 'bold 52px serif';
-      ctx.fillText(displayTitle, width / 2, 220);
+      ctx.font = 'bold 50px serif';
+      ctx.fillText(displayTitle, width / 2, 210);
+
+      ctx.strokeStyle = currentTheme.border;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(width / 2 - 160, 245);
+      ctx.lineTo(width / 2 + 160, 245);
+      ctx.stroke();
 
       // Poetry Lines
       const lines = (content.trim() || 'यहाँ आपकी कविता / शायरी की पंक्तियाँ प्रदर्शित होंगी।\nसुंदर भावों के साथ अपनी रचना लिखें।').split('\n');
       ctx.fillStyle = currentTheme.text;
       const isLarge = fontSizeRatio === 'large';
       ctx.font = isLarge ? '42px serif' : '36px serif';
-      const lineGap = isLarge ? 78 : 68;
+      const lineGap = isLarge ? 80 : 70;
 
-      let startY = 360;
+      let startY = 350;
       lines.forEach((line) => {
         if (line.trim()) {
           ctx.fillText(line, width / 2, startY);
@@ -308,19 +361,7 @@ export const PosterStudioView = ({
       ctx.stroke();
 
       if (photoImg) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(170, cardY + 80, 55, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(photoImg, 115, cardY + 25, 110, 110);
-        ctx.restore();
-
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(170, cardY + 80, 55, 0, Math.PI * 2);
-        ctx.stroke();
+        drawCircularAvatar(ctx, photoImg, 170, cardY + 80, 55, currentTheme.border, 3);
       }
 
       ctx.textAlign = 'left';
@@ -333,28 +374,24 @@ export const PosterStudioView = ({
       ctx.fillText('@' + fixedAuthorUsername + ' • bolateeworld.in', 260, cardY + 115);
 
     } else if (selectedPhotoLayout === 'leftSplit') {
-      // ⬅️ LAYOUT 3: Left Split (Photo on Left 38%, Poetry on Right 62%)
+      // ⬅️ LAYOUT 3: Left Split (Left Photo 38%, Right Poetry 62% - Perfectly Proportioned)
       const splitX = 420;
+      const photoWidth = splitX - 120;
+      const photoHeight = height - 160;
 
-      // Draw Photo on Left
+      // Draw Photo on Left with anti-stretch cover crop
       if (photoImg) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(60, 60, splitX - 80, height - 120, 24);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(photoImg, 60, 60, splitX - 80, height - 120);
-        ctx.restore();
+        drawCoverImage(ctx, photoImg, 70, 80, photoWidth, photoHeight, 24);
 
         ctx.strokeStyle = currentTheme.border;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.roundRect(60, 60, splitX - 80, height - 120, 24);
+        ctx.roundRect(70, 80, photoWidth, photoHeight, 24);
         ctx.stroke();
       }
 
-      // Right Side Poetry Box
-      const rightCenterX = splitX + (width - splitX) / 2 - 20;
+      // Right Side Poetry Content
+      const rightCenterX = splitX + (width - splitX) / 2 - 10;
 
       ctx.fillStyle = currentTheme.title;
       ctx.font = 'bold 30px serif';
@@ -365,20 +402,20 @@ export const PosterStudioView = ({
       const displayTitle = title.trim() || 'रचना का शीर्षक';
       ctx.fillStyle = currentTheme.title;
       ctx.font = 'bold 46px serif';
-      ctx.fillText(displayTitle, rightCenterX, 230);
+      ctx.fillText(displayTitle, rightCenterX, 220);
 
       ctx.strokeStyle = currentTheme.border;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(rightCenterX - 140, 265);
-      ctx.lineTo(rightCenterX + 140, 265);
+      ctx.moveTo(rightCenterX - 140, 255);
+      ctx.lineTo(rightCenterX + 140, 255);
       ctx.stroke();
 
       // Poetry Lines
       const lines = (content.trim() || 'यहाँ आपकी कविता\nकी पंक्तियाँ प्रदर्शित होंगी।\nसुंदर शब्दों में लिखें।').split('\n');
       ctx.fillStyle = currentTheme.text;
       ctx.font = '34px serif';
-      let startY = 370;
+      let startY = 360;
       lines.forEach((line) => {
         if (line.trim()) {
           ctx.fillText(line, rightCenterX, startY);
@@ -397,20 +434,14 @@ export const PosterStudioView = ({
       ctx.fillText('@' + fixedAuthorUsername + ' • bolateeworld.in', rightCenterX, authorY + 45);
 
     } else {
-      // ⬆️ LAYOUT 4: Top Hero Photo (Top 42% Cover, Bottom 58% Poetry)
-      const topHeight = 520;
+      // ⬆️ LAYOUT 4: Top Hero Photo Cover (Top 42% Cover, Bottom 58% Poetry - Perfectly Proportioned)
+      const topHeight = 480;
 
-      // Draw Top Photo Cover
+      // Draw Top Photo Cover with anti-stretch cover crop
       if (photoImg) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(60, 60, width - 120, topHeight, [24, 24, 0, 0]);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(photoImg, 60, 60, width - 120, topHeight);
-        ctx.restore();
+        drawCoverImage(ctx, photoImg, 60, 60, width - 120, topHeight, [24, 24, 0, 0]);
 
-        // Dark overlay on bottom of image for transition
+        // Smooth Dark gradient overlay on bottom of image for text transition
         const fadeGrad = ctx.createLinearGradient(0, topHeight - 120, 0, topHeight + 60);
         fadeGrad.addColorStop(0, 'transparent');
         fadeGrad.addColorStop(1, currentTheme.bg1);
@@ -421,7 +452,7 @@ export const PosterStudioView = ({
       // Title Below Photo
       const displayTitle = title.trim() || 'रचना का शीर्षक';
       ctx.fillStyle = currentTheme.title;
-      ctx.font = 'bold 50px serif';
+      ctx.font = 'bold 48px serif';
       ctx.textAlign = 'center';
       ctx.fillText(displayTitle, width / 2, topHeight + 120);
 
@@ -429,7 +460,7 @@ export const PosterStudioView = ({
       const lines = (content.trim() || 'यहाँ आपकी कविता / शायरी की पंक्तियाँ प्रदर्शित होंगी।\nसुंदर भावों के साथ अपनी रचना लिखें।').split('\n');
       ctx.fillStyle = currentTheme.text;
       ctx.font = '36px serif';
-      let startY = topHeight + 210;
+      let startY = topHeight + 200;
       lines.forEach((line) => {
         if (line.trim()) {
           ctx.fillText(line, width / 2, startY);
@@ -451,7 +482,7 @@ export const PosterStudioView = ({
     return canvas;
   };
 
-  // Update Live Preview when inputs change
+  // Update Preview URL when parameters change
   useEffect(() => {
     let active = true;
     generatePosterCanvas().then(canvas => {
@@ -460,125 +491,113 @@ export const PosterStudioView = ({
       }
     });
     return () => { active = false; };
-  }, [selectedPhotoLayout, selectedThemeId, title, content, fontSizeRatio, uploadedPhotoUrl]);
+  }, [title, content, selectedPhotoLayout, selectedThemeId, effectivePhotoUrl, fontSizeRatio]);
 
-  // Handle HD Download + Auto Copy Caption
+  // Download Handler
   const handleDownload = async () => {
-    if (!title.trim() || !content.trim()) {
-      alert('कृपया पोस्टर डाउनलोड करने से पहले शीर्षक (Title) और पंक्तियाँ अवश्य लिखें!');
-      return;
-    }
-    
-    // Auto-copy viral caption
-    handleCopyCaption();
-
     setDownloading(true);
     try {
       const canvas = await generatePosterCanvas();
       const link = document.createElement('a');
-      link.download = 'BolateeKalam_Poster_' + Date.now() + '.png';
+      link.download = 'BolateeKalam_Poster_' + (title.trim().slice(0, 15) || 'rachna') + '_' + Date.now() + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
 
-      if (onRewardPoints) {
-        onRewardPoints(-25, 'कवि पोस्टर डाउनलोड करने पर');
-      }
-
-      try {
-        confetti({
-          particleCount: 70,
-          spread: 80,
-          origin: { y: 0.6 }
-        });
-      } catch (e) {}
-    } catch (e) {
-      console.error(e);
+      if (onRewardPoints) onRewardPoints(5);
+      confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
+    } catch (err) {
+      console.error('Download error:', err);
+    } finally {
+      setDownloading(false);
     }
-    setDownloading(false);
   };
 
-  // Handle WhatsApp Share
+  // WhatsApp Share Handler
   const handleWhatsAppShare = async () => {
-    if (!title.trim() || !content.trim()) {
-      alert('कृपया शीर्षक (Title) और पंक्तियाँ अवश्य लिखें!');
-      return;
-    }
     setSharing(true);
     try {
-      const canvas = await generatePosterCanvas();
-      const displayTitle = title.trim() || 'मेरी रचना';
-      const shareText = '✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita';
+      const captionText = 
+        `✍️ रचनाकार: ${fixedAuthorName} (@${fixedAuthorUsername})\n` +
+        `📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n` +
+        `🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n` +
+        `👉 https://bolateeworld.in\n\n` +
+        `🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita`;
+
+      const shareText = `*${title || 'बोलती कलम काव्य'}*\n\n${content ? content.slice(0, 200) + '...' : ''}\n\n${captionText}`;
+      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText), '_blank');
       
-      canvas.toBlob(async (blob) => {
-        if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], 'poster.png', { type: 'image/png' })] })) {
-          try {
-            await navigator.share({
-              files: [new File([blob], 'poster.png', { type: 'image/png' })],
-              title: displayTitle,
-              text: shareText
-            });
-            setSharing(false);
-            return;
-          } catch (e) {}
-        }
-        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText), '_blank');
-        setSharing(false);
-      }, 'image/png');
-    } catch (e) {
+      if (onRewardPoints) onRewardPoints(5);
+    } catch (err) {
+      console.error('Share error:', err);
+    } finally {
       setSharing(false);
     }
   };
 
-  // Handle Copy Formatted Poem & Website Link Caption
-  const handleCopyCaption = () => {
-    const captionText = '✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita';
+  // Copy Caption Handler
+  const handleCopyCaption = async () => {
+    const captionText = 
+      `✍️ रचनाकार: ${fixedAuthorName} (@${fixedAuthorUsername})\n` +
+      `📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n` +
+      `🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n` +
+      `👉 https://bolateeworld.in\n\n` +
+      `🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita`;
 
-    navigator.clipboard.writeText(captionText);
-    setCopiedCaption(true);
-    setTimeout(() => setCopiedCaption(false), 3000);
-  };
+    const fullCopy = `${title ? `✨ ${title} ✨\n\n` : ''}${content ? `${content}\n\n` : ''}${captionText}`;
 
-  // Handle Publish Directly to Feed
-  const handlePublishToFeed = async () => {
-    if (requireAuth && !requireAuth()) return;
-    if (!title.trim() || !content.trim()) {
-      alert('कृपया शीर्षक (Title) और पंक्तियाँ अवश्य लिखें!');
-      return;
-    }
-    setDownloading(true);
     try {
-      const canvas = await generatePosterCanvas();
-      const imageUrl = canvas.toDataURL('image/jpeg', 0.9);
-
-      if (onPublishPosterPost) {
-        onPublishPosterPost({
-          title: title.trim(),
-          content: content.trim(),
-          imageUrl: imageUrl
-        });
-      }
-      alert('✨ आपका HD कवि पोस्टर मंच पर प्रकाशित हो गया है!');
+      await navigator.clipboard.writeText(fullCopy);
+      setCopiedCaption(true);
+      setTimeout(() => setCopiedCaption(false), 3000);
+      confetti({ particleCount: 25, spread: 50, origin: { y: 0.85 } });
     } catch (e) {
       console.error(e);
     }
-    setDownloading(false);
+  };
+
+  // Publish to Feed Handler
+  const handlePublishToFeed = async () => {
+    if (requireAuth && !currentUser) {
+      requireAuth();
+      return;
+    }
+    try {
+      const canvas = await generatePosterCanvas();
+      const dataUrl = canvas.toDataURL('image/png');
+      if (onPublishPosterPost) {
+        onPublishPosterPost({
+          title: title || 'कवि पोस्टर रचना',
+          content: content,
+          imageUrl: dataUrl,
+          author: fixedAuthorName,
+          authorUsername: fixedAuthorUsername,
+          authorAvatar: effectivePhotoUrl,
+          layout: selectedPhotoLayout,
+          theme: selectedThemeId
+        });
+      }
+      if (onRewardPoints) onRewardPoints(10);
+      confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+    } catch (err) {
+      console.error('Publish error:', err);
+    }
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-5 sm:space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-2xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
       
-      {/* Studio Header */}
+      {/* Studio Header Banner */}
       <div className="p-5 sm:p-7 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="space-y-1 text-center sm:text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-400/30">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>कवि पोस्टर Studio (HD)</span>
+            <span>कवि पोस्टर स्टूडियो</span>
           </div>
           <h2 className="text-xl sm:text-3xl font-black font-rozha text-amber-200">
             कवि इमेज़ पोस्टर बनाएँ
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 font-serif">
-            अपनी फोटो और रचना के साथ 4 आकर्षक लेआउट में HD पोस्टर तैयार करें।
+            अपनी फोटो और रचना के साथ आकर्षक HD पोस्टर तैयार करें।
           </p>
         </div>
 
@@ -589,272 +608,134 @@ export const PosterStudioView = ({
         </div>
       </div>
 
-      {/* Studio Card: Clean full-width creation studio */}
+      {/* Main Studio Form Card (Clean, Focused, 100% Responsive) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
         
         {/* 1. Photo Selection & Upload */}
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <span className="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
-                <Camera className="w-4 h-4 text-indigo-600" />
-                <span>1. कवि की फोटो (Photo Selection)</span>
+        <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <span className="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
+              <Camera className="w-4 h-4 text-indigo-600" />
+              <span>1. कवि की फोटो (Photo Selection)</span>
+            </span>
+            {uploadedPhotoUrl ? (
+              <button
+                onClick={() => setUploadedPhotoUrl(null)}
+                className="text-[10px] text-rose-600 font-bold hover:underline cursor-pointer"
+              >
+                प्रोफ़ाइल फोटो पर रीसेट करें
+              </button>
+            ) : (
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                ✓ प्रोफ़ाइल फोटो एक्टिव
               </span>
-              {uploadedPhotoUrl ? (
-                <button
-                  onClick={() => setUploadedPhotoUrl(null)}
-                  className="text-[10px] text-rose-600 font-bold hover:underline cursor-pointer"
-                >
-                  प्रोफ़ाइल फोटो पर रीसेट करें
-                </button>
-              ) : (
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                  ✓ प्रोफ़ाइल फोटो एक्टिव
-                </span>
-              )}
-            </div>
+            )}
+          </div>
 
-            <div className="flex items-center gap-3">
-              <img 
-                src={effectivePhotoUrl} 
-                alt="Author" 
-                className="w-14 h-14 rounded-2xl object-cover border-2 border-indigo-400 shadow-sm shrink-0"
+          <div className="flex items-center gap-3.5">
+            <img 
+              src={effectivePhotoUrl} 
+              alt="Author" 
+              className="w-14 h-14 rounded-2xl object-cover border-2 border-indigo-400 shadow-sm shrink-0"
+            />
+            <div className="space-y-1">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                accept="image/*" 
+                onChange={handlePhotoUpload} 
+                className="hidden" 
               />
-              <div className="space-y-1">
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  accept="image/*" 
-                  onChange={handlePhotoUpload} 
-                  className="hidden" 
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>अपनी फोटो बदलें / अपलोड करें</span>
-                </button>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                  यदि आप नई फोटो नहीं चुनते, तो प्रोफ़ाइल फोटो स्वतः उपयोग होगी।
-                </p>
-              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>अपनी फोटो बदलें / अपलोड करें</span>
+              </button>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                यदि आप नई फोटो नहीं चुनते, तो प्रोफ़ाइल फोटो स्वतः उपयोग होगी।
+              </p>
             </div>
           </div>
-
-          {/* 2. 4 Photo Layout Styles with Visual Graphic Previews */}
-          <div className="space-y-2.5">
-            <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Layers className="w-4 h-4 text-amber-500" />
-                <span>2. फोटो लेआउट डिज़ाइन चुनें (4 क्रिएटिव विकल्प)</span>
-              </span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {PHOTO_LAYOUTS.map(layout => (
-                <button
-                  key={layout.id}
-                  onClick={() => setSelectedPhotoLayout(layout.id)}
-                  className={'p-3.5 rounded-2xl border text-left transition cursor-pointer flex items-center gap-3.5 shadow-sm ' + (
-                    selectedPhotoLayout === layout.id
-                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-400/50 font-bold shadow-md scale-[1.01]'
-                      : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:scale-[1.01]'
-                  )}
-                >
-                  {/* Miniature Visual Graphic Wireframe */}
-                  {layout.id === 'circleAvatar' && (
-                    <div className="w-10 h-13 bg-slate-900 border border-amber-400/50 rounded-lg p-1 flex flex-col justify-between items-center shrink-0 shadow-inner">
-                      <div className="w-full space-y-0.5">
-                        <div className="h-1 w-3/4 bg-amber-400/80 rounded-full mx-auto" />
-                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
-                        <div className="h-0.5 w-2/3 bg-slate-400/50 rounded-full mx-auto" />
-                      </div>
-                      <div className="w-4 h-4 rounded-full border border-amber-400 bg-amber-500/30 flex items-center justify-center text-[7px]">⭕</div>
-                    </div>
-                  )}
-
-                  {layout.id === 'wideCard' && (
-                    <div className="w-10 h-13 bg-slate-900 border border-indigo-400/50 rounded-lg p-1 flex flex-col justify-between shrink-0 shadow-inner">
-                      <div className="space-y-0.5">
-                        <div className="h-1 w-3/4 bg-indigo-300 rounded-full" />
-                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
-                        <div className="h-0.5 w-2/3 bg-slate-400/50 rounded-full" />
-                      </div>
-                      <div className="w-full h-3.5 bg-indigo-600/40 rounded border border-indigo-400/50 flex items-center px-0.5 gap-0.5">
-                        <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-                        <div className="h-0.5 w-full bg-white/80 rounded-full" />
-                      </div>
-                    </div>
-                  )}
-
-                  {layout.id === 'leftSplit' && (
-                    <div className="w-10 h-13 bg-slate-900 border border-rose-400/50 rounded-lg p-0.5 flex gap-1 shrink-0 shadow-inner">
-                      <div className="w-3.5 h-full bg-gradient-to-b from-rose-500/40 to-amber-500/40 rounded border border-rose-400/50" />
-                      <div className="flex-1 py-1 space-y-1">
-                        <div className="h-1 w-full bg-amber-300 rounded-full" />
-                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
-                        <div className="h-0.5 w-3/4 bg-slate-400/50 rounded-full" />
-                      </div>
-                    </div>
-                  )}
-
-                  {layout.id === 'topHero' && (
-                    <div className="w-10 h-13 bg-slate-900 border border-emerald-400/50 rounded-lg p-0.5 flex flex-col gap-1 shrink-0 shadow-inner">
-                      <div className="w-full h-4 bg-gradient-to-r from-emerald-500/40 to-teal-500/40 rounded border border-emerald-400/50" />
-                      <div className="space-y-0.5 px-0.5">
-                        <div className="h-1 w-3/4 bg-emerald-300 rounded-full mx-auto" />
-                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold flex items-center justify-between gap-1">
-                      <span className="truncate">{layout.name}</span>
-                      {selectedPhotoLayout === layout.id && <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
-                    </div>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">{layout.desc}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. Color Palettes with Luxury Swatch Discs */}
-          <div className="space-y-2.5">
-            <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <Palette className="w-4 h-4 text-rose-600" />
-              <span>3. रंग एवं थीम पैलेट (6 लग्ज़री शैलियाँ)</span>
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              {THEMES.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedThemeId(t.id)}
-                  className={'px-3 py-2.5 rounded-2xl border text-xs font-bold transition cursor-pointer flex items-center gap-2.5 shadow-sm text-left ' + (
-                    selectedThemeId === t.id
-                      ? 'border-amber-500 ring-2 ring-amber-500/50 shadow-md scale-[1.02]'
-                      : 'border-slate-200 dark:border-slate-700 hover:scale-[1.02]'
-                  )}
-                  style={{ backgroundColor: t.bg2, color: t.title }}
-                >
-                  <div 
-                    className="w-5 h-5 rounded-full border border-white/40 shadow-sm shrink-0 flex items-center justify-center text-[10px]"
-                    style={{ background: `linear-gradient(135deg, ${t.bg1}, ${t.border})` }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs font-black block leading-snug truncate">{t.name}</span>
-                  </div>
-                  {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0 text-amber-400" />}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 4. Title Input */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-              <span>अपनी रचना का शीर्षक (Title) <span className="text-rose-600">*</span></span>
-              {title.trim() && <span className="text-[10px] text-emerald-600 font-bold">✓ दर्ज हुआ</span>}
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="रचना का शीर्षक दर्ज करें (जैसे: चाँदनी रात)..."
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          {/* 5. Poetry Content Input */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-              <span>कविता / शायरी की पंक्तियाँ (Poetry Lines) <span className="text-rose-600">*</span></span>
-              <span className="text-[10px] text-slate-400">लाइन ब्रेक (Enter) के साथ लिखें</span>
-            </label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={5}
-              placeholder="यहाँ अपनी कविता / शायरी की पंक्तियाँ दर्ज करें..."
-              className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-tiro text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          {/* 6. Font Size */}
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">फॉन्ट साइज़</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setFontSizeRatio('medium')}
-                className={'px-3 py-1 rounded-xl text-xs font-bold cursor-pointer ' + (fontSizeRatio === 'medium' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
-              >
-                मध्यम (Medium)
-              </button>
-              <button
-                onClick={() => setFontSizeRatio('large')}
-                className={'px-3 py-1 rounded-xl text-xs font-bold cursor-pointer ' + (fontSizeRatio === 'large' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
-              >
-                बड़ा (Large)
-              </button>
-            </div>
-          </div>
-
-          {/* 🌟 Master Action Button: Open HD Preview & Layout Switcher Modal */}
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-            <button
-              onClick={() => setShowPreviewModal(true)}
-              className="w-full py-4 px-6 bg-gradient-to-r from-amber-500 via-rose-600 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-black rounded-2xl text-sm sm:text-base shadow-xl flex items-center justify-center gap-2.5 transition active:scale-98 cursor-pointer"
-            >
-              <Eye className="w-5 h-5 text-amber-200 shrink-0 animate-pulse" />
-              <span>👁️ HD पोस्टर प्रिव्यू देखें & लेआउट बदलें</span>
-            </button>
-
-            {/* Secondary Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={handleDownload}
-                disabled={downloading}
-                className="py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-2xl text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
-              >
-                <Download className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड'}</span>
-              </button>
-
-              <button
-                onClick={handleWhatsAppShare}
-                disabled={sharing}
-                className="py-3 px-4 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 font-bold rounded-2xl text-xs border border-emerald-300 dark:border-emerald-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
-              >
-                <Share2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>WhatsApp शेयर</span>
-              </button>
-
-              <button
-                onClick={handleCopyCaption}
-                className="py-3 px-4 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-900 dark:text-amber-200 font-bold rounded-2xl text-xs border border-amber-300 dark:border-amber-800/60 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-              >
-                <Check className={'w-4 h-4 ' + (copiedCaption ? 'text-emerald-600' : 'text-amber-600')} />
-                <span>{copiedCaption ? '✓ कॉपी हुआ!' : 'कैप्शन कॉपी करें'}</span>
-              </button>
-            </div>
-          </div>
-
         </div>
 
-      {/* 🌟 Fullscreen / Large Poster Preview Popup Modal */}
+        {/* 2. Title Input */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+            <span>2. अपनी रचना का शीर्षक (Title) <span className="text-rose-600">*</span></span>
+            {title.trim() && <span className="text-[10px] text-emerald-600 font-bold">✓ दर्ज हुआ</span>}
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="रचना का शीर्षक दर्ज करें (जैसे: चाँदनी रात)..."
+            className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        {/* 3. Poetry Content Input */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+            <span>3. कविता / शायरी की पंक्तियाँ (Poetry Lines) <span className="text-rose-600">*</span></span>
+            <span className="text-[10px] text-slate-400">Enter दबाकर लाइन बदलें</span>
+          </label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={6}
+            placeholder="यहाँ अपनी कविता / शायरी की पंक्तियाँ दर्ज करें..."
+            className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-tiro text-xs sm:text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        {/* 4. Font Size */}
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">4. फॉन्ट साइज़ चुनें</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFontSizeRatio('medium')}
+              className={'px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition ' + (fontSizeRatio === 'medium' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
+            >
+              मध्यम (Medium)
+            </button>
+            <button
+              onClick={() => setFontSizeRatio('large')}
+              className={'px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition ' + (fontSizeRatio === 'large' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600')}
+            >
+              बड़ा (Large)
+            </button>
+          </div>
+        </div>
+
+        {/* 🌟 Single Clean Master Action Button */}
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+          <button
+            onClick={() => setShowPreviewModal(true)}
+            className="w-full py-4 px-6 bg-gradient-to-r from-amber-500 via-rose-600 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-black rounded-2xl text-sm sm:text-base shadow-xl flex items-center justify-center gap-2.5 transition active:scale-98 cursor-pointer"
+          >
+            <Eye className="w-5 h-5 text-amber-200 shrink-0 animate-pulse" />
+            <span>👁️ अपनी रचना का HD प्रिव्यू देखें</span>
+          </button>
+        </div>
+
+      </div>
+
+      {/* 🌟 HD Poster Preview & Layout Switcher Modal Popup */}
       {showPreviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto text-white">
+          <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[94vh] overflow-y-auto text-white">
             
-            {/* Modal Header */}
+            {/* Modal Header with Close Button */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 <div>
                   <h3 className="text-base font-bold font-rozha text-amber-200">
-                    HD पोस्टर प्रिव्यू
+                    HD पोस्टर प्रिव्यू & विकल्प
                   </h3>
-                  <span className="text-[10px] text-slate-400">बोलती कलम डिजिटल</span>
+                  <span className="text-[10px] text-slate-400">बोलती कलम डिजिटल स्टूडियो</span>
                 </div>
               </div>
 
@@ -866,8 +747,51 @@ export const PosterStudioView = ({
               </button>
             </div>
 
-            {/* Modal Poster Image */}
-            <div className="relative mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-700 bg-slate-950 flex items-center justify-center aspect-[4/5] max-h-[55vh] w-full">
+            {/* 🎛️ Dual Dropdowns / Selectors: Layout & Theme */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-2xl bg-slate-950/80 border border-slate-800">
+              
+              {/* Dropdown 1: Layout Selection */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                  <Layers className="w-3.5 h-3.5 text-amber-400" />
+                  <span>लेआउट चुनें:</span>
+                </label>
+                <select
+                  value={selectedPhotoLayout}
+                  onChange={(e) => setSelectedPhotoLayout(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+                >
+                  {PHOTO_LAYOUTS.map(layout => (
+                    <option key={layout.id} value={layout.id}>
+                      {layout.icon} {layout.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Dropdown 2: Theme Selection */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                  <Palette className="w-3.5 h-3.5 text-amber-400" />
+                  <span>रंग व थीम:</span>
+                </label>
+                <select
+                  value={selectedThemeId}
+                  onChange={(e) => setSelectedThemeId(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+                >
+                  {THEMES.map(theme => (
+                    <option key={theme.id} value={theme.id}>
+                      {theme.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+            </div>
+
+            {/* Modal Poster Canvas Display */}
+            <div className="relative mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-700 bg-slate-950 flex items-center justify-center aspect-[4/5] max-h-[50vh] w-full">
               {previewUrl ? (
                 <img 
                   src={previewUrl} 
@@ -881,66 +805,42 @@ export const PosterStudioView = ({
               )}
             </div>
 
-            {/* 🎨 Interactive Layout Switcher inside Modal for Instant Live Preview */}
-            <div className="space-y-2 p-3.5 rounded-2xl bg-slate-950/80 border-2 border-amber-500/30 shadow-inner">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-amber-300 flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-amber-400" />
-                  <span>🎨 यहाँ से लेआउट बदलकर देखें (Live Switch):</span>
-                </span>
-                <span className="text-[10px] text-slate-400">4 क्रिएटिव स्टाइल</span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {PHOTO_LAYOUTS.map(layout => (
-                  <button
-                    key={layout.id}
-                    onClick={() => setSelectedPhotoLayout(layout.id)}
-                    className={'py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-1 cursor-pointer text-center ' + (
-                      selectedPhotoLayout === layout.id
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg ring-2 ring-amber-300 font-black scale-[1.02]'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 hover:border-amber-400/50'
-                    )}
-                  >
-                    <span className="text-base">{layout.icon}</span>
-                    <span className="text-[11px] leading-tight font-extrabold">{layout.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Modal Action Buttons */}
+            {/* 🌟 4 Action Buttons inside Modal */}
             <div className="space-y-2 pt-1">
+              
+              {/* Button 1: Download Poster */}
               <button
                 onClick={() => {
                   handleDownload();
                   setShowPreviewModal(false);
                 }}
                 disabled={downloading}
-                className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <Download className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>{downloading ? 'डाउनलोड हो रहा है...' : 'HD पोस्टर डाउनलोड करें'}</span>
+                <span>{downloading ? 'डाउनलोड हो रहा है...' : '📥 HD पोस्टर डाउनलोड करें'}</span>
               </button>
 
+              {/* Button 2: WhatsApp Share */}
               <button
-                onClick={handleCopyCaption}
-                className="w-full py-2.5 px-3 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 font-bold rounded-2xl text-xs border border-amber-700 shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                onClick={() => {
+                  handleWhatsAppShare();
+                }}
+                disabled={sharing}
+                className="w-full py-3 px-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-2xl text-xs border border-emerald-500/40 shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
-                <Check className={'w-3.5 h-3.5 ' + (copiedCaption ? 'text-emerald-400' : 'text-amber-400')} />
-                <span>{copiedCaption ? '✓ कविता व वेबसाइट लिंक कॉपी हुआ!' : '📋 कविता + वेबसाइट लिंक कॉपी करें'}</span>
+                <Share2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>🚀 WhatsApp पर शेयर करें</span>
               </button>
 
+              {/* Button 3 & 4 Grid */}
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => {
-                    handleWhatsAppShare();
-                  }}
-                  disabled={sharing}
-                  className="w-full py-2.5 px-3 bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 font-bold rounded-2xl text-xs border border-emerald-700 shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                  onClick={handleCopyCaption}
+                  className="w-full py-2.5 px-3 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 font-bold rounded-2xl text-xs border border-amber-700 shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
                 >
-                  <Share2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>WhatsApp शेयर</span>
+                  <Check className={'w-3.5 h-3.5 ' + (copiedCaption ? 'text-emerald-400' : 'text-amber-400')} />
+                  <span>{copiedCaption ? '✓ लिंक कॉपी हुआ!' : '📋 कविता + लिंक कॉपी करें'}</span>
                 </button>
 
                 <button
@@ -952,9 +852,10 @@ export const PosterStudioView = ({
                   className="w-full py-2.5 px-3 bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 font-bold rounded-2xl text-xs border border-indigo-700 shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
                 >
                   <Feather className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                  <span>मंच पर प्रकाशित</span>
+                  <span>🌟 मंच पर प्रकाशित करें</span>
                 </button>
               </div>
+
             </div>
 
           </div>
