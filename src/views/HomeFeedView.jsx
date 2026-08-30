@@ -295,6 +295,19 @@ export const HomeFeedView = ({
     setGeneratingStatusImg(false);
   };
 
+  // Copy Viral Social Caption for Featured Masterpiece
+  const [copiedFeaturedCaption, setCopiedFeaturedCaption] = useState(false);
+
+  const handleCopyFeaturedCaption = () => {
+    if (!featuredPoem) return;
+    const authorName = featuredPoem.author?.name || 'साहित्य साधक';
+    const captionText = '✨ ━━━━━━━━━━━━━━━━━━ ✨\n👑 【 ' + (featuredPoem.title || 'अनुपम काव्य रचना') + ' 】 🪶\n✨ ━━━━━━━━━━━━━━━━━━ ✨\n\n' + (featuredPoem.content?.trim() || '') + '\n\n━━━━━━━━━━━━━━━━━━━━━\n✍️ रचनाकार: ' + authorName + '\n📖 आज की सर्वश्रेष्ठ रचना • बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita\n✨ ━━━━━━━━━━━━━━━━━━ ✨';
+
+    navigator.clipboard.writeText(captionText);
+    setCopiedFeaturedCaption(true);
+    setTimeout(() => setCopiedFeaturedCaption(false), 3000);
+  };
+
   // In-Feed Duel Vote
   const handleDuelVote = (poet) => {
     if (requireAuth && !requireAuth()) return;
