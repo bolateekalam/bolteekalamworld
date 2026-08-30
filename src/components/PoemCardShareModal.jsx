@@ -54,8 +54,8 @@ export const PoemCardShareModal = ({
   const cleanUser = authorUsername.replace(/^[@#]/, '');
   const postShareUrl = `https://bolateeworld.in`;
   
-  // 🌟 Ultimate Viral Multi-Platform Social Media Caption (For FB, Insta, X, WhatsApp)
-  const viralSocialCaption = `✨ ━━━━━━━━━━━━━━━━━━ ✨\n🪶 【 ${poemTitle} 】 🪶\n✨ ━━━━━━━━━━━━━━━━━━ ✨\n\n${poemContent.trim()}\n\n━━━━━━━━━━━━━━━━━━━━━\n✍️ रचनाकार: ${authorName} (${authorUsername})\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita\n✨ ━━━━━━━━━━━━━━━━━━ ✨`;
+  // 🌟 Clean, High-Impact Image Post Caption (Exact format for WhatsApp, FB, Instagram)
+  const viralSocialCaption = `✍️ रचनाकार: ${authorName} (${authorUsername})\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita`;
 
   const shareText = viralSocialCaption;
 
