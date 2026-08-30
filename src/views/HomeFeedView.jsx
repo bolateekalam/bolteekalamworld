@@ -274,7 +274,7 @@ export const HomeFeedView = ({
 
       // Download image
       const link = document.createElement('a');
-      link.download = 'BoltiKalam_Poster_4_5_' + Date.now() + '.png';
+      link.download = 'BolateeKalam_Poster_4_5_' + Date.now() + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
 

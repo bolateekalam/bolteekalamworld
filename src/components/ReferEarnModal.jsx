@@ -59,7 +59,7 @@ export const ReferEarnModal = ({ isOpen, onClose, userPoints = 4890 }) => {
           </div>
         </div>
 
-        {/* Progress Toward 5,000 Pts Bolti Kalam Kit */}
+        {/* Progress Toward 5,000 Pts Bolatee Kalam Kit */}
         <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-900 to-amber-950 text-white space-y-2">
           <div className="flex items-center justify-between text-xs font-bold">
             <span className="flex items-center gap-1 text-amber-300">

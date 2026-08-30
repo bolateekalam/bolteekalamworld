@@ -152,7 +152,7 @@ export const PoemCardShareModal = ({
       if (withWatermark) {
         ctx.fillStyle = '#881337';
         ctx.font = 'bold 22px sans-serif';
-        const wmText = 'बोलती वर्ल्ड • boltiworld.in';
+        const wmText = 'बोलती वर्ल्ड • bolateeworld.in';
         const wmWidth = ctx.measureText(wmText).width;
         ctx.fillText(wmText, 1005 - wmWidth, 1290);
       }
@@ -181,7 +181,7 @@ export const PoemCardShareModal = ({
     try {
       const canvas = await generateCanvasPNG(withWatermark);
       const link = document.createElement('a');
-      link.download = `BoltiWorld_${poemTitle.replace(/\s+/g, '_')}_${withWatermark ? 'Watermark' : 'HD'}.png`;
+      link.download = `BolateeWorld_${poemTitle.replace(/\s+/g, '_')}_${withWatermark ? 'Watermark' : 'HD'}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       setDownloadSuccessMsg(withWatermark ? '✓ वॉटरमार्क सहित पोस्टर डाउनलोड हो गया!' : '✓ बिना वॉटरमार्क HD पोस्टर डाउनलोड हुआ! (-10 Pts)');
@@ -346,7 +346,7 @@ export const PoemCardShareModal = ({
                       <Download className="w-3.5 h-3.5 text-rose-600" />
                       <span>मुफ़्त डाउनलोड</span>
                     </div>
-                    <span className="text-[10px] text-slate-500 font-normal">(boltiworld.in वॉटरमार्क सहित)</span>
+                    <span className="text-[10px] text-slate-500 font-normal">(bolateeworld.in वॉटरमार्क सहित)</span>
                   </button>
 
                   {/* Option 2: 10 Points without Watermark */}

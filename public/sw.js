@@ -1,4 +1,4 @@
-// Bolti Kalam PWA Service Worker with Zomato-style Background Push Notifications & Immediate Auto-Update
+// Bolatee Kalam PWA Service Worker with Zomato-style Background Push Notifications & Immediate Auto-Update
 const CACHE_NAME = 'bolti-kalam-pwa-v5';
 const STATIC_ASSETS = [
   '/',

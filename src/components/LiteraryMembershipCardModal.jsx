@@ -372,7 +372,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
     ctx.textAlign = 'center';
     ctx.fillStyle = '#b91c1c';
     ctx.font = 'bold 11.5px sans-serif';
-    ctx.fillText('★ BOLTI KALAM OFFICIAL SEAL ★', stampCenterX, stampCenterY - 42);
+    ctx.fillText('★ BOLATEE KALAM OFFICIAL SEAL ★', stampCenterX, stampCenterY - 42);
 
     ctx.font = 'bold 28px serif';
     ctx.fillText('🪶', stampCenterX, stampCenterY - 8);
@@ -412,7 +412,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         const canvas = await generateCanvasPNG();
         const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = `BoltiKalam_Membership_${membershipId}.png`;
+        link.download = `BolateeKalam_Membership_${membershipId}.png`;
         link.href = dataUrl;
         link.click();
         return;
@@ -430,7 +430,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
         });
         const dataUrl = domCanvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = `BoltiKalam_Membership_${membershipId}.png`;
+        link.download = `BolateeKalam_Membership_${membershipId}.png`;
         link.href = dataUrl;
         link.click();
       }
@@ -581,7 +581,7 @@ export const LiteraryMembershipCardModal = ({ isOpen, onClose, userProfile }) =>
 
             {/* Official Stamp Mockup */}
             <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full border-4 border-dashed border-red-700 bg-red-50 flex flex-col items-center justify-center text-center p-1 shadow-inner shrink-0 rotate-[-6deg] mx-auto sm:mx-0">
-              <span className="text-[8px] font-black uppercase text-red-800 tracking-tighter">BOLTI KALAM</span>
+              <span className="text-[8px] font-black uppercase text-red-800 tracking-tighter">BOLATEE KALAM</span>
               <span className="text-xs font-black text-red-700">🪶</span>
               <span className="text-[8px] font-black bg-red-700 text-white px-1.5 py-0.5 rounded mt-0.5">VERIFIED</span>
               <span className="text-[7px] text-red-800 font-bold mt-0.5">2026-27</span>

@@ -471,7 +471,7 @@ export const PosterStudioView = ({
     try {
       const canvas = await generatePosterCanvas();
       const link = document.createElement('a');
-      link.download = 'BoltiKalam_Poster_' + Date.now() + '.png';
+      link.download = 'BolateeKalam_Poster_' + Date.now() + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
 
@@ -503,7 +503,7 @@ export const PosterStudioView = ({
       const canvas = await generatePosterCanvas();
       const displayTitle = title.trim() || 'मेरी रचना';
       const displayContent = content.trim() || '';
-      const shareText = '📜 *' + displayTitle + '*\n\n"' + displayContent + '"\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BoltiKalam';
+      const shareText = '📜 *' + displayTitle + '*\n\n"' + displayContent + '"\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BolateeKalam';
       
       canvas.toBlob(async (blob) => {
         if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], 'poster.png', { type: 'image/png' })] })) {
@@ -529,7 +529,7 @@ export const PosterStudioView = ({
   const handleCopyCaption = () => {
     const displayTitle = title.trim() || 'आपकी रचना का शीर्षक';
     const displayContent = content.trim() || 'यहाँ आपकी कविता / शायरी की पंक्तियाँ प्रदर्शित होंगी।';
-    const captionText = '✨ *' + displayTitle + '* ✨\n\n' + displayContent + '\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolti Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BoltiKalam #HindiPoetry #Poetry #WritersCommunity';
+    const captionText = '✨ *' + displayTitle + '* ✨\n\n' + displayContent + '\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BolateeKalam #HindiPoetry #Poetry #WritersCommunity';
 
     navigator.clipboard.writeText(captionText);
     setCopiedCaption(true);

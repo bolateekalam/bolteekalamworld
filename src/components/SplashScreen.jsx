@@ -161,7 +161,7 @@ export const SplashScreen = ({ onFinish, duration = 2400 }) => {
             {greeting.title}
           </h2>
           <h1 className="text-lg sm:text-xl font-black text-amber-100 font-rozha tracking-wider">
-            बोलती कलम (Bolti Kalam)
+            बोलती कलम (Bolatee Kalam)
           </h1>
           <p className="text-[11px] sm:text-xs text-slate-300 font-tiro max-w-xs mx-auto leading-relaxed pt-1 opacity-90">
             {greeting.subtext}

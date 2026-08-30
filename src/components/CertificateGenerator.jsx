@@ -248,23 +248,23 @@ export const CertificateGenerator = ({
     ctx.fillStyle = '#1e293b';
     ctx.font = '20px serif';
 
-    let line1 = 'बोलती कलम (Bolti Kalam) डिजिटल साहित्यिक मंच पर आपका हार्दिक स्वागत व अभिनंदन है।';
+    let line1 = 'बोलती कलम (Bolatee Kalam) डिजिटल साहित्यिक मंच पर आपका हार्दिक स्वागत व अभिनंदन है।';
     let line2 = 'आपकी साहित्यिक यात्रा मंगलमय, प्रेरणादायी और सृजनात्मक उपलब्धियों से परिपूर्ण हो,';
     let line3 = 'इस हेतु बोलती कलम साहित्यिक परिषद द्वारा यह प्रथम पदार्पण सम्मान पत्र सादर समर्पित';
     let line4 = 'किया जाता है। हम कामना करते हैं कि आप यूँ ही साहित्य की रोशनी फैलाते रहें।';
 
     if (certType.includes('30 Days') || certType.includes('मासिक काव्य साधना')) {
-      line1 = 'ने बोलती कलम (Bolti Kalam) मंच पर लगातार 30 दिन की अखंड दैनिक साहित्यिक उपस्थिति';
+      line1 = 'ने बोलती कलम (Bolatee Kalam) मंच पर लगातार 30 दिन की अखंड दैनिक साहित्यिक उपस्थिति';
       line2 = 'और काव्य साधना पूर्ण कर अनुपम निष्ठा का परिचय दिया है। आपकी इस निरंतर लगन को सम्मानित';
       line3 = 'करते हुए बोलती कलम साहित्यिक परिषद गर्व के साथ यह सम्मान पत्र प्रदान करती है।';
       line4 = 'हम आपकी अनवरत साहित्यिक यात्रा की उज्ज्वल मंगलकामना करते हैं।';
     } else if (certType.includes('Streak') || certType.includes('साधना') || certType.includes('शिरोमणि') || certType.includes('मनीषी')) {
-      line1 = `ने बोलती कलम (Bolti Kalam) मंच पर निरंतर ${requiredStreak || 60} दिनों की अटूट सक्रियता व काव्य साधना`;
+      line1 = `ने बोलती कलम (Bolatee Kalam) मंच पर निरंतर ${requiredStreak || 60} दिनों की अटूट सक्रियता व काव्य साधना`;
       line2 = 'पूर्ण कर साहित्य जगत में विशिष्ट कीर्तिमान स्थापित किया है। आपकी अनवरत निष्ठा व शब्दों';
       line3 = 'के प्रति प्रेम को नमन करते हुए बोलती कलम साहित्यिक परिषद यह सम्मान पत्र सादर समर्पित करती है।';
       line4 = 'हम आपके यशस्वी एवं प्रेरणादायी साहित्यिक जीवन की मंगलकामना करते हैं।';
     } else if (certType.includes('अर्ध-शतक') || certType.includes('50')) {
-      line1 = 'ने बोलती कलम (Bolti Kalam) मंच पर 50 उत्कृष्ट काव्य रचनाएँ प्रकाशित कर साहित्यिक साधना';
+      line1 = 'ने बोलती कलम (Bolatee Kalam) मंच पर 50 उत्कृष्ट काव्य रचनाएँ प्रकाशित कर साहित्यिक साधना';
       line2 = 'का अद्भुत परिचय दिया है। आपकी सृजनशीलता व शब्दों के प्रति अटूट निष्ठा को नमन करते हुए';
       line3 = 'बोलती कलम साहित्यिक परिषद गर्व के साथ आपको यह सम्मान पत्र प्रदान करती है।';
       line4 = 'हम आपके उज्ज्वल एवं यशस्वी साहित्यिक भविष्य की मंगलकामना करते हैं।';
@@ -361,7 +361,7 @@ export const CertificateGenerator = ({
         const canvas = await generateCertificateCanvas();
         const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = `BoltiKalam_Certificate_${certId}.png`;
+        link.download = `BolateeKalam_Certificate_${certId}.png`;
         link.href = dataUrl;
         link.click();
         return;
@@ -379,7 +379,7 @@ export const CertificateGenerator = ({
         });
         const dataUrl = domCanvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = `BoltiKalam_Certificate_${certId}.png`;
+        link.download = `BolateeKalam_Certificate_${certId}.png`;
         link.href = dataUrl;
         link.click();
       }
@@ -463,7 +463,7 @@ export const CertificateGenerator = ({
           {/* Top Logo Emblem */}
           <div className="flex justify-center">
             <div className="w-14 h-14 rounded-full bg-white text-[#0e2238] flex items-center justify-center shadow-md border-2 border-amber-400 p-1">
-              <img src="/logo.png" alt="Bolti Kalam Logo" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="Bolatee Kalam Logo" className="w-full h-full object-contain" />
             </div>
           </div>
 
@@ -502,7 +502,7 @@ export const CertificateGenerator = ({
             {certType.includes('30 Days') || certType.includes('मासिक काव्य साधना') ? (
               <>
                 <p>
-                  ने <strong>बोलती कलम (Bolti Kalam)</strong> मंच पर लगातार 30 दिन की अखंड दैनिक साहित्यिक उपस्थिति और काव्य साधना पूर्ण कर अनुपम निष्ठा का परिचय दिया है।
+                  ने <strong>बोलती कलम (Bolatee Kalam)</strong> मंच पर लगातार 30 दिन की अखंड दैनिक साहित्यिक उपस्थिति और काव्य साधना पूर्ण कर अनुपम निष्ठा का परिचय दिया है।
                 </p>
                 <p>
                   आपकी इस निरंतर लगन व साधना को सम्मानित करते हुए बोलती कलम साहित्यिक परिषद गर्व के साथ यह सम्मान पत्र प्रदान करती है। हम आपकी अनवरत साहित्यिक यात्रा की मंगलकामना करते हैं।
@@ -511,7 +511,7 @@ export const CertificateGenerator = ({
             ) : certType.includes('Streak') || certType.includes('साधना') || certType.includes('शिरोमणि') || certType.includes('मनीषी') ? (
               <>
                 <p>
-                  ने <strong>बोलती कलम (Bolti Kalam)</strong> मंच पर निरंतर {requiredStreak} दिनों की अटूट सक्रियता व काव्य साधना पूर्ण कर साहित्य जगत में विशिष्ट कीर्तिमान स्थापित किया है।
+                  ने <strong>बोलती कलम (Bolatee Kalam)</strong> मंच पर निरंतर {requiredStreak} दिनों की अटूट सक्रियता व काव्य साधना पूर्ण कर साहित्य जगत में विशिष्ट कीर्तिमान स्थापित किया है।
                 </p>
                 <p>
                   आपकी अनवरत निष्ठा व शब्दों के प्रति प्रेम को नमन करते हुए बोलती कलम साहित्यिक परिषद यह सम्मान पत्र सादर समर्पित करती है।
@@ -520,7 +520,7 @@ export const CertificateGenerator = ({
             ) : certType.includes('अर्ध-शतक') ? (
               <>
                 <p>
-                  ने <strong>बोलती कलम (Bolti Kalam)</strong> मंच पर 50 उत्कृष्ट काव्य रचनाएँ प्रकाशित कर साहित्यिक साधना का अद्भुत परिचय दिया है।
+                  ने <strong>बोलती कलम (Bolatee Kalam)</strong> मंच पर 50 उत्कृष्ट काव्य रचनाएँ प्रकाशित कर साहित्यिक साधना का अद्भुत परिचय दिया है।
                 </p>
                 <p>
                   आपकी सृजनशीलता व शब्दों के प्रति अटूट निष्ठा को नमन करते हुए बोलती कलम साहित्यिक परिषद गर्व के साथ आपको यह सम्मान पत्र प्रदान करती है।
@@ -529,7 +529,7 @@ export const CertificateGenerator = ({
             ) : (
               <>
                 <p>
-                  <strong>बोलती कलम (Bolti Kalam)</strong> डिजिटल साहित्यिक मंच पर आपका हार्दिक स्वागत व अभिनंदन है।
+                  <strong>बोलती कलम (Bolatee Kalam)</strong> डिजिटल साहित्यिक मंच पर आपका हार्दिक स्वागत व अभिनंदन है।
                 </p>
                 <p>
                   आपकी साहित्यिक यात्रा मंगलमय, प्रेरणादायी और सृजनात्मक उपलब्धियों से परिपूर्ण हो, इस हेतु बोलती कलम साहित्यिक परिषद द्वारा यह <strong>प्रथम पदार्पण सम्मान पत्र</strong> सादर समर्पित किया जाता है।

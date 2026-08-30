@@ -205,7 +205,7 @@ export const translations = {
     }
   },
   en: {
-    brandName: "Bolti Kalam",
+    brandName: "Bolatee Kalam",
     tagline: "India's Premier Multilingual Literary & Poetry Platform",
     nav: {
       home: "Home",
@@ -236,8 +236,8 @@ export const translations = {
       yourReferralCode: "Your Unique Referral Code:",
       copyReferralLink: "Copy Referral Link",
       milestoneTitle: "Unlockable Milestones & Rewards",
-      kitClaimed: "Bolti Kalam Kit Claimed",
-      claimKit: "Claim Bolti Kalam Physical Kit",
+      kitClaimed: "Bolatee Kalam Kit Claimed",
+      claimKit: "Claim Bolatee Kalam Physical Kit",
       kitAddressPlaceholder: "Enter complete delivery address for physical kit..."
     },
     post: {
@@ -369,7 +369,7 @@ export const translations = {
       analytics: "Analytics",
       pointsManager: "Points & Badges",
       deletePost: "Remove Post",
-      dispatches: "Bolti Kalam Kit Shipments (5,000 pts)"
+      dispatches: "Bolatee Kalam Kit Shipments (5,000 pts)"
     },
     analytics: {
       dau: "Daily Active Users (DAU)",

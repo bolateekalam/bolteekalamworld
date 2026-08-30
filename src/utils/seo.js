@@ -1,5 +1,5 @@
 /**
- * 🚀 Bolti Kalam (bolateeworld.in) — Dynamic SEO & Meta Updater Utility
+ * 🚀 Bolatee Kalam (bolateeworld.in) — Dynamic SEO & Meta Updater Utility
  */
 
 export const updatePageSEO = ({ title, description, canonicalUrl, ogImage }) => {
@@ -9,7 +9,7 @@ export const updatePageSEO = ({ title, description, canonicalUrl, ogImage }) => 
   if (title) {
     document.title = `${title} — बोलती कलम (bolateeworld.in)`;
   } else {
-    document.title = 'बोलती कलम | Bolti Kalam (bolateeworld.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
+    document.title = 'बोलती कलम | Bolatee Kalam (bolateeworld.in) — राष्ट्रीय डिजिटल साहित्यिक मंच';
   }
 
   // 2. Update Meta Description

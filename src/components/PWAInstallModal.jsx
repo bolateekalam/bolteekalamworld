@@ -51,7 +51,7 @@ export const PWAInstallModal = ({ isOpen, onClose, deferredPrompt }) => {
           <div className="w-12 h-12 rounded-2xl bg-white p-1 border-2 border-amber-500 shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
             <img 
               src="/logo.png" 
-              alt="Bolti Kalam Logo" 
+              alt="Bolatee Kalam Logo" 
               className="w-full h-full object-contain rounded-xl" 
             />
           </div>

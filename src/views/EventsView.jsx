@@ -7,7 +7,7 @@ export const EventsView = ({ events = [], onOpenCertificate, onSubscribeYouTube 
   const [subscribed, setSubscribed] = useState(false);
 
   const handleSubscribe = () => {
-    // Open official Bolti Kalam YouTube Channel (https://www.youtube.com/@bolateekalam) in new tab!
+    // Open official Bolatee Kalam YouTube Channel (https://www.youtube.com/@bolateekalam) in new tab!
     window.open('https://www.youtube.com/@bolateekalam', '_blank');
     setSubscribed(true);
     if (onSubscribeYouTube) {
@@ -18,7 +18,7 @@ export const EventsView = ({ events = [], onOpenCertificate, onSubscribeYouTube 
   return (
     <div className="space-y-6">
       
-      {/* 🔴 Official Bolti Kalam YouTube Channel Showcase & Subscribe Banner */}
+      {/* 🔴 Official Bolatee Kalam YouTube Channel Showcase & Subscribe Banner */}
       <div className="p-6 rounded-3xl bg-gradient-to-r from-red-700 via-rose-900 to-slate-950 text-white shadow-xl flex items-center justify-between flex-wrap gap-4 border border-red-600/40">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-950/60 shrink-0">

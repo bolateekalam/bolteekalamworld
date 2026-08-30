@@ -4,7 +4,7 @@ export const mockEvents = [
     title: 'सावन की फुहार — भव्य ऑनलाइन कवि सम्मेलन',
     type: 'Online Kavi Sammelan',
     date: '10 अगस्त 2026, शाम 7:00 बजे',
-    platform: 'Zoom Live & Bolti Kalam Live Stream',
+    platform: 'Zoom Live & Bolatee Kalam Live Stream',
     performers: ['कुमार विश्वास', 'अनामिका अंबर', 'अमोल मिश्र', 'राहत इंदौरी स्मृति मंच'],
     slotsTotal: 500,
     slotsBooked: 412,

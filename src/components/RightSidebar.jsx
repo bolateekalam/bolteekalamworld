@@ -63,7 +63,7 @@ export const RightSidebar = ({ posts = [], currentUser, userProfile, onOpenCreat
             📜 प्रथम साहित्यिक पदार्पण सम्मान पत्र
           </span>
           <p className="text-[10px] text-slate-300 leading-relaxed font-serif">
-            बोलती कलम (Bolti Kalam) में खाता बनते ही जारी किया गया आधिकारिक डिजिटल सम्मान पत्र।
+            बोलती कलम (Bolatee Kalam) में खाता बनते ही जारी किया गया आधिकारिक डिजिटल सम्मान पत्र।
           </p>
         </div>
 

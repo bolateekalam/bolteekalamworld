@@ -379,7 +379,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     setSuccessMsg(`📩 आपकी ईमेल (${email}) पर 6-अंकों का सत्यापन कोड भेजा गया है।`);
 
     // In dev / client environment, print OTP to console for seamless testing if needed
-    console.info(`[Bolti Kalam] Security OTP for ${email}: ${generated}`);
+    console.info(`[Bolatee Kalam] Security OTP for ${email}: ${generated}`);
 
     try {
       const cleanEmail = email.trim().toLowerCase();
@@ -411,7 +411,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     setOtpInput('');
     setResendCooldown(30);
     setSuccessMsg(`🔄 नया 6-अंकों का ओटीपी आपकी ईमेल (${email}) पर पुनः भेजा गया है।`);
-    console.info(`[Bolti Kalam] Resent Security OTP for ${email}: ${newOtp}`);
+    console.info(`[Bolatee Kalam] Resent Security OTP for ${email}: ${newOtp}`);
 
     try {
       const cleanEmail = email.trim().toLowerCase();
@@ -490,7 +490,7 @@ export const AuthModal = ({ isOpen, onClose, onLoginSuccess, onFirstTimeUser }) 
     setResendCooldown(30);
     setStep(2);
     setSuccessMsg(`📩 पासवर्ड रीसेट कोड आपकी ईमेल (${cleanEmail}) पर भेज दिया गया है।`);
-    console.info(`[Bolti Kalam] Reset Password OTP for ${cleanEmail}: ${generated}`);
+    console.info(`[Bolatee Kalam] Reset Password OTP for ${cleanEmail}: ${generated}`);
 
     try {
       await supabase.auth.resetPasswordForEmail(cleanEmail);

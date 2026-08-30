@@ -1,4 +1,4 @@
-// Bolti Kalam Web Push & Inactivity Notification Service with Supabase Cloud Sync
+// Bolatee Kalam Web Push & Inactivity Notification Service with Supabase Cloud Sync
 import { supabase } from './supabase';
 
 const LAST_ACTIVE_KEY = 'bolteekalam_last_active_timestamp';

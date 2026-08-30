@@ -112,7 +112,7 @@ export const MagazineViewerModal = ({ isOpen, onClose }) => {
               </div>
 
               <div className="text-[10px] text-slate-500 font-mono">
-                अंक कोड: BK-MAG-2026-AUG | Bolti Kalam Digital Press
+                अंक कोड: BK-MAG-2026-AUG | Bolatee Kalam Digital Press
               </div>
             </div>
           )}

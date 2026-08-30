@@ -1,5 +1,5 @@
 -- ========================================================
--- BOLTI KALAM (बोलती कलम v2.0) COMPLETE & SECURE DATABASE SCHEMA
+-- BOLATEE KALAM (बोलती कलम v2.0) COMPLETE & SECURE DATABASE SCHEMA
 -- Supabase SQL Editor Script with RLS (Row Level Security) Active
 -- ========================================================
 

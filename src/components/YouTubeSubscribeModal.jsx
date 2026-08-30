@@ -59,7 +59,7 @@ export const YouTubeSubscribeModal = ({ isOpen, onClose, onConfirmSubscribe }) =
             className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-red-900/30 transition active:scale-95"
           >
             <Video className="w-4 h-4" />
-            <span>🔴 Bolti Kalam YouTube चैनल पर जाएँ</span>
+            <span>🔴 Bolatee Kalam YouTube चैनल पर जाएँ</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </button>
 
