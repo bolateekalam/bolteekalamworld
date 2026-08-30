@@ -52,8 +52,12 @@ export const PoemCardShareModal = ({
   const attachedPosterUrl = post.imageUrl || post.image;
 
   const cleanUser = authorUsername.replace(/^[@#]/, '');
-  const postShareUrl = `https://www.bolateeworld.in/profile/${cleanUser}`;
-  const shareText = `📜 *${poemTitle}*\n\n"${poemContent.slice(0, 180)}${poemContent.length > 180 ? '...' : ''}"\n\n✍️ रचनाकार: ${authorName} (${authorUsername})\n🌐 पढ़ें बोलती वर्ल्ड पर: ${postShareUrl}`;
+  const postShareUrl = `https://bolateeworld.in`;
+  
+  // 🌟 Ultimate Viral Multi-Platform Social Media Caption (For FB, Insta, X, WhatsApp)
+  const viralSocialCaption = `✨ ━━━━━━━━━━━━━━━━━━ ✨\n🪶 【 ${poemTitle} 】 🪶\n✨ ━━━━━━━━━━━━━━━━━━ ✨\n\n${poemContent.trim()}\n\n━━━━━━━━━━━━━━━━━━━━━\n✍️ रचनाकार: ${authorName} (${authorUsername})\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita\n✨ ━━━━━━━━━━━━━━━━━━ ✨`;
+
+  const shareText = viralSocialCaption;
 
   // Clean poem lines
   const poemLines = poemContent.split('\n').map(line => {
@@ -96,11 +100,11 @@ export const PoemCardShareModal = ({
       // Top Brand
       ctx.fillStyle = '#0e2238';
       ctx.font = 'bold 36px serif';
-      ctx.fillText('बोलती वर्ल्ड', 75, 95);
+      ctx.fillText('बोलती कलम', 75, 95);
 
       ctx.fillStyle = '#64748b';
       ctx.font = 'bold 20px sans-serif';
-      ctx.fillText('(bolateeworld.in)', 260, 95);
+      ctx.fillText('(bolateeworld.in)', 280, 95);
 
       // Title
       ctx.fillStyle = '#881337';
@@ -152,7 +156,7 @@ export const PoemCardShareModal = ({
       if (withWatermark) {
         ctx.fillStyle = '#881337';
         ctx.font = 'bold 22px sans-serif';
-        const wmText = 'बोलती वर्ल्ड • bolateeworld.in';
+        const wmText = 'बोलती कलम • bolateeworld.in';
         const wmWidth = ctx.measureText(wmText).width;
         ctx.fillText(wmText, 1005 - wmWidth, 1290);
       }
@@ -181,7 +185,7 @@ export const PoemCardShareModal = ({
     try {
       const canvas = await generateCanvasPNG(withWatermark);
       const link = document.createElement('a');
-      link.download = `BolateeWorld_${poemTitle.replace(/\s+/g, '_')}_${withWatermark ? 'Watermark' : 'HD'}.png`;
+      link.download = `BolateeKalam_${poemTitle.replace(/\s+/g, '_')}_${withWatermark ? 'Watermark' : 'HD'}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       setDownloadSuccessMsg(withWatermark ? '✓ वॉटरमार्क सहित पोस्टर डाउनलोड हो गया!' : '✓ बिना वॉटरमार्क HD पोस्टर डाउनलोड हुआ! (-10 Pts)');
@@ -193,25 +197,39 @@ export const PoemCardShareModal = ({
     }
   };
 
+  const handleCopyCaption = () => {
+    navigator.clipboard.writeText(viralSocialCaption);
+    setCopiedPoemText(true);
+    setDownloadSuccessMsg('✓ पूरा सोशल मीडिया कैप्शन कॉपी हो गया! अब आप सीधे FB/Insta/X पर पेस्ट कर सकते हैं।');
+    setTimeout(() => {
+      setCopiedPoemText(false);
+      setDownloadSuccessMsg('');
+    }, 4000);
+  };
+
   const handleShareWhatsApp = () => {
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(viralSocialCaption)}`, '_blank');
   };
 
   const handleShareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postShareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank');
+    navigator.clipboard.writeText(viralSocialCaption);
+    setDownloadSuccessMsg('✓ कैप्शन कॉपी हुआ! फेसबुक पर इमेज के साथ पेस्ट करें।');
+    setTimeout(() => {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://bolateeworld.in')}`, '_blank');
+    }, 500);
   };
 
   const handleShareInstagram = () => {
-    navigator.clipboard.writeText(shareText);
-    setCopiedPoemText(true);
+    navigator.clipboard.writeText(viralSocialCaption);
+    setDownloadSuccessMsg('✓ कैप्शन कॉपी हुआ! इंस्टाग्राम पर पेस्ट करें।');
     setTimeout(() => {
       window.open('https://www.instagram.com', '_blank');
-      setCopiedPoemText(false);
-    }, 800);
+    }, 500);
   };
 
   const handleShareTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
+    const tweetText = `🪶 【 ${poemTitle} 】\n\n"${poemContent.slice(0, 160)}..."\n\n✍️: ${authorName}\n🌐: https://bolateeworld.in\n\n#बोलतीकलम #BolateeKalam #HindiPoetry`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
   };
 
   const handleCopyLink = () => {
@@ -229,7 +247,7 @@ export const PoemCardShareModal = ({
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-rose-600" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-rozha">
-              रचना शेयर व पोस्टर
+              रचना शेयर व सोशल मीडिया कैप्शन
             </h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer">
@@ -241,10 +259,10 @@ export const PoemCardShareModal = ({
         <div className="p-4 rounded-2xl bg-[#fffdf9] dark:bg-slate-800/80 border-2 border-[#0e2238] shadow-inner space-y-2">
           <div className="flex items-center justify-between text-xs border-b border-slate-200 dark:border-slate-700 pb-2">
             <div className="flex items-center gap-1.5">
-              <img src="/logo.png" alt="Bolti World" className="w-5 h-5 object-contain" />
-              <span className="font-bold text-[#0e2238] dark:text-amber-200">बोलती वर्ल्ड</span>
+              <img src="/logo.png" alt="Bolatee Kalam" className="w-5 h-5 object-contain" />
+              <span className="font-bold text-[#0e2238] dark:text-amber-200">बोलती कलम (Bolatee Kalam)</span>
             </div>
-            <span className="text-[10px] text-slate-500">bolateeworld.in</span>
+            <span className="text-[10px] text-slate-500 font-mono">bolateeworld.in</span>
           </div>
 
           <h4 className="font-bold text-sm text-center font-rozha text-rose-900 dark:text-rose-300 pt-1">
@@ -270,10 +288,19 @@ export const PoemCardShareModal = ({
           </div>
         )}
 
+        {/* 🌟 1-Click Copy Caption Button */}
+        <button
+          onClick={handleCopyCaption}
+          className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 via-rose-600 to-amber-500 hover:from-amber-600 hover:to-rose-700 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+        >
+          <Copy className="w-4 h-4 text-amber-200 shrink-0" />
+          <span>{copiedPoemText ? '✓ सोशल मीडिया कैप्शन कॉपी हुआ!' : '📋 पूरा सोशल मीडिया कैप्शन कॉपी करें (FB, Insta, X)'}</span>
+        </button>
+
         {/* 1-Click Social Sharing Actions */}
         <div className="space-y-2 pt-1">
           <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-            🚀 सोशल मीडिया पर शेयर करें:
+            🚀 सोशल मीडिया पर सीधे भेजें:
           </span>
 
           <div className="grid grid-cols-4 gap-1.5">

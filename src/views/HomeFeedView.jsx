@@ -3,7 +3,7 @@ import {
   Award, ShieldCheck, CheckCircle2, Sparkles, Image as ImageIcon, 
   Flame, Feather, Flag, ArrowRight, BookOpen, Heart, MessageCircle, 
   Share2, Trophy, Star, Users, Zap, Compass, TrendingUp, Play, Pause,
-  Volume2, Eye, Clock, Check, Swords, ThumbsUp, Quote, LayoutGrid, List, Download
+  Volume2, Eye, Clock, Check, Swords, ThumbsUp, Quote, LayoutGrid, List, Download, Copy
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useLanguage } from '../context/LanguageContext';
@@ -494,6 +494,14 @@ export const HomeFeedView = ({
               >
                 <Download className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                 <span>{generatingStatusImg ? 'पोस्टर तैयार हो रहा है...' : '4:5 HD काव्य पोस्टर बनाएं (PNG)'}</span>
+              </button>
+
+              <button
+                onClick={handleCopyFeaturedCaption}
+                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-extrabold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 shadow flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+              >
+                <Copy className={'w-3.5 h-3.5 ' + (copiedFeaturedCaption ? 'text-emerald-400' : 'text-amber-300')} />
+                <span>{copiedFeaturedCaption ? '✓ सोशल कैप्शन कॉपी हुआ!' : '📋 कविता + लिंक कॉपी करें'}</span>
               </button>
             </div>
 
