@@ -1415,7 +1415,7 @@ function AppContent() {
     const authorAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
     const authorCity = userProfile?.city || 'प्रयागराज';
 
-    handleRewardPoints(10, 'नई साहित्य रचना पोस्ट करने पर');
+    handleRewardPoints(1, 'नई साहित्य रचना पोस्ट करने पर (+1 Pt)');
 
     // 1. Process / Upload Image to Supabase Storage CDN first if available
     let cdnImageUrl = newPost.imageUrl || newPost.image || null;

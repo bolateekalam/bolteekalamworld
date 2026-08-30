@@ -9,7 +9,6 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, p
   const [category, setCategory] = useState('कविता (Poetry)');
   const [content, setContent] = useState('');
   const [tagsInput, setTagsInput] = useState('हिंदीसाहित्य, काव्य');
-  const [imageUrl, setImageUrl] = useState('');
   const [showChhandHelper, setShowChhandHelper] = useState(false);
 
   if (!isOpen) return null;
@@ -29,40 +28,6 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, p
 
   const todayCount = todayUserPosts.length;
   const isDailyLimitReached = todayCount >= 5;
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const rawDataUrl = event.target.result;
-        const img = new Image();
-        img.onload = () => {
-          const maxDim = 1200;
-          let width = img.width;
-          let height = img.height;
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          setImageUrl(canvas.toDataURL('image/jpeg', 0.85));
-        };
-        img.onerror = () => setImageUrl(rawDataUrl);
-        img.src = rawDataUrl;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -92,8 +57,8 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, p
       title: title.trim(),
       category,
       content: content.trim(),
-      imageUrl: imageUrl || null,
-      image: imageUrl || null,
+      imageUrl: null,
+      image: null,
       tags: tags.length > 0 ? tags : ['हिंदीसाहित्य'],
       likes: 0,
       isLiked: false,
@@ -110,7 +75,6 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, p
     // Reset Form
     setTitle('');
     setContent('');
-    setImageUrl('');
     setTagsInput('हिंदीसाहित्य, काव्य');
     onClose();
   };
@@ -235,30 +199,19 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, p
             </div>
           </div>
 
-          {/* Image / Poster Attachment */}
-          <div className="space-y-1">
-            <label className="font-bold block text-slate-700 dark:text-slate-300">इमेज़ / पोस्टर संलग्न करें (Image Attachment - Optional):</label>
-            <div className="flex items-center gap-3">
-              <label className="flex-1 py-2.5 px-4 rounded-xl border border-dashed border-rose-400 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-100/50 transition">
-                <Image className="w-4 h-4 text-rose-600" />
-                <span>{imageUrl ? 'दूसरी फोटो बदलें' : 'फोटो / पोस्टर अपलोड करें'}</span>
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-              </label>
-              {imageUrl && (
-                <button
-                  type="button"
-                  onClick={() => setImageUrl('')}
-                  className="px-3 py-2 text-xs font-bold text-rose-600 hover:underline"
-                >
-                  फोटो हटाएँ
-                </button>
-              )}
-            </div>
-            {imageUrl && (
-              <div className="mt-2 rounded-xl overflow-hidden max-h-40 border border-slate-200 dark:border-slate-800">
-                <img src={imageUrl} alt="Attached Preview" className="w-full h-40 object-contain bg-slate-900/10" />
-              </div>
-            )}
+          {/* Poetry / Content Textarea (Dedicated Text Composition) */}
+          <div>
+            <label className="font-bold block mb-1 text-slate-700 dark:text-slate-300">
+              कविता / रचना की पंक्तियाँ (Poetry Content): *
+            </label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="यहाँ अपनी मौलिक काव्य पंक्तियाँ लिखें...&#10;&#10;उदा.&#10;शब्दों की महफ़िल में जब दीप जलेंगे,&#10;साहित्य के पन्नों पर नए गीत खिलेंगे..."
+              rows={8}
+              className="w-full p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 font-serif text-sm leading-relaxed border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/50 resize-y"
+              required
+            />
           </div>
 
           {/* Daily Post Limit Warning Banner */}
@@ -282,7 +235,7 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, p
           {/* Publish Action Button */}
           <div className="flex justify-between items-center pt-2">
             <span className="text-[10px] text-slate-400 font-semibold">
-              * प्रकाशित करते ही यह होम पेज पर तुरंत दिखने लगेगी।
+              * प्रकाशित करते ही यह मुख्य पृष्ठ पर तुरंत दिखेगी।
             </span>
 
             <button
@@ -292,7 +245,7 @@ export const CreatePostModal = ({ isOpen, onClose, onPostCreated, userProfile, p
               className="px-6 py-3 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-900/20 flex items-center gap-2 transition active:scale-95 cursor-pointer"
             >
               <Send className="w-4 h-4" />
-              <span>रचना प्रकाशित करें (+10 Pts)</span>
+              <span>रचना प्रकाशित करें (+1 Pt)</span>
             </button>
           </div>
 

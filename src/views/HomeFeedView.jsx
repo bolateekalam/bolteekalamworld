@@ -141,7 +141,7 @@ export const HomeFeedView = ({
     });
   };
 
-  // 📸 Generate 9:16 HD WhatsApp Status Image (1080x1920 Canvas)
+  // 📸 Generate 4:5 HD Masterpiece Poster Image (1080x1350 Canvas)
   const handleGenerateWhatsAppStatusImage = async () => {
     if (!featuredPoem) return;
     setGeneratingStatusImg(true);
@@ -149,90 +149,90 @@ export const HomeFeedView = ({
     try {
       const canvas = document.createElement('canvas');
       canvas.width = 1080;
-      canvas.height = 1920;
+      canvas.height = 1350;
       const ctx = canvas.getContext('2d');
 
       // 1. Royal Dark Velvet Gradient Background
-      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
+      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
       bgGrad.addColorStop(0, '#0c1829');
       bgGrad.addColorStop(0.4, '#161226');
       bgGrad.addColorStop(0.8, '#1e0e22');
       bgGrad.addColorStop(1, '#080c14');
       ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, 1080, 1920);
+      ctx.fillRect(0, 0, 1080, 1350);
 
       // 2. Gold Frame Borders
       ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 6;
-      ctx.strokeRect(40, 40, 1000, 1840);
+      ctx.strokeRect(30, 30, 1020, 1290);
 
       ctx.strokeStyle = '#be123c';
       ctx.lineWidth = 2;
-      ctx.strokeRect(52, 52, 976, 1816);
+      ctx.strokeRect(42, 42, 996, 1266);
 
       // 3. Logo & Platform Header
       const logoImg = await safeLoadImage('/logo.png');
       if (logoImg) {
-        ctx.drawImage(logoImg, 540 - 50, 100, 100, 100);
+        ctx.drawImage(logoImg, 540 - 45, 65, 90, 90);
       }
 
       ctx.fillStyle = '#fef08a';
-      ctx.font = 'bold 42px serif';
+      ctx.font = 'bold 38px serif';
       ctx.textAlign = 'center';
-      ctx.fillText('बोलती कलम', 540, 245);
+      ctx.fillText('बोलती कलम', 540, 195);
 
       ctx.fillStyle = '#cbd5e1';
-      ctx.font = '22px sans-serif';
-      ctx.fillText('राष्ट्रीय डिजिटल साहित्यिक मंच (bolateeworld.in)', 540, 285);
+      ctx.font = '20px sans-serif';
+      ctx.fillText('राष्ट्रीय डिजिटल साहित्यिक मंच (bolateeworld.in)', 540, 230);
 
       // 4. Badge: Masterpiece of the Day
       ctx.fillStyle = '#e11d48';
       ctx.beginPath();
-      ctx.roundRect(540 - 240, 325, 480, 55, 28);
+      ctx.roundRect(540 - 230, 260, 460, 48, 24);
       ctx.fill();
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.fillText('👑 आज की सर्वश्रेष्ठ रचना (Poem of the Day)', 540, 362);
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText('👑 आज की सर्वश्रेष्ठ रचना (Poem of the Day)', 540, 292);
 
       // 5. Poem Title
       const poemTitle = featuredPoem.title || 'अनुपम काव्य रचना';
       ctx.fillStyle = '#fbbf24';
-      ctx.font = 'bold 54px serif';
-      ctx.fillText(poemTitle, 540, 470);
+      ctx.font = 'bold 46px serif';
+      ctx.fillText(poemTitle, 540, 370);
 
       // Category Tag
       ctx.fillStyle = '#fda4af';
-      ctx.font = 'italic 26px serif';
-      ctx.fillText('विधा: ' + (featuredPoem.category || 'कविता'), 540, 515);
+      ctx.font = 'italic 22px serif';
+      ctx.fillText('विधा: ' + (featuredPoem.category || 'कविता'), 540, 408);
 
       // Decorative Separator Line
       ctx.strokeStyle = '#d97706';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(300, 550);
-      ctx.lineTo(780, 550);
+      ctx.moveTo(320, 430);
+      ctx.lineTo(760, 430);
       ctx.stroke();
 
-      // 6. Poetry Content Body
-      const poemLines = (featuredPoem.content || '').split('\n').slice(0, 12);
+      // 6. Poetry Content Body (4:5 Formatted)
+      const poemLines = (featuredPoem.content || '').split('\n').slice(0, 9);
       ctx.fillStyle = '#f8fafc';
-      ctx.font = '38px serif';
+      ctx.font = '34px serif';
       ctx.textAlign = 'center';
       
-      let lineY = 660;
+      let lineY = 490;
       poemLines.forEach((line) => {
         if (line.trim()) {
           ctx.fillText(line, 540, lineY);
-          lineY += 72;
+          lineY += 56;
         }
       });
 
-      // 7. Poet Info Card at Bottom
-      const poetY = 1580;
+      // 7. Poet Info Card at Bottom (4:5 Standard Placement)
+      const poetY = 1140;
       ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
       ctx.beginPath();
-      ctx.roundRect(140, poetY - 70, 800, 160, 30);
+      ctx.roundRect(140, poetY - 65, 800, 130, 24);
       ctx.fill();
       ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 2;
@@ -244,37 +244,37 @@ export const HomeFeedView = ({
       if (avatarImg) {
         ctx.save();
         ctx.beginPath();
-        ctx.arc(220, poetY + 10, 50, 0, Math.PI * 2);
+        ctx.arc(215, poetY, 44, 0, Math.PI * 2);
         ctx.closePath();
         ctx.clip();
-        ctx.drawImage(avatarImg, 170, poetY - 40, 100, 100);
+        ctx.drawImage(avatarImg, 171, poetY - 44, 88, 88);
         ctx.restore();
         
         ctx.strokeStyle = '#fbbf24';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(220, poetY + 10, 50, 0, Math.PI * 2);
+        ctx.arc(215, poetY, 44, 0, Math.PI * 2);
         ctx.stroke();
       }
 
       ctx.textAlign = 'left';
       ctx.fillStyle = '#fbbf24';
-      ctx.font = 'bold 38px serif';
-      ctx.fillText('✍️ ' + (featuredPoem.author?.name || 'साहित्य साधक'), 300, poetY);
+      ctx.font = 'bold 32px serif';
+      ctx.fillText('✍️ ' + (featuredPoem.author?.name || 'साहित्य साधक'), 280, poetY - 5);
 
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '24px sans-serif';
-      ctx.fillText((featuredPoem.author?.username || '@writer') + ' • प्रमाणित साहित्यकार', 300, poetY + 40);
+      ctx.font = '20px sans-serif';
+      ctx.fillText((featuredPoem.author?.username || '@writer') + ' • प्रमाणित साहित्यकार', 280, poetY + 30);
 
       // 8. Footer Watermark
       ctx.textAlign = 'center';
       ctx.fillStyle = '#64748b';
-      ctx.font = '22px sans-serif';
-      ctx.fillText('बोलती कलम ऐप डाउनलोड करें • bolateeworld.in', 540, 1800);
+      ctx.font = '18px sans-serif';
+      ctx.fillText('बोलती कलम ऐप • bolateeworld.in (4:5 HD)', 540, 1260);
 
       // Download image
       const link = document.createElement('a');
-      link.download = 'BoltiKalam_Status_' + Date.now() + '.png';
+      link.download = 'BoltiKalam_Poster_4_5_' + Date.now() + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
 
@@ -493,14 +493,14 @@ export const HomeFeedView = ({
                 className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <Download className="w-3.5 h-3.5 text-amber-300" />
-                <span>{generatingStatusImg ? 'इमेज तैयार हो रही है...' : '📲 WhatsApp स्टेटस इमेज बनाएं (HD PNG)'}</span>
+                <span>{generatingStatusImg ? 'पोस्टर तैयार हो रहा है...' : '📲 4:5 HD काव्य पोस्टर बनाएं (PNG)'}</span>
               </button>
             </div>
 
             {statusImageSuccess && (
               <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" />
-                <span>9:16 स्टेटस इमेज डाउनलोड हुई!</span>
+                <span>4:5 HD काव्य पोस्टर डाउनलोड हुआ!</span>
               </span>
             )}
 
