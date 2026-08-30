@@ -9,6 +9,7 @@ import confetti from 'canvas-confetti';
 import { useLanguage } from '../context/LanguageContext';
 import DailyChallenge from '../components/DailyChallenge';
 import PostCard from '../components/PostCard';
+import PoemCardShareModal from '../components/PoemCardShareModal';
 import { mockCategories } from '../data/mockPosts';
 
 export const HomeFeedView = ({ 
@@ -45,6 +46,7 @@ export const HomeFeedView = ({
   const [hasGivenWah, setHasGivenWah] = useState(false);
   const [generatingStatusImg, setGeneratingStatusImg] = useState(false);
   const [statusImageSuccess, setStatusImageSuccess] = useState(false);
+  const [showFeaturedShareModal, setShowFeaturedShareModal] = useState(false);
 
   const publicActivePosts = posts.filter(p => !p.isArchived);
 
@@ -501,12 +503,11 @@ export const HomeFeedView = ({
               </button>
 
               <button
-                onClick={handleGenerateWhatsAppStatusImage}
-                disabled={generatingStatusImg}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                onClick={() => setShowFeaturedShareModal(true)}
+                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                <span>{generatingStatusImg ? 'पोस्टर तैयार हो रहा है...' : 'काव्य पोस्टर डाउनलोड करें'}</span>
+                <Share2 className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                <span>काव्य पोस्टर शेयर व डाउनलोड</span>
               </button>
 
               <button
@@ -518,16 +519,20 @@ export const HomeFeedView = ({
               </button>
             </div>
 
-            {statusImageSuccess && (
-              <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" />
-                <span>काव्य पोस्टर डाउनलोड हुआ!</span>
-              </span>
-            )}
-
           </div>
 
         </div>
+      )}
+
+      {/* 🌟 Poem of the Day Share & Download Modal */}
+      {showFeaturedShareModal && featuredPoem && (
+        <PoemCardShareModal
+          isOpen={showFeaturedShareModal}
+          onClose={() => setShowFeaturedShareModal(false)}
+          post={featuredPoem}
+          isUserOwnPost={false}
+          userPoints={userProfile?.points || currentUser?.points || 50}
+        />
       )}
 
       {/* ⚔️ 3. Interactive Live Poetry Duel Arena (In-Feed Battle Challenge) */}
