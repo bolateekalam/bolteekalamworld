@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 // Known existing system & mock handles to avoid duplicates
 const KNOWN_EXISTING_HANDLES = [
   'admin', 'super_admin', 'sanjayrai', 'sanjayrai_founder', 'bolteekalam', 
-  'official', 'support', 'help', 'bolateeworld', 'akash_cofounder',
+  'official', 'support', 'help', 'bolateeworld',
   'kajal', 'kajal_writer', 'kavita', 'writer', 'kaviraj', 'sahitya'
 ];
 

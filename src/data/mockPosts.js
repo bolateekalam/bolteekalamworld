@@ -38,44 +38,6 @@ export const mockPosts = [
     readingTime: '2 मिनट',
     isEditorialPick: true,
     createdAt: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
-    comments: [
-      {
-        id: 'c1',
-        author: 'आकाश कुमार सिंह (सह-संस्थापक)',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
-        content: 'संस्थापक संजय राय जी के दूरदर्शी नेतृत्व में बोलती कलम डिजिटल युग का सबसे सशक्त साहित्यिक मंच बन रहा है। हार्दिक बधाई व स्वागत! 🙏',
-        createdAt: 'अभी-अभी',
-        likes: 120,
-        isPinned: true
-      }
-    ]
-  },
-  {
-    id: 'post-media-1',
-    author: {
-      id: 'author-akash',
-      name: 'आकाश कुमार सिंह (सह-संस्थापक एवं डिजिटल मीडिया)',
-      username: '@akash_cofounder',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
-      badge: 'digitalMedia',
-      city: 'नई दिल्ली',
-      followers: 980,
-      isFollowing: true
-    },
-    title: 'डिजिटल क्रांति और बहुभाषी साहित्य का नया सवेरा',
-    category: 'prerna',
-    content: `तकनीक और साहित्य का यह अनूठा संगम देश-विदेश के लाखों साहित्यसाधकों को एक मंच पर ला रहा है। मैं, आकाश कुमार सिंह (सह-संस्थापक एवं डिजिटल मीडिया प्रमुख), आप सभी का बोलती कलम मंच पर आत्मीय स्वागत करता हूँ।
-
-हमारा लक्ष्य हर रचनाकार की रचना को तकनीक के माध्यम से वैश्विक पहचान दिलाना और आधुनिक युवा पीढ़ी को अपनी समृद्ध भाषा व साहित्य से जोड़ना है।`,
-    tags: ['डिजिटलमीडिया', 'आकाशकुमारसिंह', 'सहसंस्थापक', 'बोलतीकलम'],
-    likes: 420,
-    isLiked: true,
-    bookmarks: 140,
-    isBookmarked: false,
-    views: 2890,
-    readingTime: '2.5 मिनट',
-    isEditorialPick: true,
-    createdAt: new Date().toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
     comments: []
   }
 ];
@@ -110,8 +72,8 @@ export const mockPoetryBattle = {
   },
   poet2: {
     id: 'poet-b',
-    name: 'आकाश कुमार सिंह (सह-संस्थापक)',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
+    name: 'अनामिका अंबर (कवयित्री)',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
     title: 'तिरंगे की शान (देशभक्ति)',
     lines: `तिरंगे की शान में गाएँ हम वीरों की गाथा अमर।
 भारत माँ के चरणों में नत मस्तक है ये सारा नगर!!

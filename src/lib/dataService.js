@@ -245,6 +245,7 @@ export const fetchPostsFromDB = async () => {
   const addPostIfUnique = (p) => {
     if (!p) return;
     const pId = String(p.id);
+    if (pId === 'post-media-1' || p.author?.username === '@akash_cofounder') return;
     const fp = getPostFingerprint(p);
     if (deletedIds.has(pId) || (fp && deletedIds.has(fp)) || seenIds.has(pId) || (fp && seenFingerprints.has(fp))) {
       return;

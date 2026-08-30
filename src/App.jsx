@@ -323,7 +323,6 @@ function AppContent() {
 
     map['sanjayrai'] = { name: 'संजय राय (संस्थापक)', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300' };
     map['sanjayrai_founder'] = { name: 'संजय राय (संस्थापक)', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300' };
-    map['akash_cofounder'] = { name: 'आकाश कुमार सिंह', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300' };
 
     (posts || []).forEach(p => {
       const emailKey = p.author?.email ? p.author.email.toLowerCase().trim() : null;
@@ -766,13 +765,6 @@ function AppContent() {
                 avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
                 city: 'प्रयागराज',
                 bio: 'बोलती कलम साहित्य मंच के संस्थापक एवं वरिष्ठ साहित्यकार।'
-              },
-              'akash_cofounder': {
-                name: 'आकाश कुमार सिंह',
-                username: '@akash_cofounder',
-                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300',
-                city: 'नई दिल्ली',
-                bio: 'बोलती कलम डिजिटल मीडिया प्रमुख एवं युवा कवि।'
               },
               'bolateeworld': {
                 name: 'बोलती कलम (आधिकारिक)',
