@@ -629,56 +629,111 @@ export const PosterStudioView = ({
             </div>
           </div>
 
-          {/* 2. 4 Photo Layout Styles */}
-          <div className="space-y-2">
+          {/* 2. 4 Photo Layout Styles with Visual Graphic Previews */}
+          <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Layers className="w-4 h-4 text-amber-500" />
-                <span>2. फोटो लेआउट डिज़ाइन चुनें (4 विकल्प)</span>
+                <span>2. फोटो लेआउट डिज़ाइन चुनें (4 क्रिएटिव विकल्प)</span>
               </span>
-              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold">4:5 साइज़</span>
+              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">4:5 साइज़</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PHOTO_LAYOUTS.map(layout => (
                 <button
                   key={layout.id}
                   onClick={() => setSelectedPhotoLayout(layout.id)}
-                  className={'p-3 rounded-2xl border text-left transition cursor-pointer ' + (
+                  className={'p-3.5 rounded-2xl border text-left transition cursor-pointer flex items-center gap-3.5 shadow-sm ' + (
                     selectedPhotoLayout === layout.id
-                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-400/40 font-bold shadow-sm'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-400/50 font-bold shadow-md scale-[1.01]'
+                      : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:scale-[1.01]'
                   )}
                 >
-                  <div className="text-xs font-bold flex items-center justify-between">
-                    <span>{layout.name}</span>
-                    {selectedPhotoLayout === layout.id && <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
+                  {/* Miniature Visual Graphic Wireframe */}
+                  {layout.id === 'circleAvatar' && (
+                    <div className="w-10 h-13 bg-slate-900 border border-amber-400/50 rounded-lg p-1 flex flex-col justify-between items-center shrink-0 shadow-inner">
+                      <div className="w-full space-y-0.5">
+                        <div className="h-1 w-3/4 bg-amber-400/80 rounded-full mx-auto" />
+                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
+                        <div className="h-0.5 w-2/3 bg-slate-400/50 rounded-full mx-auto" />
+                      </div>
+                      <div className="w-4 h-4 rounded-full border border-amber-400 bg-amber-500/30 flex items-center justify-center text-[7px]">⭕</div>
+                    </div>
+                  )}
+
+                  {layout.id === 'wideCard' && (
+                    <div className="w-10 h-13 bg-slate-900 border border-indigo-400/50 rounded-lg p-1 flex flex-col justify-between shrink-0 shadow-inner">
+                      <div className="space-y-0.5">
+                        <div className="h-1 w-3/4 bg-indigo-300 rounded-full" />
+                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
+                        <div className="h-0.5 w-2/3 bg-slate-400/50 rounded-full" />
+                      </div>
+                      <div className="w-full h-3.5 bg-indigo-600/40 rounded border border-indigo-400/50 flex items-center px-0.5 gap-0.5">
+                        <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                        <div className="h-0.5 w-full bg-white/80 rounded-full" />
+                      </div>
+                    </div>
+                  )}
+
+                  {layout.id === 'leftSplit' && (
+                    <div className="w-10 h-13 bg-slate-900 border border-rose-400/50 rounded-lg p-0.5 flex gap-1 shrink-0 shadow-inner">
+                      <div className="w-3.5 h-full bg-gradient-to-b from-rose-500/40 to-amber-500/40 rounded border border-rose-400/50" />
+                      <div className="flex-1 py-1 space-y-1">
+                        <div className="h-1 w-full bg-amber-300 rounded-full" />
+                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
+                        <div className="h-0.5 w-3/4 bg-slate-400/50 rounded-full" />
+                      </div>
+                    </div>
+                  )}
+
+                  {layout.id === 'topHero' && (
+                    <div className="w-10 h-13 bg-slate-900 border border-emerald-400/50 rounded-lg p-0.5 flex flex-col gap-1 shrink-0 shadow-inner">
+                      <div className="w-full h-4 bg-gradient-to-r from-emerald-500/40 to-teal-500/40 rounded border border-emerald-400/50" />
+                      <div className="space-y-0.5 px-0.5">
+                        <div className="h-1 w-3/4 bg-emerald-300 rounded-full mx-auto" />
+                        <div className="h-0.5 w-full bg-slate-400/50 rounded-full" />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold flex items-center justify-between gap-1">
+                      <span className="truncate">{layout.name}</span>
+                      {selectedPhotoLayout === layout.id && <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">{layout.desc}</p>
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">{layout.desc}</p>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* 3. Color Palettes (Never Truncated - Full Beautiful Hindi Labels) */}
-          <div className="space-y-2">
+          {/* 3. Color Palettes with Luxury Swatch Discs */}
+          <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <Palette className="w-4 h-4 text-rose-600" />
-              <span>3. रंग एवं थीम पैलेट (Theme Palette)</span>
+              <span>3. रंग एवं थीम पैलेट (6 लग्ज़री शैलियाँ)</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {THEMES.map(t => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedThemeId(t.id)}
-                  className={'px-3 py-2.5 rounded-2xl border text-xs font-bold transition cursor-pointer flex items-center justify-between gap-1.5 shadow-sm text-left ' + (
+                  className={'px-3 py-2.5 rounded-2xl border text-xs font-bold transition cursor-pointer flex items-center gap-2.5 shadow-sm text-left ' + (
                     selectedThemeId === t.id
-                      ? 'border-amber-500 ring-2 ring-amber-500/40 shadow scale-[1.02]'
+                      ? 'border-amber-500 ring-2 ring-amber-500/50 shadow-md scale-[1.02]'
                       : 'border-slate-200 dark:border-slate-700 hover:scale-[1.02]'
                   )}
                   style={{ backgroundColor: t.bg2, color: t.title }}
                 >
-                  <span className="text-xs font-bold leading-snug">{t.name}</span>
-                  {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0" />}
+                  <div 
+                    className="w-5 h-5 rounded-full border border-white/40 shadow-sm shrink-0 flex items-center justify-center text-[10px]"
+                    style={{ background: `linear-gradient(135deg, ${t.bg1}, ${t.border})` }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-black block leading-snug truncate">{t.name}</span>
+                  </div>
+                  {selectedThemeId === t.id && <Check className="w-3.5 h-3.5 shrink-0 text-amber-400" />}
                 </button>
               ))}
             </div>
