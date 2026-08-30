@@ -297,6 +297,17 @@ export const PoemCardShareModal = ({
           <span>{copiedPoemText ? '✓ सोशल मीडिया कैप्शन कॉपी हुआ!' : '📋 पूरा सोशल मीडिया कैप्शन कॉपी करें (FB, Insta, X)'}</span>
         </button>
 
+        {/* 💡 Quick Help Note */}
+        <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 rounded-2xl text-[11px] text-amber-900 dark:text-amber-200 space-y-1">
+          <p className="font-bold flex items-center gap-1">
+            <span>💡 फेसबुक / इंस्टाग्राम पर कविता कैसे पोस्ट करें:</span>
+          </p>
+          <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
+            1. ऊपर <strong>"📋 पूरा सोशल मीडिया कैप्शन कॉपी करें"</strong> दबाएं।<br/>
+            2. फेसबुक/इंस्टा पर इमेज के साथ <strong>Paste (Ctrl+V)</strong> करें। आपकी पूरी कविता, लेखक का नाम और वेबसाइट लिंक सीधे पोस्ट में दिखेगा।
+          </p>
+        </div>
+
         {/* 1-Click Social Sharing Actions */}
         <div className="space-y-2 pt-1">
           <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
