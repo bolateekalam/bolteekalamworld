@@ -461,12 +461,16 @@ export const PosterStudioView = ({
     return () => { active = false; };
   }, [selectedPhotoLayout, selectedThemeId, title, content, fontSizeRatio, uploadedPhotoUrl]);
 
-  // Handle HD Download
+  // Handle HD Download + Auto Copy Caption
   const handleDownload = async () => {
     if (!title.trim() || !content.trim()) {
       alert('कृपया पोस्टर डाउनलोड करने से पहले शीर्षक (Title) और पंक्तियाँ अवश्य लिखें!');
       return;
     }
+    
+    // Auto-copy viral caption
+    handleCopyCaption();
+
     setDownloading(true);
     try {
       const canvas = await generatePosterCanvas();
@@ -503,7 +507,7 @@ export const PosterStudioView = ({
       const canvas = await generatePosterCanvas();
       const displayTitle = title.trim() || 'मेरी रचना';
       const displayContent = content.trim() || '';
-      const shareText = '📜 *' + displayTitle + '*\n\n"' + displayContent + '"\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BolateeKalam';
+      const shareText = '✨ ━━━━━━━━━━━━━━━━━━ ✨\n🪶 【 ' + displayTitle + ' 】 🪶\n✨ ━━━━━━━━━━━━━━━━━━ ✨\n\n' + displayContent + '\n\n━━━━━━━━━━━━━━━━━━━━━\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita\n✨ ━━━━━━━━━━━━━━━━━━ ✨';
       
       canvas.toBlob(async (blob) => {
         if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], 'poster.png', { type: 'image/png' })] })) {
@@ -529,7 +533,7 @@ export const PosterStudioView = ({
   const handleCopyCaption = () => {
     const displayTitle = title.trim() || 'आपकी रचना का शीर्षक';
     const displayContent = content.trim() || 'यहाँ आपकी कविता / शायरी की पंक्तियाँ प्रदर्शित होंगी।';
-    const captionText = '✨ *' + displayTitle + '* ✨\n\n' + displayContent + '\n\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n#बोलतीकलम #कविता #हिंदीसाहित्य #BolateeKalam #HindiPoetry #Poetry #WritersCommunity';
+    const captionText = '✨ ━━━━━━━━━━━━━━━━━━ ✨\n🪶 【 ' + displayTitle + ' 】 🪶\n✨ ━━━━━━━━━━━━━━━━━━ ✨\n\n' + displayContent + '\n\n━━━━━━━━━━━━━━━━━━━━━\n✍️ रचनाकार: ' + fixedAuthorName + ' (@' + fixedAuthorUsername + ')\n📖 साहित्यिक मंच: बोलती कलम (Bolatee Kalam)\n🌐 पूरी रचना पढ़ें व अपनी कविताएं प्रकाशित करें:\n👉 https://bolateeworld.in\n\n🏷️ #बोलतीकलम #BolateeKalam #हिंदीकविता #HindiPoetry #Shayari #Sahitya #WritersOfIndia #PoetryCommunity #Kavita\n✨ ━━━━━━━━━━━━━━━━━━ ✨';
 
     navigator.clipboard.writeText(captionText);
     setCopiedCaption(true);

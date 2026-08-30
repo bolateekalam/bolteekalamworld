@@ -197,6 +197,32 @@ export const PoemCardShareModal = ({
     }
   };
 
+  const handleDownloadPNGAndCopyCaption = async (withWatermark = true) => {
+    // 1. Copy caption to clipboard
+    navigator.clipboard.writeText(viralSocialCaption);
+    setCopiedPoemText(true);
+
+    // 2. Download PNG
+    setDownloading(true);
+    try {
+      const canvas = await generateCanvasPNG(withWatermark);
+      const link = document.createElement('a');
+      link.download = `BolateeKalam_${poemTitle.replace(/\s+/g, '_')}_${withWatermark ? 'Watermark' : 'HD'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      setDownloadSuccessMsg('🎉 4:5 PNG पोस्टर डाउनलोड हुआ और कैप्शन कॉपी हुआ! अब आप सीधे फेसबुक/इंस्टा पर इमेज अपलोड कर कैप्शन पेस्ट (Ctrl+V) करें।');
+      setTimeout(() => {
+        setCopiedPoemText(false);
+        setDownloadSuccessMsg('');
+      }, 6000);
+    } catch (e) {
+      console.error('Download error:', e);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handleCopyCaption = () => {
     navigator.clipboard.writeText(viralSocialCaption);
     setCopiedPoemText(true);
@@ -211,20 +237,20 @@ export const PoemCardShareModal = ({
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(viralSocialCaption)}`, '_blank');
   };
 
-  const handleShareFacebook = () => {
-    navigator.clipboard.writeText(viralSocialCaption);
-    setDownloadSuccessMsg('✓ कैप्शन कॉपी हुआ! फेसबुक पर इमेज के साथ पेस्ट करें।');
+  const handleShareFacebook = async () => {
+    // Auto download PNG + Copy Caption + Open Facebook
+    await handleDownloadPNGAndCopyCaption(true);
     setTimeout(() => {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://bolateeworld.in')}`, '_blank');
-    }, 500);
+      window.open('https://www.facebook.com', '_blank');
+    }, 800);
   };
 
-  const handleShareInstagram = () => {
-    navigator.clipboard.writeText(viralSocialCaption);
-    setDownloadSuccessMsg('✓ कैप्शन कॉपी हुआ! इंस्टाग्राम पर पेस्ट करें।');
+  const handleShareInstagram = async () => {
+    // Auto download PNG + Copy Caption + Open Instagram
+    await handleDownloadPNGAndCopyCaption(true);
     setTimeout(() => {
       window.open('https://www.instagram.com', '_blank');
-    }, 500);
+    }, 800);
   };
 
   const handleShareTwitter = () => {
@@ -247,7 +273,7 @@ export const PoemCardShareModal = ({
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-rose-600" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-rozha">
-              रचना शेयर व सोशल मीडिया कैप्शन
+              रचना शेयर व PNG पोस्टर
             </h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer">
@@ -283,35 +309,46 @@ export const PoemCardShareModal = ({
 
         {/* Success Message Banner */}
         {downloadSuccessMsg && (
-          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500 rounded-xl text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 animate-in fade-in">
+          <div className="p-3 bg-emerald-500/10 border-2 border-emerald-500 rounded-2xl text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 animate-in fade-in leading-relaxed">
             {downloadSuccessMsg}
           </div>
         )}
 
-        {/* 🌟 1-Click Copy Caption Button */}
-        <button
-          onClick={handleCopyCaption}
-          className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 via-rose-600 to-amber-500 hover:from-amber-600 hover:to-rose-700 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-        >
-          <Copy className="w-4 h-4 text-amber-200 shrink-0" />
-          <span>{copiedPoemText ? '✓ सोशल मीडिया कैप्शन कॉपी हुआ!' : '📋 पूरा सोशल मीडिया कैप्शन कॉपी करें (FB, Insta, X)'}</span>
-        </button>
+        {/* 🌟 1-Click Master Action: PNG Download + Auto Caption Copy */}
+        <div className="space-y-2">
+          <button
+            onClick={() => handleDownloadPNGAndCopyCaption(true)}
+            disabled={downloading}
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 via-rose-600 to-amber-500 hover:from-amber-600 hover:to-rose-700 text-white font-extrabold rounded-2xl text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-4 h-4 text-amber-200 shrink-0" />
+            <span>{downloading ? 'पोस्टर तैयार हो रहा है...' : '📥 4:5 PNG डाउनलोड + 📋 कैप्शन कॉपी करें'}</span>
+          </button>
+
+          <button
+            onClick={handleCopyCaption}
+            className="w-full py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer border border-slate-200 dark:border-slate-700"
+          >
+            <Copy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span>{copiedPoemText ? '✓ सोशल मीडिया कैप्शन कॉपी हुआ!' : 'केवल सोशल मीडिया कैप्शन कॉपी करें'}</span>
+          </button>
+        </div>
 
         {/* 💡 Quick Help Note */}
-        <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 rounded-2xl text-[11px] text-amber-900 dark:text-amber-200 space-y-1">
+        <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 rounded-2xl text-[11px] text-indigo-950 dark:text-indigo-200 space-y-1">
           <p className="font-bold flex items-center gap-1">
-            <span>💡 फेसबुक / इंस्टाग्राम पर कविता कैसे पोस्ट करें:</span>
+            <span>💡 सोशल मीडिया पर कविता पोस्ट करने का नियम:</span>
           </p>
           <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
-            1. ऊपर <strong>"📋 पूरा सोशल मीडिया कैप्शन कॉपी करें"</strong> दबाएं।<br/>
-            2. फेसबुक/इंस्टा पर इमेज के साथ <strong>Paste (Ctrl+V)</strong> करें। आपकी पूरी कविता, लेखक का नाम और वेबसाइट लिंक सीधे पोस्ट में दिखेगा।
+            1. ऊपर <strong>"📥 4:5 PNG डाउनलोड + 📋 कैप्शन कॉपी करें"</strong> बटन दबाएं।<br/>
+            2. फेसबुक / इंस्टा खोलकर <strong>डाउनलोड हुई PNG फोटो</strong> अपलोड करें और उसके नीचे <strong>Paste (Ctrl+V)</strong> कर दें। फोटो व पूरी कविता साथ पोस्ट होगी!
           </p>
         </div>
 
         {/* 1-Click Social Sharing Actions */}
         <div className="space-y-2 pt-1">
           <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-            🚀 सोशल मीडिया पर सीधे भेजें:
+            🚀 सोशल मीडिया ऐप्स पर सीधे जाएँ:
           </span>
 
           <div className="grid grid-cols-4 gap-1.5">
